@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "880648692270",
+    "project_id": "yemen-family-project",
+    "storage_bucket": "yemen-family-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880648692270:android:7ac7f3f4e6292703c875bf",
+        "android_client_info": {
+          "package_name": "com.example.home_business_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm_hygGYHiJkMyaxp3PX2KFOBBF0aGCRM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
