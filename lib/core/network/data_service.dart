@@ -21,7 +21,15 @@ class DataService {
     }
   }
 
-  static Future<List<dynamic>> getProducts({String? categoryId, String? governorateId, int? limit, String? search, double? minPrice, double? maxPrice, double? minRating}) async {
+  static Future<List<dynamic>> getProducts({
+    String? categoryId,
+    String? governorateId,
+    int? limit,
+    String? search,
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+  }) async {
     try {
       final queryParams = <String, dynamic>{};
       if (governorateId != null) queryParams['governorateId'] = governorateId;
@@ -63,13 +71,19 @@ class DataService {
   }
 
   // Fetch All Businesses (Stores)
-  static Future<List<dynamic>> getBusinesses({String? governorateId, String? search}) async {
+  static Future<List<dynamic>> getBusinesses({
+    String? governorateId,
+    String? search,
+  }) async {
     try {
       final queryParams = <String, dynamic>{};
       if (governorateId != null) queryParams['governorateId'] = governorateId;
       if (search != null) queryParams['search'] = search;
 
-      final response = await ApiClient.instance.get('/business', queryParameters: queryParams);
+      final response = await ApiClient.instance.get(
+        '/business',
+        queryParameters: queryParams,
+      );
       return response.data['data'] ?? [];
     } catch (e) {
       rethrow;
@@ -81,6 +95,19 @@ class DataService {
     try {
       final response = await ApiClient.instance.get('/business/me/dashboard');
       return response.data['data'] ?? {};
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Update My Business Profile
+  static Future<Map<String, dynamic>> updateMyBusiness(dynamic formData) async {
+    try {
+      final response = await ApiClient.instance.put(
+        '/business',
+        data: formData,
+      );
+      return response.data;
     } catch (e) {
       rethrow;
     }
@@ -110,15 +137,15 @@ class DataService {
   }
 
   // Add or Edit Review
-  static Future<void> addReview(String productId, int rating, String comment) async {
+  static Future<void> addReview(
+    String productId,
+    int rating,
+    String comment,
+  ) async {
     try {
       await ApiClient.instance.post(
         '/interactions/review',
-        data: {
-          'productId': productId,
-          'rating': rating,
-          'comment': comment,
-        },
+        data: {'productId': productId, 'rating': rating, 'comment': comment},
       );
     } catch (e) {
       rethrow;
@@ -126,7 +153,11 @@ class DataService {
   }
 
   // Add Report
-  static Future<void> addReport(String targetType, String targetId, String reason) async {
+  static Future<void> addReport(
+    String targetType,
+    String targetId,
+    String reason,
+  ) async {
     try {
       await ApiClient.instance.post(
         '/interactions/report',

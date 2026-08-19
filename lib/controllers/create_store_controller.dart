@@ -6,6 +6,7 @@ import '../core/network/data_service.dart';
 import '../core/network/api_client.dart';
 import '../core/network/error_handler.dart';
 import 'auth_controller.dart';
+import 'data_controller.dart';
 import 'package:dio/dio.dart' as dio;
 
 class CreateStoreController extends GetxController {
@@ -71,7 +72,17 @@ class CreateStoreController extends GetxController {
 
       final response = await ApiClient.instance.post('/business', data: formData);
       if (response.data['success'] == true) {
-        Get.find<AuthController>().createStore();
+        final authController = Get.find<AuthController>();
+        authController.createStore();
+        
+        // Refresh auth profile so currentUser includes the new business data
+        authController.fetchProfile();
+        
+        // Refresh the stores list on the home screen
+        if (Get.isRegistered<DataController>()) {
+          Get.find<DataController>().fetchTopStores();
+        }
+        
         Get.offNamed('/seller-dashboard');
         Get.snackbar(
           'تم بنجاح', 'تم إنشاء متجرك. يمكنك الآن إضافة المنتجات.',

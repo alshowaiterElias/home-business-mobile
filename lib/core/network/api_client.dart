@@ -11,7 +11,7 @@ class ApiClient {
   // Falls back to local dev IP if not provided.
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://192.168.43.148:5000/api/v1',
+    defaultValue: 'https://home-business-backend.onrender.com/api/v1',
   );
 
   static String getImageUrl(String path) {

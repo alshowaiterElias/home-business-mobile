@@ -1,11 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart' as dio;
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/data_service.dart';
+import '../../core/network/error_handler.dart';
 import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/add_product_controller.dart';
 import '../../controllers/data_controller.dart';
+import '../../controllers/auth_controller.dart';
 
 /// Seller's private dashboard to manage their business and products.
 class SellerDashboardScreen extends StatelessWidget {
@@ -512,6 +518,14 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
   late TextEditingController phoneController;
   late TextEditingController addressController;
 
+  final dataController = Get.find<DataController>();
+  
+  File? _newLogoFile;
+  String? _currentLogoUrl;
+  String _selectedGovId = '';
+  String _selectedCityId = '';
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -526,6 +540,28 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
     }
     phoneController = TextEditingController(text: phone);
     addressController = TextEditingController(text: b['addressDetails'] ?? '');
+    _currentLogoUrl = b['logoUrl'];
+    
+    // Initialize governorate and city from existing data
+    if (b['city'] != null) {
+      _selectedCityId = b['city']['id'] ?? '';
+      // Find the governorate that contains this city
+      for (var gov in dataController.locations) {
+        final cities = gov['cities'] as List<dynamic>? ?? [];
+        for (var city in cities) {
+          if (city['id'] == _selectedCityId) {
+            _selectedGovId = gov['id'] ?? '';
+            break;
+          }
+        }
+        if (_selectedGovId.isNotEmpty) break;
+      }
+    }
+    
+    // Fetch locations if not already loaded
+    if (dataController.locations.isEmpty) {
+      dataController.fetchLocations();
+    }
   }
 
   @override
@@ -535,6 +571,68 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
     phoneController.dispose();
     addressController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickLogo() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _newLogoFile = File(picked.path);
+      });
+    }
+  }
+
+  Future<void> _saveChanges() async {
+    if (nameController.text.isEmpty || phoneController.text.isEmpty) {
+      Get.snackbar('خطأ', 'يرجى تعبئة الحقول المطلوبة',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final formattedPhone = '+967${phoneController.text.trim()}';
+
+      final formData = dio.FormData.fromMap({
+        'businessName': nameController.text.trim(),
+        'description': descController.text.trim(),
+        'contactPhone': formattedPhone,
+        'addressDetails': addressController.text.trim(),
+        if (_selectedCityId.isNotEmpty) 'cityId': _selectedCityId,
+      });
+
+      if (_newLogoFile != null) {
+        formData.files.add(MapEntry(
+          'logo',
+          await dio.MultipartFile.fromFile(_newLogoFile!.path, filename: 'logo.jpg'),
+        ));
+      }
+
+      final response = await DataService.updateMyBusiness(formData);
+      if (response['success'] == true) {
+        // Refresh the seller dashboard
+        if (Get.isRegistered<SellerDashboardController>()) {
+          Get.find<SellerDashboardController>().fetchDashboardData();
+        }
+        // Refresh auth profile
+        Get.find<AuthController>().fetchProfile();
+        // Refresh stores list on home
+        dataController.fetchTopStores();
+        
+        Get.back();
+        Get.snackbar('تم بنجاح', 'تم تحديث بيانات المتجر',
+            backgroundColor: Colors.green, colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(16));
+      }
+    } catch (e) {
+      final errorMsg = ApiErrorHandler.handle(e);
+      Get.snackbar('خطأ في التحديث', errorMsg,
+          backgroundColor: Colors.redAccent, colorText: Colors.white,
+          duration: const Duration(seconds: 4));
+    } finally {
+      setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -551,30 +649,42 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
           children: [
             // Logo
             Center(
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppTheme.primarySurface,
-                    backgroundImage: (widget.businessData != null && widget.businessData['logoUrl'] != null)
-                        ? NetworkImage(ApiClient.getImageUrl(widget.businessData['logoUrl']))
-                        : null,
-                    child: (widget.businessData == null || widget.businessData['logoUrl'] == null) 
-                        ? const Icon(Icons.storefront_rounded, size: 40, color: AppTheme.primary)
-                        : null,
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: Container(
-                      width: 32, height: 32,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primary, shape: BoxShape.circle),
-                      child: const Icon(Icons.camera_alt_rounded,
-                          size: 16, color: Colors.white),
+              child: GestureDetector(
+                onTap: _pickLogo,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: AppTheme.primarySurface,
+                      backgroundImage: _newLogoFile != null
+                          ? FileImage(_newLogoFile!)
+                          : (_currentLogoUrl != null
+                              ? NetworkImage(ApiClient.getImageUrl(_currentLogoUrl!))
+                              : null) as ImageProvider?,
+                      child: (_newLogoFile == null && _currentLogoUrl == null)
+                          ? const Icon(Icons.storefront_rounded, size: 40, color: AppTheme.primary)
+                          : null,
                     ),
-                  ),
-                ],
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: Container(
+                        width: 32, height: 32,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primary, shape: BoxShape.circle),
+                        child: const Icon(Icons.camera_alt_rounded,
+                            size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppTheme.space8),
+            Center(
+              child: Text(
+                'اضغط لتغيير شعار المتجر',
+                style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.textHint),
               ),
             ),
             const SizedBox(height: AppTheme.space24),
@@ -604,38 +714,108 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
             _FormField(label: 'تفاصيل العنوان', hint: 'شارع، حي، بجانب...', maxLines: 2, controller: addressController),
             const SizedBox(height: AppTheme.space16),
 
-            // Location dropdowns
+            // Governorate dropdown
             Text('المحافظة', style: theme.textTheme.titleMedium),
             const SizedBox(height: AppTheme.space8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppTheme.background,
-                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                border: Border.all(color: AppTheme.divider),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    (widget.businessData != null && widget.businessData['city'] != null)
-                        ? widget.businessData['city']['nameAr'] 
-                        : 'غير محدد', 
-                    style: theme.textTheme.bodyLarge,
+            Obx(() {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+                decoration: BoxDecoration(
+                  color: AppTheme.background,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  border: Border.all(color: AppTheme.divider),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _selectedGovId.isEmpty ? null : _selectedGovId,
+                    hint: Text(
+                      'اختر المحافظة',
+                      style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.textHint),
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textHint),
+                    items: dataController.locations.map<DropdownMenuItem<String>>((gov) {
+                      return DropdownMenuItem<String>(
+                        value: gov['id'],
+                        child: Text(gov['nameAr']),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _selectedGovId = val;
+                          _selectedCityId = ''; // reset city
+                        });
+                      }
+                    },
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textHint),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppTheme.space32),
+                ),
+              );
+            }),
+            const SizedBox(height: AppTheme.space16),
+
+            // City dropdown (only show when governorate is selected)
+            if (_selectedGovId.isNotEmpty) ...[
+              Text('المدينة / المديرية', style: theme.textTheme.titleMedium),
+              const SizedBox(height: AppTheme.space8),
+              Obx(() {
+                final gov = dataController.locations.firstWhere(
+                  (g) => g['id'] == _selectedGovId,
+                  orElse: () => null,
+                );
+                final cities = (gov != null ? gov['cities'] as List<dynamic>? : null) ?? [];
+                
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.background,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    border: Border.all(color: AppTheme.divider),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedCityId.isEmpty ? null : _selectedCityId,
+                      hint: Text(
+                        'اختر المدينة',
+                        style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.textHint),
+                      ),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textHint),
+                      items: cities.map<DropdownMenuItem<String>>((city) {
+                        return DropdownMenuItem<String>(
+                          value: city['id'],
+                          child: Text(city['nameAr']),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedCityId = val;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: AppTheme.space16),
+            ],
+
+            const SizedBox(height: AppTheme.space16),
 
             SizedBox(
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: () => Get.back(),
-                child: const Text('حفظ التغييرات'),
+                onPressed: _isSaving ? null : _saveChanges,
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 24, height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('حفظ التغييرات'),
               ),
             ),
             const SizedBox(height: AppTheme.space24),

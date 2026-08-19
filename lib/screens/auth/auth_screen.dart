@@ -19,9 +19,17 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
-    for (final c in _otpControllers) { c.dispose(); }
-    for (final f in _otpFocusNodes) { f.dispose(); }
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final f in _otpFocusNodes) {
+      f.dispose();
+    }
     super.dispose();
+  }
+
+  String _getOtpCode() {
+    return _otpControllers.map((c) => c.text).join();
   }
 
   @override
@@ -52,14 +60,18 @@ class _AuthScreenState extends State<AuthScreen> {
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   boxShadow: AppTheme.shadowMd,
                 ),
-                child: const Icon(Icons.store_rounded, color: Colors.white, size: 40),
+                child: const Icon(
+                  Icons.store_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
               const SizedBox(height: AppTheme.space24),
               Text('السوق المنزلي', style: theme.textTheme.headlineLarge),
               const SizedBox(height: AppTheme.space8),
               Text(
                 _isOtpSent
-                    ? 'أدخل رمز التحقق المرسل إلى هاتفك'
+                    ? 'أدخل رمز التحقق المرسل إلى هاتفك عبر SMS'
                     : 'سجّل بإستخدام رقم الهاتف',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
@@ -70,8 +82,7 @@ class _AuthScreenState extends State<AuthScreen> {
               if (!_isOtpSent) ...[
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: Text('رقم الهاتف',
-                      style: theme.textTheme.titleMedium),
+                  child: Text('رقم الهاتف', style: theme.textTheme.titleMedium),
                 ),
                 const SizedBox(height: AppTheme.space8),
                 TextField(
@@ -86,8 +97,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     prefixIcon: Container(
                       width: 48,
                       alignment: Alignment.center,
-                      child: Text('🇾🇪',
-                          style: const TextStyle(fontSize: 22)),
+                      child: const Text('🇾🇪', style: TextStyle(fontSize: 22)),
                     ),
                     hintText: '+967 7XX XXX XXX',
                   ),
@@ -103,7 +113,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: auth.isLoading.value
                           ? null
                           : () async {
-                              final success = await auth.requestOTP(_phoneController.text);
+                              final phone = _phoneController.text.trim();
+                              if (phone.length < 10) {
+                                Get.snackbar('تنبيه', 'يرجى إدخال رقم هاتف صحيح',
+                                    backgroundColor: Colors.orange,
+                                    colorText: Colors.white);
+                                return;
+                              }
+                              final success = await auth.requestOTP(phone);
                               if (success) {
                                 setState(() => _isOtpSent = true);
                               }
@@ -112,7 +129,10 @@ class _AuthScreenState extends State<AuthScreen> {
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                           : const Text('إرسال رمز التحقق'),
                     );
@@ -120,9 +140,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ],
 
-              // ── OTP Input ──────────────────────────────────────
+              // ── OTP Input ────────────────────────────────────
               if (_isOtpSent) ...[
-                // Phone display
+                // Phone number display with edit
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.space16,
@@ -135,8 +155,11 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.phone_android_rounded,
-                          size: 18, color: AppTheme.primary),
+                      const Icon(
+                        Icons.phone_android_rounded,
+                        size: 18,
+                        color: AppTheme.primary,
+                      ),
                       const SizedBox(width: AppTheme.space8),
                       Text(
                         _phoneController.text,
@@ -149,58 +172,74 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(width: AppTheme.space8),
                       GestureDetector(
                         onTap: () => setState(() => _isOtpSent = false),
-                        child: const Icon(Icons.edit_rounded,
-                            size: 16, color: AppTheme.primary),
+                        child: const Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: AppTheme.primary,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: AppTheme.space32),
+                const SizedBox(height: AppTheme.space24),
 
-                // OTP Fields
+                // 6-Digit OTP Fields
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text('رمز التحقق', style: theme.textTheme.titleMedium),
+                ),
+                const SizedBox(height: AppTheme.space12),
                 Directionality(
                   textDirection: TextDirection.ltr,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(6, (index) => Container(
-                      width: 48,
-                      height: 64,
-                      margin: EdgeInsets.symmetric(horizontal: 4),
-                      child: TextField(
-                        controller: _otpControllers[index],
-                        focusNode: _otpFocusNodes[index],
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: '',
-                          contentPadding: EdgeInsets.zero,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                            borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
+                    children: List.generate(
+                      6,
+                      (index) => Container(
+                        width: 48,
+                        height: 58,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        child: TextField(
+                          controller: _otpControllers[index],
+                          focusNode: _otpFocusNodes[index],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                            borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            contentPadding: EdgeInsets.zero,
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radiusMd),
+                              borderSide: const BorderSide(
+                                  color: AppTheme.divider, width: 1.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radiusMd),
+                              borderSide: const BorderSide(
+                                  color: AppTheme.primary, width: 2),
+                            ),
                           ),
+                          onChanged: (value) {
+                            if (value.isNotEmpty && index < 5) {
+                              _otpFocusNodes[index + 1].requestFocus();
+                            }
+                            if (value.isEmpty && index > 0) {
+                              _otpFocusNodes[index - 1].requestFocus();
+                            }
+                          },
                         ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty && index < 5) {
-                            _otpFocusNodes[index + 1].requestFocus();
-                          }
-                          if (value.isEmpty && index > 0) {
-                            _otpFocusNodes[index - 1].requestFocus();
-                          }
-                        },
                       ),
-                    )),
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppTheme.space32),
+                const SizedBox(height: AppTheme.space24),
 
+                // Verify Button
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -210,26 +249,26 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: auth.isLoading.value
                           ? null
                           : () async {
-                              // Collect OTP
-                              final otp = _otpControllers.map((c) => c.text).join();
+                              final otp = _getOtpCode();
                               if (otp.length < 6) {
-                                Get.snackbar('تنبيه', 'الرجاء إدخال الرمز كاملاً', 
-                                    backgroundColor: AppTheme.error, colorText: Colors.white);
+                                Get.snackbar(
+                                    'تنبيه', 'الرجاء إدخال الرمز كاملاً (6 أرقام)',
+                                    backgroundColor: Colors.orange,
+                                    colorText: Colors.white);
                                 return;
                               }
-                              
-                              final success = await auth.verifyOTP(_phoneController.text, otp);
-                              if (success) {
-                                Get.offAllNamed('/main');
-                              }
+                              await auth.verifyOTP(otp);
                             },
                       child: auth.isLoading.value
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
-                          : const Text('تحقق'),
+                          : const Text('تأكيد رمز التحقق'),
                     );
                   }),
                 ),
@@ -239,14 +278,18 @@ class _AuthScreenState extends State<AuthScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('لم يصلك الرمز؟',
-                        style: theme.textTheme.bodyMedium),
+                    Text('لم يصلك الرمز؟', style: theme.textTheme.bodyMedium),
                     TextButton(
-                      onPressed: () {},
-                      child: Text('إعادة الإرسال',
+                      onPressed: () {
+                        final auth = Get.find<AuthController>();
+                        auth.requestOTP(_phoneController.text.trim());
+                      },
+                      child: Text(
+                        'إعادة الإرسال',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: AppTheme.primary,
-                        )),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -259,11 +302,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: () {
                   Get.offAllNamed('/main');
                 },
-                child: Text('تصفح كضيف',
+                child: Text(
+                  'تصفح كضيف',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: AppTheme.textSecondary,
                     decoration: TextDecoration.underline,
-                  )),
+                  ),
+                ),
               ),
             ],
           ),

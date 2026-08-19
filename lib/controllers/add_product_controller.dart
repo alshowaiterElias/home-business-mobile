@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/network/api_client.dart';
 import '../core/network/error_handler.dart';
+import 'seller_dashboard_controller.dart';
 import 'package:dio/dio.dart' as dio;
 
 class AddProductController extends GetxController {
@@ -69,6 +70,10 @@ class AddProductController extends GetxController {
       final response = await ApiClient.instance.post('/products', data: formData);
       
       if (response.data['success'] == true) {
+        // Refresh the seller dashboard so the new product appears immediately
+        if (Get.isRegistered<SellerDashboardController>()) {
+          Get.find<SellerDashboardController>().fetchDashboardData();
+        }
         Get.back(); // close screen
         Get.snackbar('تم الإرسال', 'تمت إضافة منتجك وهو قيد المراجعة',
             backgroundColor: Colors.green, colorText: Colors.white,
