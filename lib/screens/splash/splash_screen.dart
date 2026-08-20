@@ -68,20 +68,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.white,
                     borderRadius: BorderRadius.circular(AppTheme.radiusXl),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.storefront_rounded,
-                    color: AppTheme.primary,
-                    size: 70,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -102,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'صُنع بحب.. من البيت إلى البيت',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       letterSpacing: 1,
                     ),
                   ),

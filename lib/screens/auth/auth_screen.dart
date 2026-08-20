@@ -52,18 +52,15 @@ class _AuthScreenState extends State<AuthScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.primaryLight],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   boxShadow: AppTheme.shadowMd,
                 ),
-                child: const Icon(
-                  Icons.store_rounded,
-                  color: Colors.white,
-                  size: 40,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                  child: Image.asset(
+                    'assets/icon/app_icon.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: AppTheme.space24),
