@@ -66,20 +66,26 @@ class AuthController extends GetxController {
           } else if (e.code == 'invalid-phone-number') {
             errorMsg = 'رقم الهاتف غير صحيح';
           }
-          Get.snackbar('خطأ', errorMsg,
-              backgroundColor: Colors.redAccent, colorText: Colors.white);
+          Get.snackbar(
+            'خطأ',
+            errorMsg,
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white,
+          );
         },
 
         codeSent: (String verId, int? forceResendToken) {
           isLoading.value = false;
           verificationId.value = verId;
           resendToken.value = forceResendToken;
-          if (kDebugMode) print('[Firebase Auth] Code sent. Verification ID: $verId');
+          if (kDebugMode)
+            print('[Firebase Auth] Code sent. Verification ID: $verId');
         },
 
         codeAutoRetrievalTimeout: (String verId) {
           verificationId.value = verId;
-          if (kDebugMode) print('[Firebase Auth] Auto retrieval timeout. VerId: $verId');
+          if (kDebugMode)
+            print('[Firebase Auth] Auto retrieval timeout. VerId: $verId');
         },
       );
 
@@ -87,8 +93,12 @@ class AuthController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       final errorMsg = ApiErrorHandler.handle(e);
-      Get.snackbar('خطأ', errorMsg,
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        'خطأ',
+        errorMsg,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     }
   }
@@ -96,8 +106,12 @@ class AuthController extends GetxController {
   /// Verifies the 6-digit SMS code entered by the user
   Future<bool> verifyOTP(String smsCode) async {
     if (verificationId.value.isEmpty) {
-      Get.snackbar('خطأ', 'يرجى طلب رمز التحقق أولاً',
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        'خطأ',
+        'يرجى طلب رمز التحقق أولاً',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     }
 
@@ -120,8 +134,12 @@ class AuthController extends GetxController {
           errorMsg = 'انتهت صلاحية الجلسة. يرجى طلب رمز جديد.';
         }
       }
-      Get.snackbar('خطأ', errorMsg,
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        'خطأ',
+        errorMsg,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     }
   }
@@ -129,7 +147,9 @@ class AuthController extends GetxController {
   /// Signs in with Firebase credential, then exchanges the Firebase ID token for our backend JWT
   Future<bool> _signInWithCredential(PhoneAuthCredential credential) async {
     try {
-      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        credential,
+      );
       final idToken = await userCredential.user?.getIdToken();
 
       if (idToken == null) {
@@ -169,8 +189,12 @@ class AuthController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       final errorMsg = ApiErrorHandler.handle(e);
-      Get.snackbar('خطأ', errorMsg,
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        'خطأ',
+        errorMsg,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     }
   }
@@ -200,8 +224,52 @@ class AuthController extends GetxController {
 
   Future<bool> deleteAccount(String reason) async {
     isLoading.value = true;
+    
+    // Show non-dismissible loading overlay dialog
+    Get.dialog(
+      PopScope(
+        canPop: false,
+        child: Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: Colors.redAccent,
+                  strokeWidth: 3,
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Text(
+                    'جاري حذف الحساب وتجميد البيانات...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
     try {
       final res = await AuthService.deleteAccount(reason: reason);
+      
+      // Close the loading dialog
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
       if (res['success'] == true) {
         _firebaseAuth.signOut();
         StorageService.removeToken();
@@ -209,12 +277,12 @@ class AuthController extends GetxController {
         hasStore.value = false;
         currentUser.value = {};
         isLoading.value = false;
-        
+
         Get.offAllNamed('/main');
         Get.snackbar(
           'تم حذف الحساب بنجاح',
           'نتمنى لرؤيتك مجدداً في المستقبل',
-          backgroundColor: Colors.orangeDark,
+          backgroundColor: Colors.deepOrange,
           colorText: Colors.white,
         );
         return true;
@@ -222,10 +290,19 @@ class AuthController extends GetxController {
       isLoading.value = false;
       return false;
     } catch (e) {
+      // Close loading dialog if open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
       isLoading.value = false;
       final errorMsg = ApiErrorHandler.handle(e);
-      Get.snackbar('خطأ', errorMsg,
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        'خطأ',
+        errorMsg,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     }
   }
