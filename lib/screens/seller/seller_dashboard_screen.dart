@@ -12,6 +12,7 @@ import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/add_product_controller.dart';
 import '../../controllers/data_controller.dart';
 import '../../controllers/auth_controller.dart';
+import 'my_product_detail_screen.dart';
 
 /// Seller's private dashboard to manage their business and products.
 class SellerDashboardScreen extends StatelessWidget {
@@ -146,86 +147,109 @@ class _ProductTile extends StatelessWidget {
         ? (product['images'][0]['imageUrl'] ?? '') 
         : '';
         
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.space12),
-      padding: const EdgeInsets.all(AppTheme.space12),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        boxShadow: AppTheme.shadowSm,
-        border: product['status'] == 'REJECTED'
-            ? Border.all(color: AppTheme.error.withOpacity(0.3))
-            : null,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                child: CachedNetworkImage(
-                  imageUrl: ApiClient.getImageUrl(imageUrl),
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
+    return InkWell(
+      onTap: () => Get.to(() => MyProductDetailScreen(initialProduct: Map<String, dynamic>.from(product))),
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppTheme.space12),
+        padding: const EdgeInsets.all(AppTheme.space12),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          boxShadow: AppTheme.shadowSm,
+          border: product['status'] == 'REJECTED'
+              ? Border.all(color: AppTheme.error.withOpacity(0.3))
+              : null,
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  child: CachedNetworkImage(
+                    imageUrl: ApiClient.getImageUrl(imageUrl),
                     width: 60,
                     height: 60,
-                    color: AppTheme.background,
-                    child: const Icon(Icons.image_not_supported_outlined,
-                        size: 20, color: AppTheme.textHint),
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      width: 60,
+                      height: 60,
+                      color: AppTheme.background,
+                      child: const Icon(Icons.image_not_supported_outlined,
+                          size: 20, color: AppTheme.textHint),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppTheme.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: AppTheme.space12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(product['title'] ?? '', style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Text('${product['price']} ${product['currency'] ?? 'YER'}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppTheme.primary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _statusColor().withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                  ),
+                  child: Text(_statusLabel(),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                          color: _statusColor())),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
                   children: [
-                    Text(product['title'] ?? '', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 4),
-                    Text('${product['price']} ${product['currency'] ?? 'YER'}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.primary, fontWeight: FontWeight.w700)),
+                    Icon(Icons.bar_chart_rounded, size: 16, color: AppTheme.primary),
+                    SizedBox(width: 4),
+                    Text(
+                      'عرض التفاصيل والتقييمات',
+                      style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textHint),
+              ],
+            ),
+            if (product['status'] == 'REJECTED' && product['rejectionReason'] != null) ...[
+              const SizedBox(height: AppTheme.space8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppTheme.space12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEBEE),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded,
+                        size: 16, color: AppTheme.error),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text('سبب الرفض: ${product['rejectionReason']}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.error)),
+                    ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _statusColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                ),
-                child: Text(_statusLabel(),
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
-                        color: _statusColor())),
-              ),
             ],
-          ),
-          if (product['status'] == 'REJECTED' && product['rejectionReason'] != null) ...[
-            const SizedBox(height: AppTheme.space8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppTheme.space12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded,
-                      size: 16, color: AppTheme.error),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('سبب الرفض: ${product['rejectionReason']}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppTheme.error)),
-                  ),
-                ],
-              ),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }
