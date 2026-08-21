@@ -198,6 +198,38 @@ class AuthController extends GetxController {
     Get.offAllNamed('/main');
   }
 
+  Future<bool> deleteAccount(String reason) async {
+    isLoading.value = true;
+    try {
+      final res = await AuthService.deleteAccount(reason: reason);
+      if (res['success'] == true) {
+        _firebaseAuth.signOut();
+        StorageService.removeToken();
+        isLoggedIn.value = false;
+        hasStore.value = false;
+        currentUser.value = {};
+        isLoading.value = false;
+        
+        Get.offAllNamed('/main');
+        Get.snackbar(
+          'تم حذف الحساب بنجاح',
+          'نتمنى لرؤيتك مجدداً في المستقبل',
+          backgroundColor: Colors.orangeDark,
+          colorText: Colors.white,
+        );
+        return true;
+      }
+      isLoading.value = false;
+      return false;
+    } catch (e) {
+      isLoading.value = false;
+      final errorMsg = ApiErrorHandler.handle(e);
+      Get.snackbar('خطأ', errorMsg,
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return false;
+    }
+  }
+
   void createStore() {
     hasStore.value = true;
   }

@@ -272,6 +272,17 @@ class ProfileScreen extends StatelessWidget {
                         title: 'عن التطبيق',
                         onTap: () => Get.toNamed('/about'),
                       ),
+                      if (isLoggedIn) ...[
+                        const Divider(indent: 68, endIndent: 16, height: 1),
+                        _MenuItem(
+                          icon: Icons.delete_forever_rounded,
+                          iconBg: const Color(0xFFFFEBEE),
+                          iconColor: AppTheme.error,
+                          title: 'حذف الحساب والبيانات',
+                          titleColor: AppTheme.error,
+                          onTap: () => _showDeleteAccountDialog(context, auth),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -295,10 +306,10 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: _MenuItem(
                     icon: Icons.logout_rounded,
-                    iconBg: const Color(0xFFFFEBEE),
-                    iconColor: AppTheme.error,
+                    iconBg: const Color(0xFFF5F5F5),
+                    iconColor: AppTheme.textSecondary,
                     title: isLoggedIn ? 'تسجيل الخروج' : 'تسجيل الدخول',
-                    titleColor: isLoggedIn ? AppTheme.error : AppTheme.primary,
+                    titleColor: isLoggedIn ? AppTheme.textPrimary : AppTheme.primary,
                     showArrow: false,
                     onTap: () {
                       if (isLoggedIn) {
@@ -315,6 +326,123 @@ class ProfileScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, AuthController auth) {
+    String selectedReason = 'عدم الحاجة للحساب حالياً';
+    final reasonController = TextEditingController();
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(AppTheme.space24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.error.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppTheme.error,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.space12),
+                  Expanded(
+                    child: Text(
+                      'تأكيد طلب حذف الحساب',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.space16),
+              const Text(
+                'تنبيه هام وفق سياسات حماية البيانات:\n'
+                '• سيتم حذف ملفك الشخصي وكافة بياناتك بشكل نهائي.\n'
+                '• إذا كنت تمتلك متجراً، سيتم إيقاف المتجر وإخفاء كافة المنتجات.\n'
+                '• لا يمكن استعادة البيانات بعد تأكيد عملية الحذف.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: AppTheme.space16),
+              const Text(
+                'سبب طلب الحذف (اختياري):',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: reasonController,
+                decoration: InputDecoration(
+                  hintText: 'يرجى كتابة سبب طلب الحذف...',
+                  fillColor: Colors.grey.shade100,
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppTheme.space24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text('إلغاء'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.error,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        Get.back();
+                        final reason = reasonController.text.trim().isEmpty
+                            ? selectedReason
+                            : reasonController.text.trim();
+                        await auth.deleteAccount(reason);
+                      },
+                      child: const Text(
+                        'تأكيد الحذف النهائي',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+    );
   }
 }
 

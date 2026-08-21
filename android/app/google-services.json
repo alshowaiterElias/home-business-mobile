@@ -7,18 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:880648692270:android:7ac7f3f4e6292703c875bf",
+        "mobilesdk_app_id": "1:880648692270:android:bca8397f61a7160dc875bf",
         "android_client_info": {
-          "package_name": "com.example.home_business_mobile"
+          "package_name": "com.eliasalshowaiter.home_business_mobile"
         }
       },
       "oauth_client": [
         {
-          "client_id": "880648692270-9ts1vd5nfavqj2libfr0g7u89u0bq80n.apps.googleusercontent.com",
+          "client_id": "880648692270-3c7o90lqjv8sjc2h8q3v0tkffoeoab6o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.home_business_mobile",
-            "certificate_hash": "977dee2321c454e895232a53eed1113d170e1b17"
+            "package_name": "com.eliasalshowaiter.home_business_mobile",
+            "certificate_hash": "85eb5eada3b5339862f8cdaeeb10eddd5b1dac52"
+          }
+        },
+        {
+          "client_id": "880648692270-q97k4pim4c2lne4ootnfdfmm5n8i8bes.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eliasalshowaiter.home_business_mobile",
+            "certificate_hash": "f6840938462da4b37ff8932f4cca5c6292c93f09"
           }
         },
         {

@@ -22,4 +22,16 @@ class AuthService {
       rethrow;
     }
   }
+
+  /// Request account deletion
+  static Future<Map<String, dynamic>> deleteAccount({String? reason}) async {
+    try {
+      final response = await ApiClient.instance.post('/users/delete-account', data: {
+        if (reason != null) 'reason': reason,
+      });
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
