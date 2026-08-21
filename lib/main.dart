@@ -12,6 +12,7 @@ import 'screens/seller/create_store_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
 import 'screens/profile/support_screen.dart';
 import 'screens/profile/about_screen.dart';
+import 'screens/profile/privacy_policy_screen.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/store/all_stores_screen.dart';
 import 'controllers/auth_controller.dart';
@@ -89,6 +90,7 @@ class HomeBusinessApp extends StatelessWidget {
         ),
         GetPage(name: '/support', page: () => const SupportScreen()),
         GetPage(name: '/about', page: () => const AboutScreen()),
+        GetPage(name: '/privacy-policy', page: () => const PrivacyPolicyScreen()),
       ],
     );
   }

@@ -266,6 +266,14 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const Divider(indent: 68, endIndent: 16, height: 1),
                       _MenuItem(
+                        icon: Icons.shield_outlined,
+                        iconBg: const Color(0xFFE8F5E9),
+                        iconColor: const Color(0xFF2E7D32),
+                        title: 'سياسة الخصوصية وحماية البيانات',
+                        onTap: () => Get.toNamed('/privacy-policy'),
+                      ),
+                      const Divider(indent: 68, endIndent: 16, height: 1),
+                      _MenuItem(
                         icon: Icons.info_outline_rounded,
                         iconBg: const Color(0xFFE0F2F1),
                         iconColor: const Color(0xFF26A69A),
