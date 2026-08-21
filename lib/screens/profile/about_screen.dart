@@ -72,7 +72,7 @@ class AboutScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppTheme.primary,
-                    child: Text('D', style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                    child: Text('E', style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
                   ),
                   const SizedBox(width: AppTheme.space16),
                   Expanded(
@@ -80,9 +80,15 @@ class AboutScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('تم تطوير هذا التطبيق بواسطة', style: theme.textTheme.bodySmall),
-                        Text('المطور الخاص بك', style: theme.textTheme.titleLarge?.copyWith(color: AppTheme.primaryDark)),
+                        Text(
+                          'Elias Al-Showaiter', 
+                          style: theme.textTheme.titleLarge?.copyWith(color: AppTheme.primaryDark, fontWeight: FontWeight.bold),
+                        ),
                         const SizedBox(height: 4),
-                        Text('شغف بالبرمجة ودعم المجتمع.', style: theme.textTheme.bodyMedium),
+                        Text(
+                          'alshowaiterelias@gmail.com', 
+                          style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                        ),
                       ],
                     ),
                   ),
@@ -91,7 +97,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: AppTheme.space48),
-            Text('جميع الحقوق محفوظة © 2024', style: theme.textTheme.bodySmall),
+            Text('جميع الحقوق محفوظة © 2026', style: theme.textTheme.bodySmall),
             const SizedBox(height: AppTheme.space24),
           ],
         ),

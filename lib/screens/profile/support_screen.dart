@@ -1,9 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
+
+  Future<void> _launchWhatsApp() async {
+    const phone = '967772546343';
+    final Uri url = Uri.parse('https://wa.me/$phone');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      Get.snackbar('خطأ', 'تعذر فتح تطبيق الواتساب',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
+
+  Future<void> _launchPhoneCall() async {
+    final Uri url = Uri.parse('tel:+967772546343');
+    try {
+      if (!await launchUrl(url)) {
+        Get.snackbar('خطأ', 'تعذر إجراء الاتصال الهاتفي',
+            backgroundColor: Colors.redAccent, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('خطأ', 'تعذر إيجاد تطبيق لإجراء المكالمة',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri url = Uri.parse('mailto:alshowaiterelias@gmail.com');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      Get.snackbar('خطأ', 'تعذر فتح تطبيق البريد الإلكتروني',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +59,7 @@ class SupportScreen extends StatelessWidget {
             Container(
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppTheme.primarySurface,
                 shape: BoxShape.circle,
               ),
@@ -40,39 +79,36 @@ class SupportScreen extends StatelessWidget {
             _ContactOption(
               icon: Icons.chat_rounded,
               title: 'تواصل عبر واتساب',
-              subtitle: '+967 777 000 000',
+              subtitle: '+967 772546343',
               color: AppTheme.whatsapp,
-              onTap: () {
-                Get.snackbar(
-                  'واتساب', 'جاري فتح محادثة الدعم الفني...',
-                  backgroundColor: AppTheme.whatsapp, colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(16),
-                );
-              },
+              onTap: _launchWhatsApp,
             ),
             const SizedBox(height: AppTheme.space16),
             _ContactOption(
               icon: Icons.phone_in_talk_rounded,
-              title: 'اتصال هاتفي',
-              subtitle: '+967 777 000 000',
+              title: 'اتصال هاتفي مباشر',
+              subtitle: '+967 772546343',
               color: AppTheme.primary,
-              onTap: () {},
+              onTap: _launchPhoneCall,
             ),
             const SizedBox(height: AppTheme.space16),
             _ContactOption(
               icon: Icons.email_rounded,
               title: 'البريد الإلكتروني',
-              subtitle: 'support@yemenhomebusiness.com',
+              subtitle: 'alshowaiterelias@gmail.com',
               color: const Color(0xFFD32F2F),
-              onTap: () {},
+              onTap: _launchEmail,
             ),
             
             const SizedBox(height: AppTheme.space48),
             const Divider(),
             const SizedBox(height: AppTheme.space16),
             
-            Text('أوقات العمل: من السبت إلى الخميس، 8 صباحاً - 8 مساءً', 
-              style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
+            Text(
+              'أوقات الدعم والاستجابة: متواجدون على مدار 24 ساعة لخدمتكم', 
+              style: theme.textTheme.bodySmall, 
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
@@ -124,11 +160,15 @@ class _ContactOption extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 1), textDirection: TextDirection.ltr),
+                  Text(
+                    subtitle, 
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 0.5), 
+                    textDirection: TextDirection.ltr,
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppTheme.textHint),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppTheme.textHint),
           ],
         ),
       ),
