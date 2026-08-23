@@ -146,7 +146,7 @@ class PushNotificationService {
 
       final platform = Platform.isIOS ? 'IOS' : 'ANDROID';
 
-      await ApiClient.post('/users/device-token', data: {
+      await ApiClient.instance.post('/users/device-token', data: {
         'fcmToken': fcmToken,
         'devicePlatform': platform,
       });
