@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "880648692270-q97k4pim4c2lne4ootnfdfmm5n8i8bes.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eliasalshowaiter.home_business_mobile",
+            "certificate_hash": "f6840938462da4b37ff8932f4cca5c6292c93f09"
+          }
+        },
+        {
           "client_id": "880648692270-llu62n1d4q4lt4hs7dk3gil9h2st70hg.apps.googleusercontent.com",
           "client_type": 3
         }
