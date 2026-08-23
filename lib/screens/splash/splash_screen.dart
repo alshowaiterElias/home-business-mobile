@@ -113,10 +113,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             const Spacer(),
             FadeTransition(
               opacity: _fadeAnimation,
-              child: const Padding(
-                padding: EdgeInsets.only(bottom: 40.0),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accent),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accent),
+                    ),
+                    const SizedBox(height: AppTheme.space16),
+                    Text(
+                      'الإصدار 1.0.0+6',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
