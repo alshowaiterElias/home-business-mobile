@@ -81,10 +81,16 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
 
     final List<dynamic> images = product['images'] ?? [];
     final List<dynamic> reviews = product['reviews'] ?? [];
-    
+
     // Rating stats
-    final double avgRating = double.tryParse('${product['ratingAverage'] ?? product['averageRating'] ?? 0.0}') ?? 0.0;
-    final int reviewsCount = reviews.length > 0 ? reviews.length : (product['reviewsCount'] ?? product['_count']?['reviews'] ?? 0);
+    final double avgRating =
+        double.tryParse(
+          '${product['ratingAverage'] ?? product['averageRating'] ?? 0.0}',
+        ) ??
+        0.0;
+    final int reviewsCount = reviews.length > 0
+        ? reviews.length
+        : (product['reviewsCount'] ?? product['_count']?['reviews'] ?? 0);
 
     // Calculate star breakdown (5 star to 1 star)
     Map<int, int> starCounts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
@@ -119,7 +125,10 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                   // Status Banner
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     color: _getStatusColor().withOpacity(0.12),
                     child: Row(
                       children: [
@@ -127,8 +136,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                           product['status'] == 'APPROVED'
                               ? Icons.check_circle_rounded
                               : (product['status'] == 'PENDING'
-                                  ? Icons.hourglass_top_rounded
-                                  : Icons.cancel_rounded),
+                                    ? Icons.hourglass_top_rounded
+                                    : Icons.cancel_rounded),
                           color: _getStatusColor(),
                           size: 22,
                         ),
@@ -148,20 +157,27 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                   ),
 
                   // Rejection Alert if rejected
-                  if (product['status'] == 'REJECTED' && product['rejectionReason'] != null)
+                  if (product['status'] == 'REJECTED' &&
+                      product['rejectionReason'] != null)
                     Container(
                       width: double.infinity,
                       margin: const EdgeInsets.all(AppTheme.space16),
-                      padding: const EdgeInsets.all(AppTheme.space14),
+                      padding: const EdgeInsets.all(AppTheme.space16),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFEBEE),
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        border: Border.all(color: AppTheme.error.withOpacity(0.4)),
+                        border: Border.all(
+                          color: AppTheme.error.withOpacity(0.4),
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 24),
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: AppTheme.error,
+                            size: 24,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -178,7 +194,10 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   '${product['rejectionReason']}',
-                                  style: const TextStyle(color: AppTheme.error, fontSize: 13),
+                                  style: const TextStyle(
+                                    color: AppTheme.error,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ],
                             ),
@@ -193,7 +212,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       height: 250,
                       child: PageView.builder(
                         itemCount: images.length,
-                        onPageChanged: (idx) => setState(() => _activeImageIndex = idx),
+                        onPageChanged: (idx) =>
+                            setState(() => _activeImageIndex = idx),
                         itemBuilder: (context, index) {
                           final imgUrl = images[index]['imageUrl'] ?? '';
                           return CachedNetworkImage(
@@ -202,11 +222,17 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             width: double.infinity,
                             placeholder: (_, __) => Container(
                               color: Colors.grey.shade100,
-                              child: const Center(child: CircularProgressIndicator()),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             ),
                             errorWidget: (_, __, ___) => Container(
                               color: Colors.grey.shade200,
-                              child: const Icon(Icons.image_not_supported_rounded, size: 50, color: Colors.grey),
+                              child: const Icon(
+                                Icons.image_not_supported_rounded,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
                             ),
                           );
                         },
@@ -242,7 +268,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       children: [
                         Text(
                           product['title'] ?? '',
-                          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -257,7 +285,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             if (product['unit'] != null) ...[
                               Text(
                                 ' / ${product['unit']}',
-                                style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                ),
                               ),
                             ],
                           ],
@@ -270,14 +300,16 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             _buildStatChip(
                               icon: Icons.star_rounded,
                               iconColor: Colors.amber.shade700,
-                              label: '${avgRating.toStringAsFixed(1)} ★ (${reviewsCount})',
+                              label:
+                                  '${avgRating.toStringAsFixed(1)} ★ (${reviewsCount})',
                             ),
                             const SizedBox(width: 8),
                             if (product['category'] != null)
                               _buildStatChip(
                                 icon: Icons.category_outlined,
                                 iconColor: AppTheme.primary,
-                                label: product['category']['nameAr'] ?? 'قسم عام',
+                                label:
+                                    product['category']['nameAr'] ?? 'قسم عام',
                               ),
                           ],
                         ),
@@ -293,13 +325,22 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('وصف المنتج', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          'وصف المنتج',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Text(
-                          product['description'] != null && (product['description'] as String).isNotEmpty
+                          product['description'] != null &&
+                                  (product['description'] as String).isNotEmpty
                               ? product['description']
                               : 'لا يوجد وصف مضاف لهذا المنتج.',
-                          style: theme.textTheme.bodyMedium?.copyWith(height: 1.6, color: AppTheme.textSecondary),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            height: 1.6,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -315,11 +356,17 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.analytics_outlined, color: AppTheme.primary, size: 22),
+                            const Icon(
+                              Icons.analytics_outlined,
+                              color: AppTheme.primary,
+                              size: 22,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'إحصائيات وتقييمات العملاء',
-                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -330,7 +377,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                           padding: const EdgeInsets.all(AppTheme.space16),
                           decoration: BoxDecoration(
                             color: AppTheme.surface,
-                            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusLg,
+                            ),
                             border: Border.all(color: AppTheme.divider),
                             boxShadow: AppTheme.shadowSm,
                           ),
@@ -355,7 +404,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                       return Icon(
                                         index < avgRating.floor()
                                             ? Icons.star_rounded
-                                            : (index < avgRating ? Icons.star_half_rounded : Icons.star_border_rounded),
+                                            : (index < avgRating
+                                                  ? Icons.star_half_rounded
+                                                  : Icons.star_border_rounded),
                                         color: Colors.amber.shade700,
                                         size: 16,
                                       );
@@ -364,7 +415,10 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                   const SizedBox(height: 6),
                                   Text(
                                     'إجمالي $reviewsCount تقييم',
-                                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -377,27 +431,49 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                 child: Column(
                                   children: [5, 4, 3, 2, 1].map((star) {
                                     final count = starCounts[star] ?? 0;
-                                    final double percent = reviewsCount > 0 ? (count / reviewsCount) : 0.0;
+                                    final double percent = reviewsCount > 0
+                                        ? (count / reviewsCount)
+                                        : 0.0;
 
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 2.5),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 2.5,
+                                      ),
                                       child: Row(
                                         children: [
-                                          Text('$star', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                          const Icon(Icons.star_rounded, size: 12, color: Colors.amber),
+                                          Text(
+                                            '$star',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.star_rounded,
+                                            size: 12,
+                                            color: Colors.amber,
+                                          ),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                               child: LinearProgressIndicator(
                                                 value: percent,
                                                 minHeight: 8,
-                                                backgroundColor: Colors.grey.shade200,
-                                                valueColor: AlwaysStoppedAnimation<Color>(
-                                                  star >= 4
-                                                      ? Colors.green
-                                                      : (star == 3 ? Colors.amber : Colors.redAccent),
-                                                ),
+                                                backgroundColor:
+                                                    Colors.grey.shade200,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(
+                                                      star >= 4
+                                                          ? Colors.green
+                                                          : (star == 3
+                                                                ? Colors.amber
+                                                                : Colors
+                                                                      .redAccent),
+                                                    ),
                                               ),
                                             ),
                                           ),
@@ -406,7 +482,10 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                             width: 24,
                                             child: Text(
                                               '$count',
-                                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppTheme.textSecondary,
+                                              ),
                                               textAlign: TextAlign.end,
                                             ),
                                           ),
@@ -425,11 +504,19 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
 
                   // Customer Reviews List
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.space16,
+                      vertical: 8,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('آراء المراجِعين (${reviews.length})', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          'آراء المراجِعين (${reviews.length})',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 12),
 
                         if (reviews.isEmpty)
@@ -438,56 +525,79 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
                               color: AppTheme.background,
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusMd,
+                              ),
                             ),
                             child: const Center(
                               child: Text(
                                 'لا توجد تعليقات أو تقييمات مكتوبة حتى الآن.',
-                                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           )
                         else
                           ...reviews.map((rev) {
-                            final userPhone = rev['user']?['phoneNumber'] ?? 'مستخدم';
-                            final rating = (rev['rating'] as num?)?.toInt() ?? 5;
+                            final userPhone =
+                                rev['user']?['phoneNumber'] ?? 'مستخدم';
+                            final rating =
+                                (rev['rating'] as num?)?.toInt() ?? 5;
                             final comment = rev['comment'] ?? '';
                             final createdAt = rev['createdAt'] != null
-                                ? DateTime.tryParse(rev['createdAt'].toString())?.toLocal().toString().split(' ')[0] ?? ''
+                                ? DateTime.tryParse(
+                                        rev['createdAt'].toString(),
+                                      )?.toLocal().toString().split(' ')[0] ??
+                                      ''
                                 : '';
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(AppTheme.space14),
+                              padding: const EdgeInsets.all(AppTheme.space16),
                               decoration: BoxDecoration(
                                 color: AppTheme.surface,
-                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
+                                ),
                                 border: Border.all(color: AppTheme.divider),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
                                           CircleAvatar(
                                             radius: 16,
-                                            backgroundColor: AppTheme.primarySurface,
-                                            child: const Icon(Icons.person, size: 18, color: AppTheme.primary),
+                                            backgroundColor:
+                                                AppTheme.primarySurface,
+                                            child: const Icon(
+                                              Icons.person,
+                                              size: 18,
+                                              color: AppTheme.primary,
+                                            ),
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
                                             userPhone,
-                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
                                           ),
                                         ],
                                       ),
                                       Row(
                                         children: List.generate(5, (starIdx) {
                                           return Icon(
-                                            starIdx < rating ? Icons.star_rounded : Icons.star_border_rounded,
+                                            starIdx < rating
+                                                ? Icons.star_rounded
+                                                : Icons.star_border_rounded,
                                             color: Colors.amber.shade700,
                                             size: 14,
                                           );
@@ -499,14 +609,21 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                     const SizedBox(height: 8),
                                     Text(
                                       comment,
-                                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, height: 1.4),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppTheme.textPrimary,
+                                        height: 1.4,
+                                      ),
                                     ),
                                   ],
                                   if (createdAt.isNotEmpty) ...[
                                     const SizedBox(height: 6),
                                     Text(
                                       createdAt,
-                                      style: const TextStyle(fontSize: 11, color: AppTheme.textHint),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textHint,
+                                      ),
                                     ),
                                   ],
                                 ],
@@ -524,7 +641,11 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
     );
   }
 
-  Widget _buildStatChip({required IconData icon, required Color iconColor, required String label}) {
+  Widget _buildStatChip({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -538,7 +659,11 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: iconColor),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: iconColor,
+            ),
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../core/network/auth_service.dart';
 import '../core/network/storage_service.dart';
 import '../core/network/error_handler.dart';
+import '../core/network/push_notification_service.dart';
 
 class AuthController extends GetxController {
   var isLoggedIn = false.obs;
@@ -29,6 +30,7 @@ class AuthController extends GetxController {
     if (StorageService.hasToken()) {
       try {
         await fetchProfile();
+        PushNotificationService.syncFCMToken();
       } catch (e) {
         final errorStr = e.toString().toLowerCase();
         if (errorStr.contains('401') || errorStr.contains('unauthorized')) {
@@ -37,6 +39,7 @@ class AuthController extends GetxController {
           hasStore.value = false;
         } else {
           isLoggedIn.value = true;
+          PushNotificationService.syncFCMToken();
         }
       }
     }
@@ -162,6 +165,7 @@ class AuthController extends GetxController {
       if (response['success'] == true && response['token'] != null) {
         await StorageService.saveToken(response['token']);
         isLoggedIn.value = true;
+        PushNotificationService.syncFCMToken();
 
         final user = response['user'];
         if (user != null) {

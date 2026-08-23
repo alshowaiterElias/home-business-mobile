@@ -26,6 +26,8 @@ import 'core/network/whatsapp_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'core/network/push_notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -34,10 +36,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize networking and storage
+  // Initialize networking, storage & push notifications
   await StorageService.init();
   ApiClient.init();
   await WhatsAppService.loadTemplates();
+  await PushNotificationService.init();
 
   Get.put(NetworkController(), permanent: true);
   Get.put(AuthController(), permanent: true);
