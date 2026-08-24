@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../core/network/auth_service.dart';
 import '../core/network/storage_service.dart';
 import '../core/network/error_handler.dart';
 import '../core/network/push_notification_service.dart';
+
+// =========================================================================
+// LEGACY: Firebase Phone Auth imports (commented out — pivoted to Evolution API)
+// =========================================================================
+// import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthController extends GetxController {
   var isLoggedIn = false.obs;
@@ -14,11 +18,15 @@ class AuthController extends GetxController {
 
   var currentUser = {}.obs;
 
-  // Firebase Phone Auth state
-  var verificationId = ''.obs;
-  var resendToken = Rxn<int>();
+  // Current phone number being verified (used in OTP step)
+  var currentPhone = ''.obs;
 
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  // =========================================================================
+  // LEGACY: Firebase Phone Auth state (commented out)
+  // =========================================================================
+  // var verificationId = ''.obs;
+  // var resendToken = Rxn<int>();
+  // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
   void onInit() {
@@ -45,54 +53,34 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Sends OTP via Firebase Phone Auth
+  /// Requests OTP via backend → Evolution API (WhatsApp delivery)
   Future<bool> requestOTP(String phoneNumber) async {
     isLoading.value = true;
 
     try {
-      await _firebaseAuth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 60),
-        forceResendingToken: resendToken.value,
+      final response = await AuthService.requestOTP(phoneNumber);
 
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification (e.g., on some Android devices)
-          if (kDebugMode) print('[Firebase Auth] Auto-verification triggered');
-          await _signInWithCredential(credential);
-        },
+      if (response['success'] == true) {
+        currentPhone.value = phoneNumber;
+        isLoading.value = false;
 
-        verificationFailed: (FirebaseAuthException e) {
-          isLoading.value = false;
-          String errorMsg = 'فشل إرسال رمز التحقق';
-          if (e.code == 'too-many-requests') {
-            errorMsg = 'تم إرسال عدد كبير من الطلبات. يرجى المحاولة لاحقاً.';
-          } else if (e.code == 'invalid-phone-number') {
-            errorMsg = 'رقم الهاتف غير صحيح';
-          }
-          Get.snackbar(
-            'خطأ',
-            errorMsg,
-            backgroundColor: Colors.redAccent,
-            colorText: Colors.white,
-          );
-        },
+        Get.snackbar(
+          'تم إرسال رمز التحقق 📩',
+          response['message'] ?? 'تحقق من رسائل الواتساب',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        return true;
+      }
 
-        codeSent: (String verId, int? forceResendToken) {
-          isLoading.value = false;
-          verificationId.value = verId;
-          resendToken.value = forceResendToken;
-          if (kDebugMode)
-            print('[Firebase Auth] Code sent. Verification ID: $verId');
-        },
-
-        codeAutoRetrievalTimeout: (String verId) {
-          verificationId.value = verId;
-          if (kDebugMode)
-            print('[Firebase Auth] Auto retrieval timeout. VerId: $verId');
-        },
+      isLoading.value = false;
+      Get.snackbar(
+        'خطأ',
+        response['message'] ?? 'فشل إرسال رمز التحقق',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
       );
-
-      return true;
+      return false;
     } catch (e) {
       isLoading.value = false;
       final errorMsg = ApiErrorHandler.handle(e);
@@ -106,9 +94,9 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Verifies the 6-digit SMS code entered by the user
-  Future<bool> verifyOTP(String smsCode) async {
-    if (verificationId.value.isEmpty) {
+  /// Verifies OTP code entered by the user against the backend
+  Future<bool> verifyOTP(String otpCode) async {
+    if (currentPhone.value.isEmpty) {
       Get.snackbar(
         'خطأ',
         'يرجى طلب رمز التحقق أولاً',
@@ -121,46 +109,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId.value,
-        smsCode: smsCode.trim(),
-      );
-
-      return await _signInWithCredential(credential);
-    } catch (e) {
-      isLoading.value = false;
-      String errorMsg = 'رمز التحقق غير صحيح';
-      if (e is FirebaseAuthException) {
-        if (e.code == 'invalid-verification-code') {
-          errorMsg = 'رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.';
-        } else if (e.code == 'session-expired') {
-          errorMsg = 'انتهت صلاحية الجلسة. يرجى طلب رمز جديد.';
-        }
-      }
-      Get.snackbar(
-        'خطأ',
-        errorMsg,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return false;
-    }
-  }
-
-  /// Signs in with Firebase credential, then exchanges the Firebase ID token for our backend JWT
-  Future<bool> _signInWithCredential(PhoneAuthCredential credential) async {
-    try {
-      final userCredential = await _firebaseAuth.signInWithCredential(
-        credential,
-      );
-      final idToken = await userCredential.user?.getIdToken();
-
-      if (idToken == null) {
-        throw Exception('Failed to get Firebase ID token');
-      }
-
-      // Exchange Firebase ID token for our backend JWT
-      final response = await AuthService.verifyFirebaseToken(idToken);
+      final response = await AuthService.verifyOTP(currentPhone.value, otpCode.trim());
 
       if (response['success'] == true && response['token'] != null) {
         await StorageService.saveToken(response['token']);
@@ -189,6 +138,12 @@ class AuthController extends GetxController {
       }
 
       isLoading.value = false;
+      Get.snackbar(
+        'خطأ',
+        response['message'] ?? 'فشل التحقق من الرمز',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     } catch (e) {
       isLoading.value = false;
@@ -202,6 +157,119 @@ class AuthController extends GetxController {
       return false;
     }
   }
+
+  /* =========================================================================
+     LEGACY: Firebase Phone Auth methods (commented out — pivoted to Evolution API)
+     =========================================================================
+
+  /// Sends OTP via Firebase Phone Auth
+  Future<bool> requestOTP_firebase(String phoneNumber) async {
+    isLoading.value = true;
+
+    try {
+      await _firebaseAuth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: resendToken.value,
+
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          if (kDebugMode) print('[Firebase Auth] Auto-verification triggered');
+          await _signInWithCredential(credential);
+        },
+
+        verificationFailed: (FirebaseAuthException e) {
+          isLoading.value = false;
+          String errorMsg = 'فشل إرسال رمز التحقق';
+          if (e.code == 'too-many-requests') {
+            errorMsg = 'تم إرسال عدد كبير من الطلبات. يرجى المحاولة لاحقاً.';
+          } else if (e.code == 'invalid-phone-number') {
+            errorMsg = 'رقم الهاتف غير صحيح';
+          }
+          Get.snackbar('خطأ', errorMsg, backgroundColor: Colors.redAccent, colorText: Colors.white);
+        },
+
+        codeSent: (String verId, int? forceResendToken) {
+          isLoading.value = false;
+          verificationId.value = verId;
+          resendToken.value = forceResendToken;
+        },
+
+        codeAutoRetrievalTimeout: (String verId) {
+          verificationId.value = verId;
+        },
+      );
+
+      return true;
+    } catch (e) {
+      isLoading.value = false;
+      final errorMsg = ApiErrorHandler.handle(e);
+      Get.snackbar('خطأ', errorMsg, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return false;
+    }
+  }
+
+  /// Verifies the 6-digit SMS code entered by the user (Firebase)
+  Future<bool> verifyOTP_firebase(String smsCode) async {
+    if (verificationId.value.isEmpty) {
+      Get.snackbar('خطأ', 'يرجى طلب رمز التحقق أولاً', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return false;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: verificationId.value,
+        smsCode: smsCode.trim(),
+      );
+      return await _signInWithCredential(credential);
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar('خطأ', 'رمز التحقق غير صحيح', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return false;
+    }
+  }
+
+  /// Signs in with Firebase credential, then exchanges the Firebase ID token for our backend JWT
+  Future<bool> _signInWithCredential(PhoneAuthCredential credential) async {
+    try {
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+
+      if (idToken == null) throw Exception('Failed to get Firebase ID token');
+
+      final response = await AuthService.verifyFirebaseToken(idToken);
+
+      if (response['success'] == true && response['token'] != null) {
+        await StorageService.saveToken(response['token']);
+        isLoggedIn.value = true;
+        PushNotificationService.syncFCMToken();
+
+        final user = response['user'];
+        if (user != null) {
+          currentUser.value = user;
+          hasStore.value = user['business'] != null;
+        } else {
+          await fetchProfile();
+        }
+
+        isLoading.value = false;
+        Get.snackbar('تم التحقق بنجاح! 🎉', 'مرحباً بك في السوق المنزلي', backgroundColor: Colors.green, colorText: Colors.white);
+        Get.offAllNamed('/main');
+        return true;
+      }
+
+      isLoading.value = false;
+      return false;
+    } catch (e) {
+      isLoading.value = false;
+      final errorMsg = ApiErrorHandler.handle(e);
+      Get.snackbar('خطأ', errorMsg, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return false;
+    }
+  }
+
+     ========================================================================= */
 
   Future<void> fetchProfile() async {
     try {
@@ -218,11 +286,12 @@ class AuthController extends GetxController {
   }
 
   void logout() {
-    _firebaseAuth.signOut();
+    // LEGACY: _firebaseAuth.signOut();
     StorageService.removeToken();
     isLoggedIn.value = false;
     hasStore.value = false;
     currentUser.value = {};
+    currentPhone.value = '';
     Get.offAllNamed('/main');
   }
 
@@ -275,7 +344,7 @@ class AuthController extends GetxController {
       }
 
       if (res['success'] == true) {
-        _firebaseAuth.signOut();
+        // LEGACY: _firebaseAuth.signOut();
         StorageService.removeToken();
         isLoggedIn.value = false;
         hasStore.value = false;

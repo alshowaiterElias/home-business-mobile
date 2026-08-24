@@ -13,8 +13,8 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   bool _isOtpSent = false;
   final _phoneController = TextEditingController(text: '+967');
-  final _otpControllers = List.generate(6, (_) => TextEditingController());
-  final _otpFocusNodes = List.generate(6, (_) => FocusNode());
+  final _otpControllers = List.generate(4, (_) => TextEditingController());
+  final _otpFocusNodes = List.generate(4, (_) => FocusNode());
 
   @override
   void dispose() {
@@ -68,7 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: AppTheme.space8),
               Text(
                 _isOtpSent
-                    ? 'أدخل رمز التحقق المرسل إلى هاتفك عبر SMS'
+                    ? 'أدخل رمز التحقق المرسل إلى واتساب'
                     : 'سجّل بإستخدام رقم الهاتف',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
@@ -180,7 +180,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: AppTheme.space24),
 
-                // 6-Digit OTP Fields
+                // 4-Digit OTP Fields
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: Text('رمز التحقق', style: theme.textTheme.titleMedium),
@@ -191,11 +191,11 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
-                      6,
+                      4,
                       (index) => Container(
-                        width: 48,
-                        height: 58,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: 56,
+                        height: 64,
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
                         child: TextField(
                           controller: _otpControllers[index],
                           focusNode: _otpFocusNodes[index],
@@ -222,7 +222,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                           onChanged: (value) {
-                            if (value.isNotEmpty && index < 5) {
+                            if (value.isNotEmpty && index < 3) {
                               _otpFocusNodes[index + 1].requestFocus();
                             }
                             if (value.isEmpty && index > 0) {
@@ -247,9 +247,9 @@ class _AuthScreenState extends State<AuthScreen> {
                           ? null
                           : () async {
                               final otp = _getOtpCode();
-                              if (otp.length < 6) {
+                              if (otp.length < 4) {
                                 Get.snackbar(
-                                    'تنبيه', 'الرجاء إدخال الرمز كاملاً (6 أرقام)',
+                                    'تنبيه', 'الرجاء إدخال الرمز كاملاً (4 أرقام)',
                                     backgroundColor: Colors.orange,
                                     colorText: Colors.white);
                                 return;
