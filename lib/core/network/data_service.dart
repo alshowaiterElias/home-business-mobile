@@ -219,4 +219,14 @@ class DataService {
       rethrow;
     }
   }
+
+  // Fetch Public App Configuration (Support & Developer contacts)
+  static Future<Map<String, dynamic>> getAppConfig() async {
+    try {
+      final response = await ApiClient.instance.get('/config');
+      return response.data['data'] ?? {};
+    } catch (e) {
+      return {};
+    }
+  }
 }

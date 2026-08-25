@@ -3,13 +3,19 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../controllers/auth_controller.dart';
+import '../../controllers/data_controller.dart';
 
 class SuspendedAccountScreen extends StatelessWidget {
   final String? storeName;
   const SuspendedAccountScreen({super.key, this.storeName});
 
   Future<void> _openWhatsAppSupport() async {
-    const adminPhone = '+967772546343';
+    final dataController = Get.isRegistered<DataController>()
+        ? Get.find<DataController>()
+        : Get.put(DataController());
+    final rawPhone = dataController.supportPhone.value;
+    final adminPhone = rawPhone.replaceAll(RegExp(r'[^\d+]'), '');
+    
     final message = Uri.encodeComponent(
       'مرحباً إدارة تطبيق السوق المنزلي،\n\nأنا صاحب متجر ${storeName ?? ""}. أود الاستفسار عن سبب تعليق حساب المتجر وكيفية إعادة تفعيله. شكراً لكم.',
     );
@@ -26,7 +32,13 @@ class SuspendedAccountScreen extends StatelessWidget {
   }
 
   Future<void> _makeSupportCall() async {
-    final uri = Uri.parse('tel:+967772546343');
+    final dataController = Get.isRegistered<DataController>()
+        ? Get.find<DataController>()
+        : Get.put(DataController());
+    final rawPhone = dataController.supportPhone.value;
+    final phoneUrl = rawPhone.startsWith('+') ? rawPhone : '+$rawPhone';
+
+    final uri = Uri.parse('tel:$phoneUrl');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {

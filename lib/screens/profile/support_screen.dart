@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 
+import '../../controllers/data_controller.dart';
+
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
 
-  Future<void> _launchWhatsApp() async {
-    const phone = '967772546343';
-    final Uri url = Uri.parse('https://wa.me/$phone');
+  Future<void> _launchWhatsApp(String phone) async {
+    final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    final Uri url = Uri.parse('https://wa.me/$cleanPhone');
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         await launchUrl(url);
@@ -19,8 +21,9 @@ class SupportScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _launchPhoneCall() async {
-    final Uri url = Uri.parse('tel:+967772546343');
+  Future<void> _launchPhoneCall(String phone) async {
+    final cleanPhone = phone.startsWith('+') ? phone : '+$phone';
+    final Uri url = Uri.parse('tel:$cleanPhone');
     try {
       if (!await launchUrl(url)) {
         Get.snackbar('خطأ', 'تعذر إجراء الاتصال الهاتفي',
@@ -32,8 +35,8 @@ class SupportScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _launchEmail() async {
-    final Uri url = Uri.parse('mailto:alshowaiterelias@gmail.com');
+  Future<void> _launchEmail(String email) async {
+    final Uri url = Uri.parse('mailto:$email');
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         await launchUrl(url);
@@ -47,6 +50,9 @@ class SupportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final dataController = Get.isRegistered<DataController>()
+        ? Get.find<DataController>()
+        : Get.put(DataController());
 
     return Scaffold(
       appBar: AppBar(title: const Text('المساعدة والدعم')),
@@ -75,31 +81,40 @@ class SupportScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppTheme.space48),
 
-            // Contact Options
-            _ContactOption(
-              icon: Icons.chat_rounded,
-              title: 'تواصل عبر واتساب',
-              subtitle: '+967 772546343',
-              color: AppTheme.whatsapp,
-              onTap: _launchWhatsApp,
-            ),
-            const SizedBox(height: AppTheme.space16),
-            _ContactOption(
-              icon: Icons.phone_in_talk_rounded,
-              title: 'اتصال هاتفي مباشر',
-              subtitle: '+967 772546343',
-              color: AppTheme.primary,
-              onTap: _launchPhoneCall,
-            ),
-            const SizedBox(height: AppTheme.space16),
-            _ContactOption(
-              icon: Icons.email_rounded,
-              title: 'البريد الإلكتروني',
-              subtitle: 'alshowaiterelias@gmail.com',
-              color: const Color(0xFFD32F2F),
-              onTap: _launchEmail,
-            ),
-            
+            // Contact Options (Dynamic from Admin Settings)
+            Obx(() {
+              final phone = dataController.supportPhone.value;
+              final email = dataController.supportEmail.value;
+
+              return Column(
+                children: [
+                  _ContactOption(
+                    icon: Icons.chat_rounded,
+                    title: 'تواصل عبر واتساب',
+                    subtitle: phone,
+                    color: AppTheme.whatsapp,
+                    onTap: () => _launchWhatsApp(phone),
+                  ),
+                  const SizedBox(height: AppTheme.space16),
+                  _ContactOption(
+                    icon: Icons.phone_in_talk_rounded,
+                    title: 'اتصال هاتفي مباشر',
+                    subtitle: phone,
+                    color: AppTheme.primary,
+                    onTap: () => _launchPhoneCall(phone),
+                  ),
+                  const SizedBox(height: AppTheme.space16),
+                  _ContactOption(
+                    icon: Icons.email_rounded,
+                    title: 'البريد الإلكتروني',
+                    subtitle: email,
+                    color: const Color(0xFFD32F2F),
+                    onTap: () => _launchEmail(email),
+                  ),
+                ],
+              );
+            }),
+
             const SizedBox(height: AppTheme.space48),
             const Divider(),
             const SizedBox(height: AppTheme.space16),

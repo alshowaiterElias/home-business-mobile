@@ -16,6 +16,12 @@ class DataController extends GetxController {
   var locations = <dynamic>[].obs;
   var topStores = <dynamic>[].obs;
 
+  // System Contacts
+  var supportPhone = '+967772546343'.obs;
+  var supportEmail = 'alshowaiterelias@gmail.com'.obs;
+  var developerPhone = '+967772546343'.obs;
+  var developerEmail = 'alshowaiterelias@gmail.com'.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -24,6 +30,7 @@ class DataController extends GetxController {
 
   Future<void> fetchInitialData() async {
     await Future.wait([
+      fetchAppConfig(),
       fetchCategories(),
       fetchFeaturedProducts(),
       fetchFeaturedStores(),
@@ -31,6 +38,26 @@ class DataController extends GetxController {
       fetchLocations(),
       fetchTopStores(),
     ]);
+  }
+
+  Future<void> fetchAppConfig() async {
+    try {
+      final config = await DataService.getAppConfig();
+      if (config['supportPhone'] != null && config['supportPhone'].toString().trim().isNotEmpty) {
+        supportPhone.value = config['supportPhone'].toString().trim();
+      }
+      if (config['supportEmail'] != null && config['supportEmail'].toString().trim().isNotEmpty) {
+        supportEmail.value = config['supportEmail'].toString().trim();
+      }
+      if (config['developerPhone'] != null && config['developerPhone'].toString().trim().isNotEmpty) {
+        developerPhone.value = config['developerPhone'].toString().trim();
+      }
+      if (config['developerEmail'] != null && config['developerEmail'].toString().trim().isNotEmpty) {
+        developerEmail.value = config['developerEmail'].toString().trim();
+      }
+    } catch (e) {
+      print('Error fetching app config: $e');
+    }
   }
 
   Future<void> fetchCategories() async {
