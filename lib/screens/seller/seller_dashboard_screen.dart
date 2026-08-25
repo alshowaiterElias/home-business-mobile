@@ -136,7 +136,8 @@ class _ProductTile extends StatelessWidget {
     switch (product['status']) {
       case 'APPROVED': return AppTheme.primary;
       case 'PENDING': return AppTheme.accent;
-      case 'REJECTED': return AppTheme.error;
+      case 'REJECTED': 
+      case 'SUSPENDED': return AppTheme.error;
       default: return AppTheme.textHint;
     }
   }
@@ -146,6 +147,7 @@ class _ProductTile extends StatelessWidget {
       case 'APPROVED': return 'مقبول';
       case 'PENDING': return 'بالانتظار';
       case 'REJECTED': return 'مرفوض';
+      case 'SUSPENDED': return 'موقوف 🚫';
       default: return '';
     }
   }

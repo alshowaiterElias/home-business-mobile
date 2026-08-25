@@ -77,6 +77,35 @@ class NotificationController extends GetxController {
     }
   }
 
+  Future<void> deleteNotification(String id) async {
+    final index = notifications.indexWhere((n) => n['id'] == id);
+    if (index != -1) {
+      final removed = notifications.removeAt(index);
+      try {
+        await DataService.deleteNotification(id);
+      } catch (e) {
+        // Revert on error
+        notifications.insert(index, removed);
+        print('Failed to delete notification: $e');
+      }
+    }
+  }
+
+  Future<void> deleteAllNotifications() async {
+    if (notifications.isEmpty) return;
+
+    final backup = List<dynamic>.from(notifications);
+    notifications.clear();
+
+    try {
+      await DataService.deleteAllNotifications();
+    } catch (e) {
+      // Revert on error
+      notifications.assignAll(backup);
+      print('Failed to delete all notifications: $e');
+    }
+  }
+
   int get unreadCount {
     return notifications.where((n) => n['isRead'] == false).length;
   }

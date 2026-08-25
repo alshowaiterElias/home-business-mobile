@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../controllers/seller_dashboard_controller.dart';
+import 'suspended_product_screen.dart';
 
 class MyProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> initialProduct;
@@ -79,6 +80,13 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (product['status'] == 'SUSPENDED') {
+      return SuspendedProductScreen(
+        productTitle: product['title'] ?? '',
+        storeName: product['business']?['businessName'],
+      );
+    }
 
     final List<dynamic> images = product['images'] ?? [];
     final List<dynamic> reviews = product['reviews'] ?? [];
@@ -317,45 +325,46 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
 
                         const SizedBox(height: 16),
 
-                        // AI Marketing Ad Generator Button
-                        InkWell(
-                          onTap: () => _showAiAdModal(context),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF7C3AED), Color(0xFF2563EB)],
-                                begin: Alignment.centerRight,
-                                end: Alignment.centerLeft,
-                              ),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF7C3AED).withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                )
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
-                                SizedBox(width: 8),
-                                Text(
-                                  'صياغة إعلان تسويقي بالذكاء الاصطناعي 🪄',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
+                        // AI Marketing Ad Generator Button (Only for APPROVED products)
+                        if (product['status'] == 'APPROVED')
+                          InkWell(
+                            onTap: () => _showAiAdModal(context),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF7C3AED), Color(0xFF2563EB)],
+                                  begin: Alignment.centerRight,
+                                  end: Alignment.centerLeft,
                                 ),
-                              ],
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF7C3AED).withOpacity(0.3),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'صياغة إعلان تسويقي بالذكاء الاصطناعي 🪄',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -714,6 +723,16 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
   }
 
   void _showAiAdModal(BuildContext context) {
+    if (product['status'] != 'APPROVED') {
+      Get.snackbar(
+        'تنبيه',
+        'توليد إعلانات الذكاء الاصطناعي متاح فقط للمنتجات المعتمدة من الإدارة.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

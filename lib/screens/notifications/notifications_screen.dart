@@ -36,6 +36,30 @@ class NotificationsScreen extends StatelessWidget {
     return 'الآن';
   }
 
+  void _showDeleteAllDialog(BuildContext context, NotificationController controller) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('مسح جميع الإشعارات'),
+        content: const Text('هل أنت متأكد من رغبتك في حذف كافة الإشعارات؟ لا يمكن التراجع عن هذا الإجراء.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            onPressed: () {
+              Navigator.pop(ctx);
+              controller.deleteAllNotifications();
+            },
+            child: const Text('حذف الكل', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -45,10 +69,25 @@ class NotificationsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('الإشعارات'),
         actions: [
-          TextButton(
-            onPressed: () => controller.markAllAsRead(),
-            child: Text('تحديد كـ مقروء', style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.primary)),
-          ),
+          Obx(() {
+            if (controller.notifications.isEmpty) return const SizedBox();
+            return Row(
+              children: [
+                TextButton(
+                  onPressed: () => controller.markAllAsRead(),
+                  child: Text(
+                    'مقروء الكل',
+                    style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.primary),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep_outlined, color: AppTheme.error),
+                  tooltip: 'مسح الكل',
+                  onPressed: () => _showDeleteAllDialog(context, controller),
+                ),
+              ],
+            );
+          }),
         ],
       ),
       body: Obx(() {
@@ -58,7 +97,14 @@ class NotificationsScreen extends StatelessWidget {
 
         if (controller.notifications.isEmpty) {
           return Center(
-            child: Text('لا توجد إشعارات', style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.textHint)),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.notifications_off_outlined, size: 64, color: AppTheme.textHint.withOpacity(0.5)),
+                const SizedBox(height: 16),
+                Text('لا توجد إشعارات حالياً', style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.textHint)),
+              ],
+            ),
           );
         }
 
@@ -82,31 +128,61 @@ class NotificationsScreen extends StatelessWidget {
               }
               final timeString = createdAt != null ? _formatTimeAgo(createdAt) : '';
 
-              return Material(
-                color: !isRead ? AppTheme.primarySurface.withOpacity(0.2) : Colors.transparent,
-                child: ListTile(
-                  onTap: () {
-                    if (!isRead) controller.markAsRead(n['id']);
-                  },
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.space16, vertical: AppTheme.space8),
-                  leading: Container(
-                    width: 44, height: 44,
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                    ),
-                    child: Icon(icon, color: color, size: 22),
-                  ),
-                  title: Text(n['title'] ?? '', style: theme.textTheme.titleMedium),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              return Dismissible(
+                key: Key(n['id'].toString()),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  color: AppTheme.error,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.space20),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const SizedBox(height: 4),
-                      Text(n['body'] ?? '', style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Text(timeString, style: theme.textTheme.bodySmall),
+                      Text(
+                        'حذف',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.delete_outline, color: Colors.white),
                     ],
+                  ),
+                ),
+                onDismissed: (direction) {
+                  controller.deleteNotification(n['id']);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('تم حذف الإشعار'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Material(
+                  color: !isRead ? AppTheme.primarySurface.withOpacity(0.2) : Colors.transparent,
+                  child: ListTile(
+                    onTap: () {
+                      if (!isRead) controller.markAsRead(n['id']);
+                    },
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.space16, vertical: AppTheme.space8),
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      ),
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    title: Text(n['title'] ?? '', style: theme.textTheme.titleMedium),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(n['body'] ?? '', style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 4),
+                        Text(timeString, style: theme.textTheme.bodySmall),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -117,5 +193,3 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 }
-
-

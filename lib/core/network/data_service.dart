@@ -206,6 +206,24 @@ class DataService {
     }
   }
 
+  // Delete Single Notification
+  static Future<void> deleteNotification(String id) async {
+    try {
+      await ApiClient.instance.delete('/notifications/$id');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Delete All Notifications
+  static Future<void> deleteAllNotifications() async {
+    try {
+      await ApiClient.instance.delete('/notifications/delete-all');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Generate AI Marketing Ad for product
   static Future<List<String>> generateAiAd(String productId) async {
     try {
