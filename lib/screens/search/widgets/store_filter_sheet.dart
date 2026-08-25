@@ -74,7 +74,7 @@ class _StoreFilterSheetState extends State<StoreFilterSheet> {
           Text('المحافظة', style: theme.textTheme.titleSmall),
           const SizedBox(height: AppTheme.space8),
           DropdownButtonFormField<String>(
-            value: _selectedGovernorateId,
+            initialValue: _selectedGovernorateId,
             hint: const Text('جميع المحافظات'),
             decoration: InputDecoration(
               filled: true,

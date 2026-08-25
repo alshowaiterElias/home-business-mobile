@@ -53,7 +53,7 @@ class FavoritesController extends GetxController {
       }).toList();
       favorites.assignAll(parsed);
     } catch (e) {
-      print('Error fetching favorites: $e');
+      debugPrint('Error fetching favorites: $e');
     } finally {
       isLoading.value = false;
     }

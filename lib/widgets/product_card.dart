@@ -91,7 +91,7 @@ class ProductCard extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.55),
+                          color: Colors.black.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusFull,
                           ),
@@ -177,7 +177,7 @@ class ProductCard extends StatelessWidget {
                       ),
                       // Small WhatsApp icon button
                       Material(
-                        color: AppTheme.whatsapp.withOpacity(0.1),
+                        color: AppTheme.whatsapp.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(
@@ -185,8 +185,12 @@ class ProductCard extends StatelessWidget {
                           ),
                           onTap: () {
                             if (product.sellerPhone.isEmpty) {
-                              Get.snackbar('تنبيه', 'رقم هاتف المتجر غير متوفر',
-                                  backgroundColor: Colors.orange, colorText: Colors.white);
+                              Get.snackbar(
+                                'تنبيه',
+                                'رقم هاتف المتجر غير متوفر',
+                                backgroundColor: Colors.orange,
+                                colorText: Colors.white,
+                              );
                               return;
                             }
                             WhatsAppService.openWhatsAppForProduct(
@@ -255,11 +259,11 @@ class _FavBadge extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
+            color: Colors.white.withValues(alpha: 0.92),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

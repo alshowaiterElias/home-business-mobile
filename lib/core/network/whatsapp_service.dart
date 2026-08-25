@@ -18,7 +18,7 @@ class WhatsAppService {
         _templates[template['type']] = template['content'];
       }
     } catch (e) {
-      print('Failed to load WhatsApp templates: $e');
+      debugPrint('Failed to load WhatsApp templates: $e');
       // Safely show snackbar only if UI overlay context is ready
       if (Get.context != null && Get.overlayContext != null) {
         Get.snackbar(
@@ -120,14 +120,17 @@ class WhatsAppService {
             '${tempDir.path}/share_product_${DateTime.now().millisecondsSinceEpoch}.jpg';
         await Dio().download(fullUrl, filePath);
         if (Get.isDialogOpen ?? false) Get.back(); // close loader
+        // ignore: deprecated_member_use
         await Share.shareXFiles([XFile(filePath)], text: message);
       } else {
         if (Get.isDialogOpen ?? false) Get.back();
+        // ignore: deprecated_member_use
         await Share.share(message);
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
       // Fallback
+      // ignore: deprecated_member_use
       await Share.share(
         '$message\nصورة المنتج: ${ApiClient.getImageUrl(product.imageUrl)}',
       );
@@ -166,13 +169,16 @@ class WhatsAppService {
             '${tempDir.path}/share_store_${DateTime.now().millisecondsSinceEpoch}.jpg';
         await Dio().download(fullUrl, filePath);
         if (Get.isDialogOpen ?? false) Get.back(); // close loader
+        // ignore: deprecated_member_use
         await Share.shareXFiles([XFile(filePath)], text: message);
       } else {
         if (Get.isDialogOpen ?? false) Get.back();
+        // ignore: deprecated_member_use
         await Share.share(message);
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
+      // ignore: deprecated_member_use
       await Share.share(message);
     }
   }

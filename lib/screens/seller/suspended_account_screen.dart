@@ -78,10 +78,10 @@ class SuspendedAccountScreen extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: AppTheme.error.withOpacity(0.12),
+                    color: AppTheme.error.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppTheme.error.withOpacity(0.3),
+                      color: AppTheme.error.withValues(alpha: 0.3),
                       width: 2,
                     ),
                   ),
@@ -114,7 +114,7 @@ class SuspendedAccountScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                     boxShadow: AppTheme.shadowSm,
                     border: Border.all(
-                      color: AppTheme.error.withOpacity(0.2),
+                      color: AppTheme.error.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(

@@ -224,8 +224,12 @@ class ProductDetailsScreen extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        AppTheme.primary.withOpacity(0.15),
-                                        AppTheme.primaryLight.withOpacity(0.1),
+                                        AppTheme.primary.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        AppTheme.primaryLight.withValues(
+                                          alpha: 0.1,
+                                        ),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(
@@ -334,7 +338,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 color: AppTheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 16,
                     offset: const Offset(0, -4),
                   ),
@@ -366,8 +370,12 @@ class ProductDetailsScreen extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         if (product.sellerPhone.isEmpty) {
-                          Get.snackbar('تنبيه', 'رقم هاتف المتجر غير متوفر',
-                              backgroundColor: Colors.orange, colorText: Colors.white);
+                          Get.snackbar(
+                            'تنبيه',
+                            'رقم هاتف المتجر غير متوفر',
+                            backgroundColor: Colors.orange,
+                            colorText: Colors.white,
+                          );
                           return;
                         }
                         WhatsAppService.openWhatsAppForProduct(
@@ -424,11 +432,11 @@ class _CircleButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
+          color: Colors.white.withValues(alpha: 0.92),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -451,6 +459,7 @@ class ReviewCard extends StatelessWidget {
   final VoidCallback? onEdit;
 
   const ReviewCard({
+    super.key,
     required this.theme,
     required this.name,
     required this.rating,
@@ -468,7 +477,7 @@ class ReviewCard extends StatelessWidget {
         color: isMine ? AppTheme.primarySurface : AppTheme.background,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: isMine
-            ? Border.all(color: AppTheme.primary.withOpacity(0.2))
+            ? Border.all(color: AppTheme.primary.withValues(alpha: 0.2))
             : null,
       ),
       child: Column(
@@ -601,7 +610,9 @@ class _ReviewsSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppTheme.background,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                  border: Border.all(
+                    color: AppTheme.primary.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

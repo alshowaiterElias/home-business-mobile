@@ -44,8 +44,8 @@ class FavoritesScreen extends StatelessWidget {
         );
       }
 
-      final _favorites = favoritesController.favorites;
-      final hasFavorites = _favorites.isNotEmpty;
+      final favorites = favoritesController.favorites;
+      final hasFavorites = favorites.isNotEmpty;
 
       return Scaffold(
         appBar: AppBar(title: const Text('المفضلة')),
@@ -63,7 +63,7 @@ class FavoritesScreen extends StatelessWidget {
                         AppTheme.space4,
                       ),
                       child: Text(
-                        '${_favorites.length} منتج محفوظ',
+                        '${favorites.length} منتج محفوظ',
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -80,10 +80,10 @@ class FavoritesScreen extends StatelessWidget {
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         return ProductCard(
-                          product: _favorites[index],
+                          product: favorites[index],
                           heroTagPrefix: 'fav-',
                         );
-                      }, childCount: _favorites.length),
+                      }, childCount: favorites.length),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,

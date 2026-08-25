@@ -33,7 +33,7 @@ class CreateStoreController extends GetxController {
       final data = await DataService.getLocations();
       locations.assignAll(data);
     } catch (e) {
-      print('Error loading locations: $e');
+      debugPrint('Error loading locations: $e');
     }
   }
 

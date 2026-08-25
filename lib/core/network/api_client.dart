@@ -47,14 +47,14 @@ class ApiClient {
           }
 
           if (kDebugMode) {
-            print('🌐 [API Request] ${options.method} ${options.uri}');
-            if (options.data != null) print('📦 Data: ${options.data}');
+            debugPrint('🌐 [API Request] ${options.method} ${options.uri}');
+            if (options.data != null) debugPrint('📦 Data: ${options.data}');
           }
           return handler.next(options);
         },
         onResponse: (response, handler) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ [API Response] ${response.statusCode} ${response.requestOptions.uri}',
             );
           }
@@ -62,9 +62,9 @@ class ApiClient {
         },
         onError: (DioException e, handler) {
           if (kDebugMode) {
-            print('❌ [API Error] ${e.type} - ${e.message}');
+            debugPrint('❌ [API Error] ${e.type} - ${e.message}');
             if (e.response != null) {
-              print('🚨 Error Data: ${e.response?.data}');
+              debugPrint('🚨 Error Data: ${e.response?.data}');
             }
           }
 

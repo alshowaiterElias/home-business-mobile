@@ -18,7 +18,7 @@ class NetworkController extends GetxController {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results);
     } catch (e) {
-      print('Connectivity check failed: $e');
+      debugPrint('Connectivity check failed: $e');
     }
   }
 

@@ -101,7 +101,7 @@ class AboutScreen extends StatelessWidget {
                   color: AppTheme.primarySurface,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   border: Border.all(
-                    color: AppTheme.primaryLight.withOpacity(0.3),
+                    color: AppTheme.primaryLight.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(

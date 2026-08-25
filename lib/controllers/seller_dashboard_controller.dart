@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
 import 'auth_controller.dart';
@@ -27,7 +28,7 @@ class SellerDashboardController extends GetxController {
         myProducts.assignAll(data['products']);
       }
     } catch (e) {
-      print('Error fetching seller dashboard: $e');
+      debugPrint('Error fetching seller dashboard: $e');
     } finally {
       isLoading.value = false;
     }

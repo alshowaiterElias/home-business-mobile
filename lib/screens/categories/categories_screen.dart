@@ -23,8 +23,10 @@ class CategoriesScreen extends StatelessWidget {
         return ListView.builder(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
-            AppTheme.space16, AppTheme.space8,
-            AppTheme.space16, AppTheme.space24,
+            AppTheme.space16,
+            AppTheme.space8,
+            AppTheme.space16,
+            AppTheme.space24,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
@@ -75,11 +77,16 @@ class _CategoryCard extends StatelessWidget {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: category.color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                          color: category.color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
                         ),
-                        child: Icon(category.icon,
-                            color: category.color, size: 26),
+                        child: Icon(
+                          category.icon,
+                          color: category.color,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(width: AppTheme.space16),
 
@@ -88,8 +95,10 @@ class _CategoryCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(category.nameAr,
-                                style: theme.textTheme.titleLarge),
+                            Text(
+                              category.nameAr,
+                              style: theme.textTheme.titleLarge,
+                            ),
                             const SizedBox(height: 2),
                             Text(
                               '${category.productCount} منتج',
@@ -116,34 +125,40 @@ class _CategoryCard extends StatelessWidget {
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      AppTheme.space16, AppTheme.space12,
-                      AppTheme.space16, AppTheme.space16,
+                      AppTheme.space16,
+                      AppTheme.space12,
+                      AppTheme.space16,
+                      AppTheme.space16,
                     ),
                     child: Wrap(
                       spacing: AppTheme.space8,
                       runSpacing: AppTheme.space8,
                       children: category.children.map((sub) {
                         return InkWell(
-                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusFull,
+                          ),
                           onTap: () {
                             Get.toNamed('/category-products', arguments: sub);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8,
+                              horizontal: 14,
+                              vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: sub.color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                              color: sub.color.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusFull,
+                              ),
                               border: Border.all(
-                                color: sub.color.withOpacity(0.2),
+                                color: sub.color.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(sub.icon,
-                                    size: 15, color: sub.color),
+                                Icon(sub.icon, size: 15, color: sub.color),
                                 const SizedBox(width: 6),
                                 Text(
                                   sub.nameAr,

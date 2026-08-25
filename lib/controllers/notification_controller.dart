@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
 import 'auth_controller.dart';
@@ -29,7 +30,7 @@ class NotificationController extends GetxController {
       final data = await DataService.getNotifications();
       notifications.assignAll(data);
     } catch (e) {
-      print('Failed to fetch notifications: $e');
+      debugPrint('Failed to fetch notifications: $e');
     } finally {
       isLoading.value = false;
     }
@@ -49,7 +50,7 @@ class NotificationController extends GetxController {
         // Revert on error
         notif['isRead'] = false;
         notifications[index] = notif;
-        print('Failed to mark notification as read: $e');
+        debugPrint('Failed to mark notification as read: $e');
       }
     }
   }
@@ -73,7 +74,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       // Revert on error
       notifications.assignAll(backup);
-      print('Failed to mark all as read: $e');
+      debugPrint('Failed to mark all as read: $e');
     }
   }
 
@@ -86,7 +87,7 @@ class NotificationController extends GetxController {
       } catch (e) {
         // Revert on error
         notifications.insert(index, removed);
-        print('Failed to delete notification: $e');
+        debugPrint('Failed to delete notification: $e');
       }
     }
   }
@@ -102,7 +103,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       // Revert on error
       notifications.assignAll(backup);
-      print('Failed to delete all notifications: $e');
+      debugPrint('Failed to delete all notifications: $e');
     }
   }
 

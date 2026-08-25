@@ -107,7 +107,7 @@ class ProductDetailsController extends GetxController {
         // Or we just rely on the initial passed product model, but here we can try to find it
       }
     } catch (e) {
-      print('Error fetching product details: $e');
+      debugPrint('Error fetching product details: $e');
     }
   }
 

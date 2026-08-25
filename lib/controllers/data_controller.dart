@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
 import '../core/network/error_handler.dart';
@@ -56,7 +57,7 @@ class DataController extends GetxController {
         developerEmail.value = config['developerEmail'].toString().trim();
       }
     } catch (e) {
-      print('Error fetching app config: $e');
+      debugPrint('Error fetching app config: $e');
     }
   }
 
@@ -66,7 +67,7 @@ class DataController extends GetxController {
       final data = await DataService.getCategories();
       categories.assignAll(data);
     } catch (e) {
-      print('Error fetching categories: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching categories: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingCategories.value = false;
     }
@@ -78,7 +79,7 @@ class DataController extends GetxController {
       final data = await DataService.getProducts(featured: true, limit: 10);
       featuredProducts.assignAll(data);
     } catch (e) {
-      print('Error fetching featured products: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching featured products: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingFeaturedProducts.value = false;
     }
@@ -90,7 +91,7 @@ class DataController extends GetxController {
       final data = await DataService.getBusinesses(featured: true, limit: 10);
       featuredStores.assignAll(data);
     } catch (e) {
-      print('Error fetching featured stores: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching featured stores: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingFeaturedStores.value = false;
     }
@@ -102,7 +103,7 @@ class DataController extends GetxController {
       final data = await DataService.getProducts(limit: 10);
       latestProducts.assignAll(data);
     } catch (e) {
-      print('Error fetching products: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching products: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingProducts.value = false;
     }
@@ -113,7 +114,7 @@ class DataController extends GetxController {
       final data = await DataService.getLocations();
       locations.assignAll(data);
     } catch (e) {
-      print('Error fetching locations: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching locations: ${ApiErrorHandler.handle(e)}');
     }
   }
 
@@ -123,7 +124,7 @@ class DataController extends GetxController {
       final data = await DataService.getBusinesses();
       topStores.assignAll(data);
     } catch (e) {
-      print('Error fetching top stores: ${ApiErrorHandler.handle(e)}');
+      debugPrint('Error fetching top stores: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingStores.value = false;
     }

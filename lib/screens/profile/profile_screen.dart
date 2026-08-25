@@ -58,10 +58,10 @@ class ProfileScreen extends StatelessWidget {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withValues(alpha: 0.4),
                           width: 2.5,
                         ),
                       ),
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
                           horizontal: AppTheme.space20,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusMd,
                           ),
@@ -145,8 +145,8 @@ class ProfileScreen extends StatelessWidget {
                         boxShadow: AppTheme.shadowSm,
                         border: Border.all(
                           color: isSuspended 
-                              ? AppTheme.error.withOpacity(0.5) 
-                              : AppTheme.primaryLight.withOpacity(0.3),
+                              ? AppTheme.error.withValues(alpha: 0.5) 
+                              : AppTheme.primaryLight.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -155,7 +155,7 @@ class ProfileScreen extends StatelessWidget {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: isSuspended ? AppTheme.error.withOpacity(0.1) : AppTheme.primarySurface,
+                              color: isSuspended ? AppTheme.error.withValues(alpha: 0.1) : AppTheme.primarySurface,
                               borderRadius: BorderRadius.circular(
                                 AppTheme.radiusMd,
                               ),
@@ -368,7 +368,7 @@ class ProfileScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.error.withOpacity(0.1),
+                      color: AppTheme.error.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -501,7 +501,7 @@ class _Divider extends StatelessWidget {
     return Container(
       height: 28,
       width: 1,
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
     );
   }
 }

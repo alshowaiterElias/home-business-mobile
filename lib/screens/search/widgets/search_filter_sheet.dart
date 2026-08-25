@@ -119,7 +119,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             Text('القسم', style: theme.textTheme.titleSmall),
             const SizedBox(height: AppTheme.space8),
             DropdownButtonFormField<String>(
-              value: _categoryId,
+              initialValue: _categoryId,
               hint: const Text('جميع الأقسام'),
               decoration: _dropdownDeco(),
               items: [
@@ -137,7 +137,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             Text('المحافظة', style: theme.textTheme.titleSmall),
             const SizedBox(height: AppTheme.space8),
             DropdownButtonFormField<String>(
-              value: _governorateId,
+              initialValue: _governorateId,
               hint: const Text('جميع المحافظات'),
               decoration: _dropdownDeco(),
               items: [
@@ -179,7 +179,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             Text('التقييم', style: theme.textTheme.titleSmall),
             const SizedBox(height: AppTheme.space8),
             DropdownButtonFormField<double>(
-              value: _minRating,
+              initialValue: _minRating,
               hint: const Text('جميع التقييمات'),
               decoration: _dropdownDeco(),
               items: const [

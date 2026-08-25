@@ -8,21 +8,31 @@ class NotificationsScreen extends StatelessWidget {
 
   IconData _getIconForType(String type) {
     switch (type) {
-      case 'PRODUCT_APPROVED': return Icons.check_circle_outline;
-      case 'PRODUCT_REJECTED': return Icons.cancel_outlined;
-      case 'NEW_REVIEW': return Icons.star_outline_rounded;
-      case 'SYSTEM_ALERT': return Icons.waving_hand_rounded;
-      default: return Icons.notifications_none_rounded;
+      case 'PRODUCT_APPROVED':
+        return Icons.check_circle_outline;
+      case 'PRODUCT_REJECTED':
+        return Icons.cancel_outlined;
+      case 'NEW_REVIEW':
+        return Icons.star_outline_rounded;
+      case 'SYSTEM_ALERT':
+        return Icons.waving_hand_rounded;
+      default:
+        return Icons.notifications_none_rounded;
     }
   }
 
   Color _getColorForType(String type) {
     switch (type) {
-      case 'PRODUCT_APPROVED': return AppTheme.primary;
-      case 'PRODUCT_REJECTED': return AppTheme.error;
-      case 'NEW_REVIEW': return AppTheme.accent;
-      case 'SYSTEM_ALERT': return const Color(0xFF5C6BC0);
-      default: return AppTheme.textHint;
+      case 'PRODUCT_APPROVED':
+        return AppTheme.primary;
+      case 'PRODUCT_REJECTED':
+        return AppTheme.error;
+      case 'NEW_REVIEW':
+        return AppTheme.accent;
+      case 'SYSTEM_ALERT':
+        return const Color(0xFF5C6BC0);
+      default:
+        return AppTheme.textHint;
     }
   }
 
@@ -36,12 +46,17 @@ class NotificationsScreen extends StatelessWidget {
     return 'الآن';
   }
 
-  void _showDeleteAllDialog(BuildContext context, NotificationController controller) {
+  void _showDeleteAllDialog(
+    BuildContext context,
+    NotificationController controller,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('مسح جميع الإشعارات'),
-        content: const Text('هل أنت متأكد من رغبتك في حذف كافة الإشعارات؟ لا يمكن التراجع عن هذا الإجراء.'),
+        content: const Text(
+          'هل أنت متأكد من رغبتك في حذف كافة الإشعارات؟ لا يمكن التراجع عن هذا الإجراء.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -53,7 +68,10 @@ class NotificationsScreen extends StatelessWidget {
               Navigator.pop(ctx);
               controller.deleteAllNotifications();
             },
-            child: const Text('حذف الكل', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'حذف الكل',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -77,11 +95,16 @@ class NotificationsScreen extends StatelessWidget {
                   onPressed: () => controller.markAllAsRead(),
                   child: Text(
                     'مقروء الكل',
-                    style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.primary),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: AppTheme.primary,
+                    ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_sweep_outlined, color: AppTheme.error),
+                  icon: const Icon(
+                    Icons.delete_sweep_outlined,
+                    color: AppTheme.error,
+                  ),
                   tooltip: 'مسح الكل',
                   onPressed: () => _showDeleteAllDialog(context, controller),
                 ),
@@ -100,9 +123,18 @@ class NotificationsScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.notifications_off_outlined, size: 64, color: AppTheme.textHint.withOpacity(0.5)),
+                Icon(
+                  Icons.notifications_off_outlined,
+                  size: 64,
+                  color: AppTheme.textHint.withValues(alpha: 0.5),
+                ),
                 const SizedBox(height: 16),
-                Text('لا توجد إشعارات حالياً', style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.textHint)),
+                Text(
+                  'لا توجد إشعارات حالياً',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: AppTheme.textHint,
+                  ),
+                ),
               ],
             ),
           );
@@ -114,19 +146,22 @@ class NotificationsScreen extends StatelessWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: AppTheme.space8),
             itemCount: controller.notifications.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, indent: 72, endIndent: 16),
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, indent: 72, endIndent: 16),
             itemBuilder: (_, i) {
               final n = controller.notifications[i];
               final isRead = n['isRead'] == true;
               final type = n['type'] ?? '';
               final color = _getColorForType(type);
               final icon = _getIconForType(type);
-              
+
               DateTime? createdAt;
               if (n['createdAt'] != null) {
                 createdAt = DateTime.tryParse(n['createdAt']);
               }
-              final timeString = createdAt != null ? _formatTimeAgo(createdAt) : '';
+              final timeString = createdAt != null
+                  ? _formatTimeAgo(createdAt)
+                  : '';
 
               return Dismissible(
                 key: Key(n['id'].toString()),
@@ -134,13 +169,18 @@ class NotificationsScreen extends StatelessWidget {
                 background: Container(
                   color: AppTheme.error,
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.space20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.space20,
+                  ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
                         'حذف',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(width: 8),
                       Icon(Icons.delete_outline, color: Colors.white),
@@ -157,28 +197,40 @@ class NotificationsScreen extends StatelessWidget {
                   );
                 },
                 child: Material(
-                  color: !isRead ? AppTheme.primarySurface.withOpacity(0.2) : Colors.transparent,
+                  color: !isRead
+                      ? AppTheme.primarySurface.withValues(alpha: 0.2)
+                      : Colors.transparent,
                   child: ListTile(
                     onTap: () {
                       if (!isRead) controller.markAsRead(n['id']);
                     },
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.space16, vertical: AppTheme.space8),
+                      horizontal: AppTheme.space16,
+                      vertical: AppTheme.space8,
+                    ),
                     leading: Container(
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                       ),
                       child: Icon(icon, color: color, size: 22),
                     ),
-                    title: Text(n['title'] ?? '', style: theme.textTheme.titleMedium),
+                    title: Text(
+                      n['title'] ?? '',
+                      style: theme.textTheme.titleMedium,
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        Text(n['body'] ?? '', style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        Text(
+                          n['body'] ?? '',
+                          style: theme.textTheme.bodyMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         const SizedBox(height: 4),
                         Text(timeString, style: theme.textTheme.bodySmall),
                       ],

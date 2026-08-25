@@ -259,13 +259,11 @@ class CreateStoreScreen extends StatelessWidget {
 class _FormField extends StatelessWidget {
   final String label, hint;
   final int maxLines;
-  final TextInputType keyboardType;
   final TextEditingController? controller;
   const _FormField({
     required this.label,
     required this.hint,
     this.maxLines = 1,
-    this.keyboardType = TextInputType.text,
     this.controller,
   });
 
@@ -278,9 +276,7 @@ class _FormField extends StatelessWidget {
         const SizedBox(height: AppTheme.space8),
         TextField(
           controller: controller,
-
           maxLines: maxLines,
-          keyboardType: keyboardType,
           decoration: InputDecoration(hintText: hint),
         ),
       ],

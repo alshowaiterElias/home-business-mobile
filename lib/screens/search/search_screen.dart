@@ -188,7 +188,7 @@ class _SearchScreenState extends State<SearchScreen> {
               final id = cat['id'].toString();
               return ActionChip(
                 label: Text(name),
-                backgroundColor: AppTheme.primarySurface.withOpacity(0.3),
+                backgroundColor: AppTheme.primarySurface.withValues(alpha: 0.3),
                 side: BorderSide.none,
                 labelStyle: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primary),
                 onPressed: () {

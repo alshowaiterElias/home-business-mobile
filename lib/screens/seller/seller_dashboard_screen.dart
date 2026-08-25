@@ -169,7 +169,7 @@ class _ProductTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           boxShadow: AppTheme.shadowSm,
           border: product['status'] == 'REJECTED'
-              ? Border.all(color: AppTheme.error.withOpacity(0.3))
+              ? Border.all(color: AppTheme.error.withValues(alpha: 0.3))
               : null,
         ),
         child: Column(
@@ -208,7 +208,7 @@ class _ProductTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _statusColor().withOpacity(0.1),
+                    color: _statusColor().withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                   ),
                   child: Text(_statusLabel(),

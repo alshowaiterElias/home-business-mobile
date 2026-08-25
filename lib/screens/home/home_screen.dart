@@ -237,7 +237,9 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
+                                          ),
                                           blurRadius: 4,
                                         ),
                                       ],
@@ -571,8 +573,8 @@ class HomeScreen extends StatelessWidget {
                           height: 70,
                           decoration: BoxDecoration(
                             color: hasStore
-                                ? Colors.white.withOpacity(0.3)
-                                : Colors.white.withOpacity(0.15),
+                                ? Colors.white.withValues(alpha: 0.3)
+                                : Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusLg,
                             ),
@@ -710,7 +712,7 @@ class _CategoryChip extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: category.color.withOpacity(0.1),
+                color: category.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               ),
               child: Icon(category.icon, color: category.color, size: 26),

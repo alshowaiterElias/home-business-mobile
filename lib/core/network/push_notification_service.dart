@@ -9,7 +9,7 @@ import 'storage_service.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
-    print('[PushNotificationService] Background message received: ${message.messageId}');
+    debugPrint('[PushNotificationService] Background message received: ${message.messageId}');
   }
 }
 
@@ -38,7 +38,7 @@ class PushNotificationService {
       );
 
       if (kDebugMode) {
-        print('[PushNotificationService] User granted permission: ${settings.authorizationStatus}');
+        debugPrint('[PushNotificationService] User granted permission: ${settings.authorizationStatus}');
       }
 
       // 3. Initialize Local Notifications Plugin for Foreground Heads-Up Banner
@@ -73,7 +73,7 @@ class PushNotificationService {
       // 4. Listen to Foreground Messages
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (kDebugMode) {
-          print('[PushNotificationService] Foreground Message: ${message.notification?.title}');
+          debugPrint('[PushNotificationService] Foreground Message: ${message.notification?.title}');
         }
         RemoteNotification? notification = message.notification;
         AndroidNotification? android = message.notification?.android;
@@ -106,7 +106,7 @@ class PushNotificationService {
       // 5. Handle App Opened from Background / Terminated State
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         if (kDebugMode) {
-          print('[PushNotificationService] Notification Tapped from Background!');
+          debugPrint('[PushNotificationService] Notification Tapped from Background!');
         }
         _handleNotificationMessageTap(message);
       });
@@ -114,7 +114,7 @@ class PushNotificationService {
       RemoteMessage? initialMessage = await _messaging.getInitialMessage();
       if (initialMessage != null) {
         if (kDebugMode) {
-          print('[PushNotificationService] App launched from Terminated Notification!');
+          debugPrint('[PushNotificationService] App launched from Terminated Notification!');
         }
         _handleNotificationMessageTap(initialMessage);
       }
@@ -128,7 +128,7 @@ class PushNotificationService {
       });
     } catch (e) {
       if (kDebugMode) {
-        print('[PushNotificationService] Initialization error: $e');
+        debugPrint('[PushNotificationService] Initialization error: $e');
       }
     }
   }
@@ -152,11 +152,11 @@ class PushNotificationService {
       });
 
       if (kDebugMode) {
-        print('[PushNotificationService] FCM Token synced to backend successfully: $fcmToken');
+        debugPrint('[PushNotificationService] FCM Token synced to backend successfully: $fcmToken');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[PushNotificationService] Failed to sync FCM token: $e');
+        debugPrint('[PushNotificationService] Failed to sync FCM token: $e');
       }
     }
   }

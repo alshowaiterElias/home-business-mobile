@@ -23,25 +23,24 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Make the status bar icons dark on light background
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Obx(() {
       final index = controller.currentIndex.value;
 
       return Scaffold(
-        body: IndexedStack(
-          index: index,
-          children: pages,
-        ),
+        body: IndexedStack(index: index, children: pages),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: AppTheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 12,
                 offset: const Offset(0, -2),
               ),
@@ -124,7 +123,7 @@ class _NavItem extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isActive
-              ? AppTheme.primary.withOpacity(0.08)
+              ? AppTheme.primary.withValues(alpha: 0.08)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
         ),

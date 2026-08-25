@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../core/network/auth_service.dart';
 import '../core/network/storage_service.dart';
@@ -109,7 +108,10 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
-      final response = await AuthService.verifyOTP(currentPhone.value, otpCode.trim());
+      final response = await AuthService.verifyOTP(
+        currentPhone.value,
+        otpCode.trim(),
+      );
 
       if (response['success'] == true && response['token'] != null) {
         await StorageService.saveToken(response['token']);
@@ -173,7 +175,7 @@ class AuthController extends GetxController {
         forceResendingToken: resendToken.value,
 
         verificationCompleted: (PhoneAuthCredential credential) async {
-          if (kDebugMode) print('[Firebase Auth] Auto-verification triggered');
+          if (kDebugMode) debugPrint('[Firebase Auth] Auto-verification triggered');
           await _signInWithCredential(credential);
         },
 
@@ -297,7 +299,7 @@ class AuthController extends GetxController {
 
   Future<bool> deleteAccount(String reason) async {
     isLoading.value = true;
-    
+
     // Show non-dismissible loading overlay dialog
     Get.dialog(
       PopScope(
@@ -337,7 +339,7 @@ class AuthController extends GetxController {
 
     try {
       final res = await AuthService.deleteAccount(reason: reason);
-      
+
       // Close the loading dialog
       if (Get.isDialogOpen ?? false) {
         Get.back();

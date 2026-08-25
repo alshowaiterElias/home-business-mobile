@@ -93,12 +93,15 @@ void showReportSheet(
                 const SizedBox(height: AppTheme.space12),
 
                 ...reasons.map(
+                  // ignore: deprecated_member_use
                   (r) => RadioListTile<String>(
                     value: r,
+                    // ignore: deprecated_member_use
                     groupValue: selectedReason,
                     title: Text(r, style: theme.textTheme.bodyLarge),
                     activeColor: AppTheme.primary,
                     contentPadding: EdgeInsets.zero,
+                    // ignore: deprecated_member_use
                     onChanged: (v) => setState(() => selectedReason = v),
                   ),
                 ),
@@ -113,7 +116,7 @@ void showReportSheet(
                         ? () async {
                             try {
                               await DataService.addReport(targetType, targetId, selectedReason!);
-                              Navigator.pop(context);
+                              Get.back();
                               Get.snackbar(
                                 'تم الإبلاغ',
                                 'شكراً لمساعدتنا في الحفاظ على جودة المنصة',
@@ -123,7 +126,7 @@ void showReportSheet(
                                 margin: const EdgeInsets.all(16),
                               );
                             } catch (e) {
-                              Navigator.pop(context);
+                              Get.back();
                               Get.snackbar(
                                 'خطأ',
                                 ApiErrorHandler.handle(e),

@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
-import '../../controllers/seller_dashboard_controller.dart';
 import 'suspended_product_screen.dart';
 
 class MyProductDetailScreen extends StatefulWidget {
@@ -97,7 +96,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
           '${product['ratingAverage'] ?? product['averageRating'] ?? 0.0}',
         ) ??
         0.0;
-    final int reviewsCount = reviews.length > 0
+    final int reviewsCount = reviews.isNotEmpty
         ? reviews.length
         : (product['reviewsCount'] ?? product['_count']?['reviews'] ?? 0);
 
@@ -138,7 +137,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    color: _getStatusColor().withOpacity(0.12),
+                    color: _getStatusColor().withValues(alpha: 0.12),
                     child: Row(
                       children: [
                         Icon(
@@ -176,7 +175,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                         color: const Color(0xFFFFEBEE),
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         border: Border.all(
-                          color: AppTheme.error.withOpacity(0.4),
+                          color: AppTheme.error.withValues(alpha: 0.4),
                         ),
                       ),
                       child: Row(
@@ -310,7 +309,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                               icon: Icons.star_rounded,
                               iconColor: Colors.amber.shade700,
                               label:
-                                  '${avgRating.toStringAsFixed(1)} ★ (${reviewsCount})',
+                                  '${avgRating.toStringAsFixed(1)} ★ ($reviewsCount)',
                             ),
                             const SizedBox(width: 8),
                             if (product['category'] != null)
@@ -329,29 +328,45 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                         if (product['status'] == 'APPROVED')
                           InkWell(
                             onTap: () => _showAiAdModal(context),
-                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF7C3AED), Color(0xFF2563EB)],
+                                  colors: [
+                                    Color(0xFF7C3AED),
+                                    Color(0xFF2563EB),
+                                  ],
                                   begin: Alignment.centerRight,
                                   end: Alignment.centerLeft,
                                 ),
-                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF7C3AED).withOpacity(0.3),
+                                    color: const Color(
+                                      0xFF7C3AED,
+                                    ).withValues(alpha: 0.3),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
-                                  )
+                                  ),
                                 ],
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                                  Icon(
+                                    Icons.auto_awesome_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     'صياغة إعلان تسويقي بالذكاء الاصطناعي 🪄',
@@ -681,7 +696,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                       ],
                     ),
                   ),
@@ -701,7 +716,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusFull),
       ),
       child: Row(
@@ -757,7 +772,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                 });
               } catch (e) {
                 setModalState(() {
-                  errorMessage = 'تعذر توليد الإعلان. يرجى التأكد من الاتصال بالإنترنت والمحاولة مجدداً.';
+                  errorMessage =
+                      'تعذر توليد الإعلان. يرجى التأكد من الاتصال بالإنترنت والمحاولة مجدداً.';
                   isGenerating = false;
                 });
               }
@@ -795,7 +811,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED).withOpacity(0.1),
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -844,7 +860,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                CircularProgressIndicator(color: Color(0xFF7C3AED)),
+                                CircularProgressIndicator(
+                                  color: Color(0xFF7C3AED),
+                                ),
                                 SizedBox(height: 16),
                                 Text(
                                   'جاري صياغة الإعلانات التسويقية بواسطة الذكاء الاصطناعي... 🪄',
@@ -859,114 +877,150 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             ),
                           )
                         : (errorMessage != null
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.error_outline_rounded, color: AppTheme.error, size: 48),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      errorMessage!,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(color: AppTheme.error, fontSize: 13),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: generateAds,
-                                      icon: const Icon(Icons.refresh_rounded),
-                                      label: const Text('إعادة المحاولة'),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : ListView.separated(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: ads.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                                itemBuilder: (context, index) {
-                                  final adText = ads[index];
-                                  return Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF9FAFB),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: Colors.grey.shade200),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'النموذج ${index + 1} 📌',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13,
-                                                color: Color(0xFF7C3AED),
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(Icons.copy_rounded, size: 20),
-                                                  color: AppTheme.primary,
-                                                  tooltip: 'نسخ الإعلان',
-                                                  onPressed: () {
-                                                    Clipboard.setData(ClipboardData(text: adText));
-                                                    Get.snackbar(
-                                                      'تم النسخ! 📋',
-                                                      'تم نسخ الإعلان التسويقي إلى الحافظة.',
-                                                      snackPosition: SnackPosition.BOTTOM,
-                                                      backgroundColor: AppTheme.primary,
-                                                      colorText: Colors.white,
-                                                      duration: const Duration(seconds: 2),
-                                                    );
-                                                  },
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline_rounded,
+                                        color: AppTheme.error,
+                                        size: 48,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        errorMessage!,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: AppTheme.error,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      ElevatedButton.icon(
+                                        onPressed: generateAds,
+                                        icon: const Icon(Icons.refresh_rounded),
+                                        label: const Text('إعادة المحاولة'),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : ListView.separated(
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: ads.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 16),
+                                  itemBuilder: (context, index) {
+                                    final adText = ads[index];
+                                    return Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF9FAFB),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: Colors.grey.shade200,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'النموذج ${index + 1} 📌',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: Color(0xFF7C3AED),
                                                 ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        SelectableText(
-                                          adText,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            height: 1.6,
-                                            color: AppTheme.textPrimary,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.copy_rounded,
+                                                      size: 20,
+                                                    ),
+                                                    color: AppTheme.primary,
+                                                    tooltip: 'نسخ الإعلان',
+                                                    onPressed: () {
+                                                      Clipboard.setData(
+                                                        ClipboardData(
+                                                          text: adText,
+                                                        ),
+                                                      );
+                                                      Get.snackbar(
+                                                        'تم النسخ! 📋',
+                                                        'تم نسخ الإعلان التسويقي إلى الحافظة.',
+                                                        snackPosition:
+                                                            SnackPosition
+                                                                .BOTTOM,
+                                                        backgroundColor:
+                                                            AppTheme.primary,
+                                                        colorText: Colors.white,
+                                                        duration:
+                                                            const Duration(
+                                                              seconds: 2,
+                                                            ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        SizedBox(
-                                          width: double.infinity,
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              Clipboard.setData(ClipboardData(text: adText));
-                                              Get.snackbar(
-                                                'تم النسخ بنجاح! 📋',
-                                                'يمكنك الآن لصق الإعلان في الواتساب أو إنستغرام.',
-                                                snackPosition: SnackPosition.BOTTOM,
-                                                backgroundColor: AppTheme.primary,
-                                                colorText: Colors.white,
-                                              );
-                                            },
-                                            icon: const Icon(Icons.content_copy_rounded, size: 18),
-                                            label: const Text('نسخ هذا الإعلان 📋'),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppTheme.primary,
-                                              foregroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
+                                          const SizedBox(height: 8),
+                                          SelectableText(
+                                            adText,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              height: 1.6,
+                                              color: AppTheme.textPrimary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                Clipboard.setData(
+                                                  ClipboardData(text: adText),
+                                                );
+                                                Get.snackbar(
+                                                  'تم النسخ بنجاح! 📋',
+                                                  'يمكنك الآن لصق الإعلان في الواتساب أو إنستغرام.',
+                                                  snackPosition:
+                                                      SnackPosition.BOTTOM,
+                                                  backgroundColor:
+                                                      AppTheme.primary,
+                                                  colorText: Colors.white,
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.content_copy_rounded,
+                                                size: 18,
+                                              ),
+                                              label: const Text(
+                                                'نسخ هذا الإعلان 📋',
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppTheme.primary,
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              )),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                )),
                   ),
 
                   // Modal Bottom Actions
