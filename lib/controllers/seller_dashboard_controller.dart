@@ -45,6 +45,14 @@ class SellerDashboardController extends GetxController {
     return myProducts.where((p) => p['status'] == 'REJECTED').length;
   }
 
+  bool get isBusinessSuspended {
+    final auth = Get.find<AuthController>();
+    final userBus = auth.currentUser['business'];
+    if (userBus != null && userBus['isActive'] == false) return true;
+    if (businessData['isActive'] == false) return true;
+    return false;
+  }
+
   String get storeRating {
     double totalRating = 0;
     int ratedCount = 0;

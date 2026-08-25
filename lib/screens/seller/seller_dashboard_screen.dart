@@ -13,6 +13,7 @@ import '../../controllers/add_product_controller.dart';
 import '../../controllers/data_controller.dart';
 import '../../controllers/auth_controller.dart';
 import 'my_product_detail_screen.dart';
+import 'suspended_account_screen.dart';
 
 /// Seller's private dashboard to manage their business and products.
 class SellerDashboardScreen extends StatelessWidget {
@@ -27,30 +28,37 @@ class SellerDashboardScreen extends StatelessWidget {
       controller.fetchDashboardData();
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('لوحة تحكم البائع'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Get.to(() => EditBusinessScreen(businessData: Map<String, dynamic>.from(controller.businessData))),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.to(() => const AddProductScreen()),
-        backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('إضافة منتج'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: controller.fetchDashboardData,
-        child: Obx(() {
-          if (controller.isLoading.value && controller.myProducts.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Obx(() {
+      if (controller.isBusinessSuspended) {
+        return SuspendedAccountScreen(
+          storeName: controller.businessData['businessName'],
+        );
+      }
 
-        return ListView(
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('لوحة تحكم البائع'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => Get.to(() => EditBusinessScreen(businessData: Map<String, dynamic>.from(controller.businessData))),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => Get.to(() => const AddProductScreen()),
+          backgroundColor: AppTheme.primary,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('إضافة منتج'),
+        ),
+        body: RefreshIndicator(
+          onRefresh: controller.fetchDashboardData,
+          child: Builder(builder: (context) {
+            if (controller.isLoading.value && controller.myProducts.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(AppTheme.space16),
           children: [
@@ -79,9 +87,10 @@ class SellerDashboardScreen extends StatelessWidget {
               ...controller.myProducts.map((p) => _ProductTile(product: p, theme: theme)),
           ],
         );
-      }),
-      ),
-    );
+          }),
+        ),
+      );
+    });
   }
 }
 

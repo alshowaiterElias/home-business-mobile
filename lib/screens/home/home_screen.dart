@@ -205,7 +205,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         itemCount: products.length,
                         separatorBuilder: (_, __) =>
-                            const SizedBox(width: AppTheme.space14),
+                            const SizedBox(width: AppTheme.space16),
                         itemBuilder: (_, index) {
                           final pData = products[index];
                           final product = Product.fromJson(pData);
@@ -227,7 +227,10 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [AppTheme.accent, Color(0xFFFFB300)],
+                                        colors: [
+                                          AppTheme.accent,
+                                          Color(0xFFFFB300),
+                                        ],
                                       ),
                                       borderRadius: BorderRadius.circular(
                                         AppTheme.radiusSm,
@@ -292,8 +295,8 @@ class HomeScreen extends StatelessWidget {
                       if (dataController.isLoadingFeaturedStores.value) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final stores = dataController.featuredStores.isNotEmpty 
-                          ? dataController.featuredStores 
+                      final stores = dataController.featuredStores.isNotEmpty
+                          ? dataController.featuredStores
                           : dataController.topStores;
 
                       if (stores.isEmpty) {
@@ -314,20 +317,26 @@ class HomeScreen extends StatelessWidget {
                           final name = store['businessName'] ?? '';
                           final logoUrl = store['logoUrl'];
                           final isFeatured = store['isFeatured'] == true;
-                          
+
                           // Calculate store rating
                           double totalRating = 0;
                           int ratedCount = 0;
                           if (store['products'] != null) {
                             for (var p in store['products']) {
-                              final rating = double.tryParse(p['averageRating']?.toString() ?? '0') ?? 0.0;
+                              final rating =
+                                  double.tryParse(
+                                    p['averageRating']?.toString() ?? '0',
+                                  ) ??
+                                  0.0;
                               if (rating > 0) {
                                 totalRating += rating;
                                 ratedCount++;
                               }
                             }
                           }
-                          final ratingStr = ratedCount > 0 ? (totalRating / ratedCount).toStringAsFixed(1) : '0.0';
+                          final ratingStr = ratedCount > 0
+                              ? (totalRating / ratedCount).toStringAsFixed(1)
+                              : '0.0';
 
                           return GestureDetector(
                             onTap: () {
@@ -337,9 +346,14 @@ class HomeScreen extends StatelessWidget {
                               width: 140,
                               decoration: BoxDecoration(
                                 color: AppTheme.surface,
-                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
+                                ),
                                 border: isFeatured
-                                    ? Border.all(color: AppTheme.accent, width: 1.5)
+                                    ? Border.all(
+                                        color: AppTheme.accent,
+                                        width: 1.5,
+                                      )
                                     : null,
                                 boxShadow: AppTheme.shadowSm,
                               ),
@@ -347,30 +361,50 @@ class HomeScreen extends StatelessWidget {
                                 children: [
                                   Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(2),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: isFeatured ? AppTheme.accent : Colors.transparent,
+                                              color: isFeatured
+                                                  ? AppTheme.accent
+                                                  : Colors.transparent,
                                               width: 2,
                                             ),
                                           ),
                                           child: CircleAvatar(
                                             radius: 34,
-                                            backgroundColor: AppTheme.background,
-                                            backgroundImage: logoUrl != null ? NetworkImage(ApiClient.getImageUrl(logoUrl)) : null,
-                                            child: logoUrl == null ? const Icon(Icons.storefront_rounded, size: 34, color: AppTheme.textHint) : null,
+                                            backgroundColor:
+                                                AppTheme.background,
+                                            backgroundImage: logoUrl != null
+                                                ? NetworkImage(
+                                                    ApiClient.getImageUrl(
+                                                      logoUrl,
+                                                    ),
+                                                  )
+                                                : null,
+                                            child: logoUrl == null
+                                                ? const Icon(
+                                                    Icons.storefront_rounded,
+                                                    size: 34,
+                                                    color: AppTheme.textHint,
+                                                  )
+                                                : null,
                                           ),
                                         ),
                                         const SizedBox(height: AppTheme.space8),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6.0,
+                                          ),
                                           child: Text(
                                             name,
-                                            style: Theme.of(context).textTheme.titleMedium,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.center,
@@ -378,11 +412,21 @@ class HomeScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
-                                            const Icon(Icons.star_rounded, size: 14, color: AppTheme.accent),
+                                            const Icon(
+                                              Icons.star_rounded,
+                                              size: 14,
+                                              color: AppTheme.accent,
+                                            ),
                                             const SizedBox(width: 4),
-                                            Text(ratingStr, style: Theme.of(context).textTheme.bodySmall),
+                                            Text(
+                                              ratingStr,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -438,9 +482,12 @@ class HomeScreen extends StatelessWidget {
                     } else {
                       if (!auth.isLoggedIn.value) {
                         Get.snackbar(
-                          'تنبيه', 'يجب تسجيل الدخول أولاً لإنشاء متجرك',
-                          backgroundColor: AppTheme.error, colorText: Colors.white,
-                          snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(16)
+                          'تنبيه',
+                          'يجب تسجيل الدخول أولاً لإنشاء متجرك',
+                          backgroundColor: AppTheme.error,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                          margin: const EdgeInsets.all(16),
                         );
                         Get.toNamed('/auth');
                       } else {
@@ -469,17 +516,25 @@ class HomeScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                hasStore ? 'متجرك جاهز!' : 'ابدأ مشروعك من البيت!',
+                                hasStore
+                                    ? 'متجرك جاهز!'
+                                    : 'ابدأ مشروعك من البيت!',
                                 style: theme.textTheme.headlineSmall?.copyWith(
-                                  color: hasStore ? AppTheme.textPrimary : Colors.white,
+                                  color: hasStore
+                                      ? AppTheme.textPrimary
+                                      : Colors.white,
                                   fontSize: 17,
                                 ),
                               ),
                               const SizedBox(height: AppTheme.space8),
                               Text(
-                                hasStore ? 'انتقل إلى لوحة التحكم لإدارة منتجاتك وطلباتك.' : 'أنشئ متجرك مجاناً وابدأ البيع الآن',
+                                hasStore
+                                    ? 'انتقل إلى لوحة التحكم لإدارة منتجاتك وطلباتك.'
+                                    : 'أنشئ متجرك مجاناً وابدأ البيع الآن',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: hasStore ? AppTheme.textSecondary : Colors.white70,
+                                  color: hasStore
+                                      ? AppTheme.textSecondary
+                                      : Colors.white70,
                                   fontSize: 12,
                                 ),
                               ),
@@ -490,7 +545,9 @@ class HomeScreen extends StatelessWidget {
                                   vertical: 7,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: hasStore ? AppTheme.primary : Colors.white,
+                                  color: hasStore
+                                      ? AppTheme.primary
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(
                                     AppTheme.radiusFull,
                                   ),
@@ -498,7 +555,9 @@ class HomeScreen extends StatelessWidget {
                                 child: Text(
                                   hasStore ? 'لوحة التحكم' : 'أنشئ متجرك',
                                   style: theme.textTheme.labelMedium?.copyWith(
-                                    color: hasStore ? Colors.white : AppTheme.primaryDark,
+                                    color: hasStore
+                                        ? Colors.white
+                                        : AppTheme.primaryDark,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -511,12 +570,20 @@ class HomeScreen extends StatelessWidget {
                           width: 70,
                           height: 70,
                           decoration: BoxDecoration(
-                            color: hasStore ? Colors.white.withOpacity(0.3) : Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                            color: hasStore
+                                ? Colors.white.withOpacity(0.3)
+                                : Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusLg,
+                            ),
                           ),
                           child: Icon(
-                            hasStore ? Icons.dashboard_customize_rounded : Icons.storefront_rounded,
-                            color: hasStore ? AppTheme.textPrimary : Colors.white,
+                            hasStore
+                                ? Icons.dashboard_customize_rounded
+                                : Icons.storefront_rounded,
+                            color: hasStore
+                                ? AppTheme.textPrimary
+                                : Colors.white,
                             size: 36,
                           ),
                         ),
@@ -532,9 +599,12 @@ class HomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: AppTheme.space24),
-              child: _SectionHeader(title: 'أحدث المنتجات', onSeeAll: () {
-                Get.to(() => const AllProductsScreen());
-              }),
+              child: _SectionHeader(
+                title: 'أحدث المنتجات',
+                onSeeAll: () {
+                  Get.to(() => const AllProductsScreen());
+                },
+              ),
             ),
           ),
 
@@ -560,17 +630,11 @@ class HomeScreen extends StatelessWidget {
                 );
               }
               return SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final productData = products[index];
-                    final product = Product.fromJson(productData);
-                    return ProductCard(
-                      product: product,
-                      heroTagPrefix: 'home-',
-                    );
-                  },
-                  childCount: products.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final productData = products[index];
+                  final product = Product.fromJson(productData);
+                  return ProductCard(product: product, heroTagPrefix: 'home-');
+                }, childCount: products.length),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.60,

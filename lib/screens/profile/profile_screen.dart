@@ -117,92 +117,103 @@ class ProfileScreen extends StatelessWidget {
 
             // ── My Store CTA ───────────────────────────────────────
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTheme.space16,
-                  AppTheme.space20,
-                  AppTheme.space16,
-                  AppTheme.space4,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    if (auth.hasStore.value) {
-                      Get.toNamed('/seller-dashboard');
-                    } else if (isLoggedIn) {
-                      Get.toNamed('/create-store');
-                    } else {
-                      Get.toNamed('/auth');
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(AppTheme.space16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surface,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                      boxShadow: AppTheme.shadowSm,
-                      border: Border.all(
-                        color: AppTheme.primaryLight.withOpacity(0.3),
+              child: Builder(builder: (context) {
+                final isSuspended = user['business'] != null && user['business']['isActive'] == false;
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.space16,
+                    AppTheme.space20,
+                    AppTheme.space16,
+                    AppTheme.space4,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      if (auth.hasStore.value) {
+                        Get.toNamed('/seller-dashboard');
+                      } else if (isLoggedIn) {
+                        Get.toNamed('/create-store');
+                      } else {
+                        Get.toNamed('/auth');
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        boxShadow: AppTheme.shadowSm,
+                        border: Border.all(
+                          color: isSuspended 
+                              ? AppTheme.error.withOpacity(0.5) 
+                              : AppTheme.primaryLight.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: isSuspended ? AppTheme.error.withOpacity(0.1) : AppTheme.primarySurface,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusMd,
+                              ),
+                            ),
+                            child: Icon(
+                              isSuspended ? Icons.no_accounts_rounded : Icons.storefront_rounded,
+                              color: isSuspended ? AppTheme.error : AppTheme.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: AppTheme.space16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  auth.hasStore.value ? 'متجري' : 'إنشاء متجر',
+                                  style: theme.textTheme.titleLarge,
+                                ),
+                                Text(
+                                  isSuspended
+                                      ? 'حساب المتجر معطل 🚫 - اضغط للتفاصيل'
+                                      : (auth.hasStore.value
+                                          ? 'إدارة المنتجات والطلبات'
+                                          : 'ابدأ مشروعك المنزلي الآن'),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: isSuspended ? AppTheme.error : AppTheme.textSecondary,
+                                    fontWeight: isSuspended ? FontWeight.w600 : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSuspended ? AppTheme.error : AppTheme.primary,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusFull,
+                              ),
+                            ),
+                            child: Text(
+                              isSuspended ? 'معطل' : 'فتح',
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppTheme.primarySurface,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusMd,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.storefront_rounded,
-                            color: AppTheme.primary,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.space16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                auth.hasStore.value ? 'متجري' : 'إنشاء متجر',
-                                style: theme.textTheme.titleLarge,
-                              ),
-                              Text(
-                                auth.hasStore.value
-                                    ? 'إدارة المنتجات والطلبات'
-                                    : 'ابدأ مشروعك المنزلي الآن',
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusFull,
-                            ),
-                          ),
-                          child: Text(
-                            'فتح',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
 
             // ── Menu Items ─────────────────────────────────────────
