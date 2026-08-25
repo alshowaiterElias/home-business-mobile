@@ -5,12 +5,16 @@ import '../core/network/error_handler.dart';
 class DataController extends GetxController {
   var isLoadingCategories = false.obs;
   var isLoadingProducts = false.obs;
+  var isLoadingFeaturedProducts = false.obs;
+  var isLoadingFeaturedStores = false.obs;
+  var isLoadingStores = false.obs;
   
   var categories = <dynamic>[].obs;
   var latestProducts = <dynamic>[].obs;
+  var featuredProducts = <dynamic>[].obs;
+  var featuredStores = <dynamic>[].obs;
   var locations = <dynamic>[].obs;
   var topStores = <dynamic>[].obs;
-  var isLoadingStores = false.obs;
 
   @override
   void onInit() {
@@ -21,6 +25,8 @@ class DataController extends GetxController {
   Future<void> fetchInitialData() async {
     await Future.wait([
       fetchCategories(),
+      fetchFeaturedProducts(),
+      fetchFeaturedStores(),
       fetchLatestProducts(),
       fetchLocations(),
       fetchTopStores(),
@@ -36,6 +42,30 @@ class DataController extends GetxController {
       print('Error fetching categories: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingCategories.value = false;
+    }
+  }
+
+  Future<void> fetchFeaturedProducts() async {
+    isLoadingFeaturedProducts.value = true;
+    try {
+      final data = await DataService.getProducts(featured: true, limit: 10);
+      featuredProducts.assignAll(data);
+    } catch (e) {
+      print('Error fetching featured products: ${ApiErrorHandler.handle(e)}');
+    } finally {
+      isLoadingFeaturedProducts.value = false;
+    }
+  }
+
+  Future<void> fetchFeaturedStores() async {
+    isLoadingFeaturedStores.value = true;
+    try {
+      final data = await DataService.getBusinesses(featured: true, limit: 10);
+      featuredStores.assignAll(data);
+    } catch (e) {
+      print('Error fetching featured stores: ${ApiErrorHandler.handle(e)}');
+    } finally {
+      isLoadingFeaturedStores.value = false;
     }
   }
 

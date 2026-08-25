@@ -29,6 +29,7 @@ class DataService {
     double? minPrice,
     double? maxPrice,
     double? minRating,
+    bool? featured,
   }) async {
     try {
       final queryParams = <String, dynamic>{};
@@ -39,6 +40,7 @@ class DataService {
       if (minPrice != null) queryParams['minPrice'] = minPrice;
       if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
       if (minRating != null) queryParams['minRating'] = minRating;
+      if (featured != null) queryParams['featured'] = featured;
 
       final response = await ApiClient.instance.get(
         '/products',
@@ -74,11 +76,15 @@ class DataService {
   static Future<List<dynamic>> getBusinesses({
     String? governorateId,
     String? search,
+    bool? featured,
+    int? limit,
   }) async {
     try {
       final queryParams = <String, dynamic>{};
       if (governorateId != null) queryParams['governorateId'] = governorateId;
       if (search != null) queryParams['search'] = search;
+      if (featured != null) queryParams['featured'] = featured;
+      if (limit != null) queryParams['limit'] = limit;
 
       final response = await ApiClient.instance.get(
         '/business',
@@ -195,6 +201,20 @@ class DataService {
   static Future<void> markAllNotificationsAsRead() async {
     try {
       await ApiClient.instance.patch('/notifications/read-all');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Generate AI Marketing Ad for product
+  static Future<List<String>> generateAiAd(String productId) async {
+    try {
+      final response = await ApiClient.instance.post(
+        '/ai/generate-ad',
+        data: {'productId': productId},
+      );
+      final List<dynamic> adsData = response.data['data']?['ads'] ?? [];
+      return adsData.map((e) => e.toString()).toList();
     } catch (e) {
       rethrow;
     }

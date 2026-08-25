@@ -172,27 +172,130 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // ── Top Stores Horizontal Scroll ───────────────────────
+          // ── Featured Products Spotlight ─────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: AppTheme.space24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(
+                    title: '⭐ منتجات مختارة',
+                    onSeeAll: () {
+                      Get.to(() => const AllProductsScreen());
+                    },
+                  ),
+                  const SizedBox(height: AppTheme.space12),
+                  SizedBox(
+                    height: 240,
+                    child: Obx(() {
+                      final dataController = Get.find<DataController>();
+                      if (dataController.isLoadingFeaturedProducts.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final products = dataController.featuredProducts;
+                      if (products.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.space16,
+                        ),
+                        itemCount: products.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppTheme.space14),
+                        itemBuilder: (_, index) {
+                          final pData = products[index];
+                          final product = Product.fromJson(pData);
+                          return SizedBox(
+                            width: 170,
+                            child: Stack(
+                              children: [
+                                ProductCard(
+                                  product: product,
+                                  heroTagPrefix: 'featured-',
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [AppTheme.accent, Color(0xFFFFB300)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.radiusSm,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.star_rounded,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(width: 2),
+                                        Text(
+                                          'مميز',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Featured Stores Horizontal Scroll ───────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: AppTheme.space24),
               child: Column(
                 children: [
                   _SectionHeader(
-                    title: 'أفضل المتاجر',
+                    title: '🌟 متاجر متميزة',
                     onSeeAll: () {
                       Get.toNamed('/all-stores');
                     },
                   ),
                   const SizedBox(height: AppTheme.space12),
                   SizedBox(
-                    height: 160,
+                    height: 165,
                     child: Obx(() {
                       final dataController = Get.find<DataController>();
-                      if (dataController.isLoadingStores.value) {
+                      if (dataController.isLoadingFeaturedStores.value) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final stores = dataController.topStores;
+                      final stores = dataController.featuredStores.isNotEmpty 
+                          ? dataController.featuredStores 
+                          : dataController.topStores;
+
                       if (stores.isEmpty) {
                         return const Center(child: Text('لا توجد متاجر'));
                       }
@@ -210,6 +313,7 @@ class HomeScreen extends StatelessWidget {
                           final id = store['id'];
                           final name = store['businessName'] ?? '';
                           final logoUrl = store['logoUrl'];
+                          final isFeatured = store['isFeatured'] == true;
                           
                           // Calculate store rating
                           double totalRating = 0;
@@ -234,33 +338,73 @@ class HomeScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppTheme.surface,
                                 borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                border: isFeatured
+                                    ? Border.all(color: AppTheme.accent, width: 1.5)
+                                    : null,
                                 boxShadow: AppTheme.shadowSm,
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              child: Stack(
                                 children: [
-                                  CircleAvatar(
-                                    radius: 36,
-                                    backgroundColor: AppTheme.background,
-                                    backgroundImage: logoUrl != null ? NetworkImage(ApiClient.getImageUrl(logoUrl)) : null,
-                                    child: logoUrl == null ? const Icon(Icons.storefront_rounded, size: 36, color: AppTheme.textHint) : null,
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isFeatured ? AppTheme.accent : Colors.transparent,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: CircleAvatar(
+                                            radius: 34,
+                                            backgroundColor: AppTheme.background,
+                                            backgroundImage: logoUrl != null ? NetworkImage(ApiClient.getImageUrl(logoUrl)) : null,
+                                            child: logoUrl == null ? const Icon(Icons.storefront_rounded, size: 34, color: AppTheme.textHint) : null,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppTheme.space8),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                          child: Text(
+                                            name,
+                                            style: Theme.of(context).textTheme.titleMedium,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(Icons.star_rounded, size: 14, color: AppTheme.accent),
+                                            const SizedBox(width: 4),
+                                            Text(ratingStr, style: Theme.of(context).textTheme.bodySmall),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(height: AppTheme.space8),
-                                  Text(
-                                    name,
-                                    style: Theme.of(context).textTheme.titleMedium,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.star_rounded, size: 14, color: AppTheme.accent),
-                                      const SizedBox(width: 4),
-                                      Text(ratingStr, style: Theme.of(context).textTheme.bodySmall),
-                                    ],
-                                  ),
+                                  if (isFeatured)
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: AppTheme.accent,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.star_rounded,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
