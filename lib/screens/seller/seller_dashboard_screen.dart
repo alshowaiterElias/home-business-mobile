@@ -50,12 +50,15 @@ class SellerDashboardScreen extends StatelessWidget {
         ),
         body: RefreshIndicator(
           onRefresh: controller.fetchDashboardData,
-          child: Builder(builder: (context) {
-            if (controller.isLoading.value && controller.myProducts.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          child: GetBuilder<SellerDashboardController>(
+            builder: (cnt) {
+              if (cnt.isLoading.value && cnt.myProducts.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            return ListView(
+              final products = cnt.filteredProducts;
+
+              return ListView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(AppTheme.space16),
               children: [
@@ -202,7 +205,7 @@ class SellerDashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppTheme.space12),
 
-                if (controller.filteredProducts.isEmpty)
+                if (products.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
@@ -211,7 +214,7 @@ class SellerDashboardScreen extends StatelessWidget {
                           Icon(Icons.inventory_rounded, size: 56, color: AppTheme.textHint.withValues(alpha: 0.4)),
                           const SizedBox(height: 12),
                           Text(
-                            controller.myProducts.isEmpty
+                            cnt.myProducts.isEmpty
                                 ? 'لم تقم بإضافة أي منتجات بعد'
                                 : 'لا توجد منتجات مطابقة لهذا الفلتر',
                             style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textHint),
@@ -221,7 +224,7 @@ class SellerDashboardScreen extends StatelessWidget {
                     ),
                   )
                 else
-                  ...controller.filteredProducts.map((p) => _ProductTile(product: p, theme: theme)),
+                  ...products.map((p) => _ProductTile(product: p, theme: theme)),
               ],
             );
           }),

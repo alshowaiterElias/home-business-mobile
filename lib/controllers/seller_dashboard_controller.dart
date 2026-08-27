@@ -38,20 +38,24 @@ class SellerDashboardController extends GetxController {
   List<dynamic> get filteredProducts {
     final filter = selectedFilter.value.toUpperCase();
     if (filter == 'ALL') return myProducts;
-    if (filter == 'REJECTED') {
-      return myProducts.where((p) {
-        final status = (p['status'] ?? '').toString().toUpperCase();
+    
+    final list = myProducts.where((p) {
+      final status = (p['status'] ?? '').toString().trim().toUpperCase();
+      if (filter == 'REJECTED') {
         return status == 'REJECTED' || status == 'SUSPENDED';
-      }).toList();
-    }
-    return myProducts.where((p) {
-      final status = (p['status'] ?? '').toString().toUpperCase();
+      }
       return status == filter;
     }).toList();
+
+    debugPrint('🔍 [filteredProducts] Filter "$filter" matched ${list.length} / ${myProducts.length} items');
+    return list;
   }
 
   void setFilter(String filter) {
-    debugPrint('🎯 Setting seller dashboard filter to: $filter (Current products count: ${myProducts.length})');
+    debugPrint('🎯 Setting filter to: $filter (myProducts total: ${myProducts.length})');
+    for (var p in myProducts) {
+      debugPrint('   -> Product "${p['title']}": status = "${p['status']}"');
+    }
     selectedFilter.value = filter;
     update();
   }
