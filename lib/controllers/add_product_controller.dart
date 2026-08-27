@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/network/api_client.dart';
 import '../core/network/error_handler.dart';
+import '../core/utils/image_compressor.dart';
 import 'seller_dashboard_controller.dart';
+import 'data_controller.dart';
 import 'package:dio/dio.dart' as dio;
 
 class AddProductController extends GetxController {
@@ -14,15 +16,25 @@ class AddProductController extends GetxController {
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
 
-  var selectedUnit = 'حبة'.obs;
+  late RxString selectedUnit;
   var selectedCurrency = 'YER'.obs;
   var selectedCategoryId = ''.obs;
   var selectedSubCategoryId = ''.obs;
 
   var images = <File>[].obs;
 
-  final units = ['حبة', 'كيلو', 'درزن', 'لتر', 'جرام', 'مجموعة'];
+  List<String> get units {
+    final dc = Get.find<DataController>();
+    return dc.unitsOfSale.isNotEmpty ? dc.unitsOfSale : ['حبة', 'قطعة', 'كيلو', 'لتر'];
+  }
   final currencies = ['YER', 'SAR', 'USD'];
+
+  @override
+  void onInit() {
+    super.onInit();
+    final availableUnits = units;
+    selectedUnit = (availableUnits.isNotEmpty ? availableUnits.first : 'حبة').obs;
+  }
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
@@ -60,7 +72,9 @@ class AddProductController extends GetxController {
         'currency': selectedCurrency.value,
       });
 
-      for (var file in images) {
+      final compressedImages = await ImageCompressor.compressFileList(images);
+
+      for (var file in compressedImages) {
         formData.files.add(MapEntry(
           'productImages',
           await dio.MultipartFile.fromFile(file.path, filename: file.path.split('/').last),

@@ -238,6 +238,16 @@ class DataService {
     }
   }
 
+  // Fetch Units of Sale
+  static Future<List<dynamic>> getUnitsOfSale() async {
+    try {
+      final response = await ApiClient.instance.get('/taxonomy/units');
+      return response.data['data'] ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Fetch Public App Configuration (Support & Developer contacts)
   static Future<Map<String, dynamic>> getAppConfig() async {
     try {

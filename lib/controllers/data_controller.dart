@@ -16,6 +16,7 @@ class DataController extends GetxController {
   var featuredStores = <dynamic>[].obs;
   var locations = <dynamic>[].obs;
   var topStores = <dynamic>[].obs;
+  var unitsOfSale = <String>['حبة', 'قطعة', 'كيلو', 'جرام', 'لتر', 'درزن', 'طقم', 'علبة', 'طبق', 'قالب', 'قرص', 'كرتون', 'مجموعة'].obs;
 
   // System Contacts
   var supportPhone = '+967772546343'.obs;
@@ -33,12 +34,25 @@ class DataController extends GetxController {
     await Future.wait([
       fetchAppConfig(),
       fetchCategories(),
+      fetchUnitsOfSale(),
       fetchFeaturedProducts(),
       fetchFeaturedStores(),
       fetchLatestProducts(),
       fetchLocations(),
       fetchTopStores(),
     ]);
+  }
+
+  Future<void> fetchUnitsOfSale() async {
+    try {
+      final data = await DataService.getUnitsOfSale();
+      if (data.isNotEmpty) {
+        final unitNames = data.map((u) => u['nameAr'].toString()).toList();
+        unitsOfSale.assignAll(unitNames);
+      }
+    } catch (e) {
+      debugPrint('Error fetching units of sale: ${ApiErrorHandler.handle(e)}');
+    }
   }
 
   Future<void> fetchAppConfig() async {

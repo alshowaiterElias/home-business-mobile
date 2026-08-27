@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../core/network/error_handler.dart';
+import '../../core/utils/image_compressor.dart';
 import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/add_product_controller.dart';
 import '../../controllers/data_controller.dart';
@@ -59,34 +60,174 @@ class SellerDashboardScreen extends StatelessWidget {
             }
 
             return ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(AppTheme.space16),
-          children: [
-            // ── Quick Stats ─────────────────────────────────────────
-            Row(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(AppTheme.space16),
               children: [
-                _QuickStat(label: 'المنتجات', value: '${controller.myProducts.length}',
-                    icon: Icons.inventory_2_outlined, color: AppTheme.primary),
-                const SizedBox(width: 12),
-                _QuickStat(label: 'بالانتظار', value: '${controller.pendingProductsCount}',
-                    icon: Icons.hourglass_top_rounded, color: AppTheme.accent),
-                const SizedBox(width: 12),
-                _QuickStat(label: 'مرفوضة', value: '${controller.rejectedProductsCount}',
-                    icon: Icons.cancel_outlined, color: AppTheme.error),
+                // ── Business Header Card ─────────────────────────────
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.space16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primary,
+                        AppTheme.primary.withValues(alpha: 0.85),
+                      ],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                    boxShadow: AppTheme.shadowSm,
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 28,
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        backgroundImage: controller.businessData['logoUrl'] != null
+                            ? CachedNetworkImageProvider(
+                                ApiClient.getImageUrl(controller.businessData['logoUrl']),
+                              )
+                            : null,
+                        child: controller.businessData['logoUrl'] == null
+                            ? const Icon(Icons.storefront_rounded, color: Colors.white, size: 28)
+                            : null,
+                      ),
+                      const SizedBox(width: AppTheme.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.businessData['businessName'] ?? 'متجري',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  controller.storeRating,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(Icons.location_on_outlined, color: Colors.white.withValues(alpha: 0.8), size: 14),
+                                const SizedBox(width: 2),
+                                Text(
+                                  controller.businessData['city']?['nameAr'] ?? 'اليمن',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Get.to(() => EditBusinessScreen(
+                              businessData: Map<String, dynamic>.from(controller.businessData),
+                            )),
+                        icon: const Icon(Icons.edit_note_rounded, color: Colors.white, size: 26),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space20),
+
+                // ── Quick Stats Grid (Interactive Filter Buttons) ────
+                Text('إحصائيات المنتجات', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppTheme.space12),
+                Row(
+                  children: [
+                    _QuickStat(
+                      label: 'الكل',
+                      value: '${controller.myProducts.length}',
+                      icon: Icons.inventory_2_outlined,
+                      color: AppTheme.primary,
+                      isSelected: controller.selectedFilter.value == 'ALL',
+                      onTap: () => controller.setFilter('ALL'),
+                    ),
+                    const SizedBox(width: 8),
+                    _QuickStat(
+                      label: 'نشطة',
+                      value: '${controller.activeProductsCount}',
+                      icon: Icons.check_circle_outline_rounded,
+                      color: Colors.teal,
+                      isSelected: controller.selectedFilter.value == 'APPROVED',
+                      onTap: () => controller.setFilter('APPROVED'),
+                    ),
+                    const SizedBox(width: 8),
+                    _QuickStat(
+                      label: 'بالانتظار',
+                      value: '${controller.pendingProductsCount}',
+                      icon: Icons.hourglass_top_rounded,
+                      color: AppTheme.accent,
+                      isSelected: controller.selectedFilter.value == 'PENDING',
+                      onTap: () => controller.setFilter('PENDING'),
+                    ),
+                    const SizedBox(width: 8),
+                    _QuickStat(
+                      label: 'مرفوضة',
+                      value: '${controller.rejectedProductsCount}',
+                      icon: Icons.cancel_outlined,
+                      color: AppTheme.error,
+                      isSelected: controller.selectedFilter.value == 'REJECTED',
+                      onTap: () => controller.setFilter('REJECTED'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppTheme.space24),
+
+                // ── Products Header & Filter Indicator ────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('منتجاتي', style: theme.textTheme.headlineSmall),
+                    if (controller.selectedFilter.value != 'ALL')
+                      TextButton.icon(
+                        onPressed: () => controller.setFilter('ALL'),
+                        icon: const Icon(Icons.close_rounded, size: 16),
+                        label: const Text('إلغاء التصفية'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppTheme.space12),
+
+                if (controller.filteredProducts.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        children: [
+                          Icon(Icons.inventory_rounded, size: 56, color: AppTheme.textHint.withValues(alpha: 0.4)),
+                          const SizedBox(height: 12),
+                          Text(
+                            controller.myProducts.isEmpty
+                                ? 'لم تقم بإضافة أي منتجات بعد'
+                                : 'لا توجد منتجات مطابقة لهذا الفلتر',
+                            style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textHint),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  ...controller.filteredProducts.map((p) => _ProductTile(product: p, theme: theme)),
               ],
-            ),
-            const SizedBox(height: AppTheme.space24),
-
-            // ── Products List ───────────────────────────────────────
-            Text('منتجاتي', style: theme.textTheme.headlineSmall),
-            const SizedBox(height: AppTheme.space12),
-
-            if (controller.myProducts.isEmpty)
-              const Center(child: Padding(padding: EdgeInsets.all(32), child: Text('لم تقم بإضافة أي منتجات بعد')))
-            else
-              ...controller.myProducts.map((p) => _ProductTile(product: p, theme: theme)),
-          ],
-        );
+            );
           }),
         ),
       );
@@ -94,32 +235,72 @@ class SellerDashboardScreen extends StatelessWidget {
   }
 }
 
-// ─── Quick Stat Widget ───────────────────────────────────────────
+// ─── Quick Stat Widget (Interactive Filter Button) ─────────────
 class _QuickStat extends StatelessWidget {
   final String label, value;
   final IconData icon;
   final Color color;
-  const _QuickStat({required this.label, required this.value,
-      required this.icon, required this.color});
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _QuickStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppTheme.space16),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          boxShadow: AppTheme.shadowSm,
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: color)),
-            const SizedBox(height: 2),
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.space12, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.12) : AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    )
+                  ]
+                : AppTheme.shadowSm,
+            border: Border.all(
+              color: isSelected ? color : AppTheme.divider.withValues(alpha: 0.5),
+              width: isSelected ? 2.0 : 1.0,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: isSelected ? color : AppTheme.textSecondary, size: 22),
+              const SizedBox(height: 6),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isSelected ? color : AppTheme.textSecondary,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 11,
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -394,12 +575,20 @@ class AddProductScreen extends StatelessWidget {
                             border: Border.all(color: AppTheme.divider),
                           ),
                           child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              value: controller.selectedUnit.value,
-                              items: controller.units.map((u) => DropdownMenuItem<String>(value: u, child: Text(u))).toList(),
-                              onChanged: (val) => controller.selectedUnit.value = val!,
-                            ),
+                            child: Obx(() {
+                              final availableUnits = controller.units;
+                              if (!availableUnits.contains(controller.selectedUnit.value) && availableUnits.isNotEmpty) {
+                                controller.selectedUnit.value = availableUnits.first;
+                              }
+                              return DropdownButton<String>(
+                                isExpanded: true,
+                                value: controller.selectedUnit.value,
+                                items: availableUnits.map((u) => DropdownMenuItem<String>(value: u, child: Text(u))).toList(),
+                                onChanged: (val) {
+                                  if (val != null) controller.selectedUnit.value = val;
+                                },
+                              );
+                            }),
                           ),
                         ),
                       ],
@@ -638,9 +827,10 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
       });
 
       if (_newLogoFile != null) {
+        final compressedLogo = await ImageCompressor.compressFile(_newLogoFile!);
         formData.files.add(MapEntry(
           'logo',
-          await dio.MultipartFile.fromFile(_newLogoFile!.path, filename: 'logo.jpg'),
+          await dio.MultipartFile.fromFile(compressedLogo.path, filename: 'logo.jpg'),
         ));
       }
 

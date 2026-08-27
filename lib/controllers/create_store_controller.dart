@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../core/network/data_service.dart';
 import '../core/network/api_client.dart';
 import '../core/network/error_handler.dart';
+import '../core/utils/image_compressor.dart';
 import 'auth_controller.dart';
 import 'data_controller.dart';
 import 'package:dio/dio.dart' as dio;
@@ -64,9 +65,10 @@ class CreateStoreController extends GetxController {
       });
 
       if (logoFile.value != null) {
+        final compressedLogo = await ImageCompressor.compressFile(logoFile.value!);
         formData.files.add(MapEntry(
           'logo',
-          await dio.MultipartFile.fromFile(logoFile.value!.path, filename: 'logo.jpg'),
+          await dio.MultipartFile.fromFile(compressedLogo.path, filename: 'logo.jpg'),
         ));
       }
 

@@ -7,6 +7,7 @@ class SellerDashboardController extends GetxController {
   var isLoading = false.obs;
   var businessData = {}.obs;
   var myProducts = <dynamic>[].obs;
+  var selectedFilter = 'ALL'.obs; // ALL, APPROVED, PENDING, REJECTED, SUSPENDED
 
   @override
   void onInit() {
@@ -34,6 +35,18 @@ class SellerDashboardController extends GetxController {
     }
   }
 
+  List<dynamic> get filteredProducts {
+    if (selectedFilter.value == 'ALL') return myProducts;
+    if (selectedFilter.value == 'REJECTED') {
+      return myProducts.where((p) => p['status'] == 'REJECTED' || p['status'] == 'SUSPENDED').toList();
+    }
+    return myProducts.where((p) => p['status'] == selectedFilter.value).toList();
+  }
+
+  void setFilter(String filter) {
+    selectedFilter.value = filter;
+  }
+
   int get activeProductsCount {
     return myProducts.where((p) => p['status'] == 'APPROVED').length;
   }
@@ -43,7 +56,7 @@ class SellerDashboardController extends GetxController {
   }
 
   int get rejectedProductsCount {
-    return myProducts.where((p) => p['status'] == 'REJECTED').length;
+    return myProducts.where((p) => p['status'] == 'REJECTED' || p['status'] == 'SUSPENDED').length;
   }
 
   bool get isBusinessSuspended {
