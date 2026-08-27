@@ -36,27 +36,38 @@ class SellerDashboardController extends GetxController {
   }
 
   List<dynamic> get filteredProducts {
-    if (selectedFilter.value == 'ALL') return myProducts;
-    if (selectedFilter.value == 'REJECTED') {
-      return myProducts.where((p) => p['status'] == 'REJECTED' || p['status'] == 'SUSPENDED').toList();
+    final filter = selectedFilter.value.toUpperCase();
+    if (filter == 'ALL') return myProducts;
+    if (filter == 'REJECTED') {
+      return myProducts.where((p) {
+        final status = (p['status'] ?? '').toString().toUpperCase();
+        return status == 'REJECTED' || status == 'SUSPENDED';
+      }).toList();
     }
-    return myProducts.where((p) => p['status'] == selectedFilter.value).toList();
+    return myProducts.where((p) {
+      final status = (p['status'] ?? '').toString().toUpperCase();
+      return status == filter;
+    }).toList();
   }
 
   void setFilter(String filter) {
     selectedFilter.value = filter;
+    update();
   }
 
   int get activeProductsCount {
-    return myProducts.where((p) => p['status'] == 'APPROVED').length;
+    return myProducts.where((p) => (p['status'] ?? '').toString().toUpperCase() == 'APPROVED').length;
   }
 
   int get pendingProductsCount {
-    return myProducts.where((p) => p['status'] == 'PENDING').length;
+    return myProducts.where((p) => (p['status'] ?? '').toString().toUpperCase() == 'PENDING').length;
   }
 
   int get rejectedProductsCount {
-    return myProducts.where((p) => p['status'] == 'REJECTED' || p['status'] == 'SUSPENDED').length;
+    return myProducts.where((p) {
+      final status = (p['status'] ?? '').toString().toUpperCase();
+      return status == 'REJECTED' || status == 'SUSPENDED';
+    }).length;
   }
 
   bool get isBusinessSuspended {

@@ -24,10 +24,6 @@ class SellerDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final controller = Get.put(SellerDashboardController());
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchDashboardData();
-    });
 
     return Obx(() {
       if (controller.isBusinessSuspended) {
@@ -582,6 +578,8 @@ class AddProductScreen extends StatelessWidget {
                               }
                               return DropdownButton<String>(
                                 isExpanded: true,
+                                menuMaxHeight: 250,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                                 value: controller.selectedUnit.value,
                                 items: availableUnits.map((u) => DropdownMenuItem<String>(value: u, child: Text(u))).toList(),
                                 onChanged: (val) {
@@ -611,6 +609,8 @@ class AddProductScreen extends StatelessWidget {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
+                    menuMaxHeight: 250,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     value: controller.selectedCategoryId.value.isEmpty ? null : controller.selectedCategoryId.value,
                     hint: const Text('اختر القسم'),
                     items: dataController.categories.map((c) => DropdownMenuItem<String>(value: c['id'], child: Text(c['nameAr']))).toList(),
@@ -644,6 +644,8 @@ class AddProductScreen extends StatelessWidget {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             isExpanded: true,
+                            menuMaxHeight: 250,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                             value: controller.selectedSubCategoryId.value.isEmpty ? null : controller.selectedSubCategoryId.value,
                             hint: const Text('بدون قسم فرعي'),
                             items: (parentCat['children'] as List<dynamic>).map((c) => DropdownMenuItem<String>(value: c['id'], child: Text(c['nameAr']))).toList(),
@@ -674,6 +676,8 @@ class AddProductScreen extends StatelessWidget {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
+                    menuMaxHeight: 250,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     value: controller.selectedCurrency.value,
                     items: controller.currencies.map((c) => DropdownMenuItem<String>(value: c, child: Text(c))).toList(),
                     onChanged: (val) => controller.selectedCurrency.value = val!,
@@ -954,6 +958,8 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
+                    menuMaxHeight: 250,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     value: _selectedGovId.isEmpty ? null : _selectedGovId,
                     hint: Text(
                       'اختر المحافظة',
@@ -1002,6 +1008,8 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       isExpanded: true,
+                      menuMaxHeight: 250,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       value: _selectedCityId.isEmpty ? null : _selectedCityId,
                       hint: Text(
                         'اختر المدينة',

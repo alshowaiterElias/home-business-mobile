@@ -142,6 +142,8 @@ class CreateStoreScreen extends StatelessWidget {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
+                    menuMaxHeight: 250,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     value: controller.selectedGovId.value.isEmpty
                         ? null
                         : controller.selectedGovId.value,
@@ -193,6 +195,8 @@ class CreateStoreScreen extends StatelessWidget {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       isExpanded: true,
+                      menuMaxHeight: 250,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       value: controller.selectedCityId.value.isEmpty
                           ? null
                           : controller.selectedCityId.value,
