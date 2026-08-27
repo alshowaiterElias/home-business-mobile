@@ -51,6 +51,7 @@ class SellerDashboardController extends GetxController {
   }
 
   void setFilter(String filter) {
+    debugPrint('🎯 Setting seller dashboard filter to: $filter (Current products count: ${myProducts.length})');
     selectedFilter.value = filter;
     update();
   }
