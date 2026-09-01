@@ -312,7 +312,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                     Icon(sub.icon, size: 15, color: sub.color),
                                     const SizedBox(width: 6),
                                     Text(
-                                      sub.nameAr,
+                                      sub.productCount > 0 ? '${sub.nameAr} (${sub.productCount})' : sub.nameAr,
                                       style: theme.textTheme.labelMedium?.copyWith(
                                         color: AppTheme.textPrimary,
                                         fontWeight: FontWeight.w600,
