@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/theme/app_theme.dart';
 import '../core/network/data_service.dart';
 import 'auth_controller.dart';
 import 'data_controller.dart';
+import 'favorites_controller.dart';
 
 class SellerDashboardController extends GetxController {
   var isLoading = false.obs;
@@ -73,6 +73,9 @@ class SellerDashboardController extends GetxController {
           final dataCtrl = Get.find<DataController>();
           dataCtrl.fetchLatestProducts();
           dataCtrl.fetchFeaturedProducts();
+        }
+        if (Get.isRegistered<FavoritesController>()) {
+          Get.find<FavoritesController>().fetchFavorites();
         }
         final bool notificationSent = res['notificationSent'] ?? true;
         final Color snackColor = updated['isAvailable'] == true

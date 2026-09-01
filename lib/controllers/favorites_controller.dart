@@ -33,7 +33,13 @@ class FavoritesController extends GetxController {
     isLoading.value = true;
     try {
       final data = await DataService.getFavorites();
-      final List<Product> parsed = data.map((item) {
+      final List<Product> parsed = data
+          .where((item) =>
+              item['product'] != null &&
+              item['product']['isAvailable'] != false &&
+              (item['product']['status'] == null ||
+                  item['product']['status'] == 'APPROVED'))
+          .map((item) {
         final productJson = item['product'];
         final p = Product.fromJson(productJson);
         return Product(

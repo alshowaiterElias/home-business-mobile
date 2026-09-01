@@ -7,6 +7,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/data_controller.dart';
+import '../../controllers/favorites_controller.dart';
 import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
 
@@ -270,6 +271,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                         final dataCtrl = Get.find<DataController>();
                                         dataCtrl.fetchLatestProducts();
                                         dataCtrl.fetchFeaturedProducts();
+                                      }
+                                      if (Get.isRegistered<FavoritesController>()) {
+                                        Get.find<FavoritesController>().fetchFavorites();
                                       }
                                       final bool notificationSent =
                                           res['notificationSent'] ?? true;
