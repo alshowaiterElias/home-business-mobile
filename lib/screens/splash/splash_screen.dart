@@ -128,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: AppTheme.space16),
                     Text(
-                      'الإصدار 1.0.0+10',
+                      'الإصدار 1.0.0+11',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,

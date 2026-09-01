@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import '../../controllers/auth_controller.dart';
-import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/notification_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -19,14 +18,21 @@ class ProfileScreen extends StatelessWidget {
       final user = auth.currentUser;
       final phone = user['phoneNumber'] ?? '';
 
-      // We can also extract business info to show stats if needed
       final hasStore = auth.hasStore.value;
-      SellerDashboardController? sellerController;
-      if (hasStore) {
-        sellerController = Get.put(SellerDashboardController());
+      final business = user['business'] is Map ? user['business'] as Map : null;
+      final businessName = business?['businessName'] as String?;
+      final logoUrl = business?['logoUrl'] as String?;
+
+      String headerTitle;
+      if (!isLoggedIn) {
+        headerTitle = 'زائر';
+      } else if (hasStore) {
+        headerTitle = (businessName != null && businessName.trim().isNotEmpty)
+            ? businessName.trim()
+            : 'صاحب متجر';
+      } else {
+        headerTitle = 'عميل';
       }
-      final productsCount = sellerController?.activeProductsCount.toString() ?? '0';
-      final storeRating = sellerController?.storeRating ?? '0.0';
 
       return Scaffold(
         body: CustomScrollView(
@@ -65,18 +71,41 @@ class ProfileScreen extends StatelessWidget {
                           width: 2.5,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: Colors.white,
-                        size: 42,
+                      child: ClipOval(
+                        child:
+                            (isLoggedIn &&
+                                hasStore &&
+                                logoUrl != null &&
+                                logoUrl.trim().isNotEmpty)
+                            ? Image.network(
+                                logoUrl.trim(),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.storefront_rounded,
+                                  color: Colors.white,
+                                  size: 42,
+                                ),
+                              )
+                            : Icon(
+                                !isLoggedIn
+                                    ? Icons.person_outline_rounded
+                                    : (hasStore
+                                          ? Icons.storefront_rounded
+                                          : Icons.person_rounded),
+                                color: Colors.white,
+                                size: 42,
+                              ),
                       ),
                     ),
                     const SizedBox(height: AppTheme.space16),
 
                     Text(
-                      isLoggedIn ? 'مستخدم' : 'زائر',
+                      headerTitle,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -87,29 +116,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppTheme.space20),
-
-                    // Stats Row (only if they have a store or just dummy for user)
-                    if (auth.hasStore.value)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppTheme.space16,
-                          horizontal: AppTheme.space20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusMd,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _StatItem(label: 'المنتجات', value: productsCount),
-                            _Divider(),
-                            _StatItem(label: 'التقييم', value: storeRating),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -117,103 +123,123 @@ class ProfileScreen extends StatelessWidget {
 
             // ── My Store CTA ───────────────────────────────────────
             SliverToBoxAdapter(
-              child: Builder(builder: (context) {
-                final isSuspended = user['business'] != null && user['business']['isActive'] == false;
+              child: Builder(
+                builder: (context) {
+                  final isSuspended =
+                      user['business'] != null &&
+                      user['business']['isActive'] == false;
 
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppTheme.space16,
-                    AppTheme.space20,
-                    AppTheme.space16,
-                    AppTheme.space4,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      if (auth.hasStore.value) {
-                        Get.toNamed('/seller-dashboard');
-                      } else if (isLoggedIn) {
-                        Get.toNamed('/create-store');
-                      } else {
-                        Get.toNamed('/auth');
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(AppTheme.space16),
-                      decoration: BoxDecoration(
-                        color: AppTheme.surface,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                        boxShadow: AppTheme.shadowSm,
-                        border: Border.all(
-                          color: isSuspended 
-                              ? AppTheme.error.withValues(alpha: 0.5) 
-                              : AppTheme.primaryLight.withValues(alpha: 0.3),
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppTheme.space16,
+                      AppTheme.space20,
+                      AppTheme.space16,
+                      AppTheme.space4,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (auth.hasStore.value) {
+                          Get.toNamed('/seller-dashboard');
+                        } else if (isLoggedIn) {
+                          Get.toNamed('/create-store');
+                        } else {
+                          Get.toNamed('/auth');
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(AppTheme.space16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusLg,
+                          ),
+                          boxShadow: AppTheme.shadowSm,
+                          border: Border.all(
+                            color: isSuspended
+                                ? AppTheme.error.withValues(alpha: 0.5)
+                                : AppTheme.primaryLight.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: isSuspended
+                                    ? AppTheme.error.withValues(alpha: 0.1)
+                                    : AppTheme.primarySurface,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
+                                ),
+                              ),
+                              child: Icon(
+                                isSuspended
+                                    ? Icons.no_accounts_rounded
+                                    : Icons.storefront_rounded,
+                                color: isSuspended
+                                    ? AppTheme.error
+                                    : AppTheme.primary,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: AppTheme.space16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    auth.hasStore.value
+                                        ? 'متجري'
+                                        : 'إنشاء متجر',
+                                    style: theme.textTheme.titleLarge,
+                                  ),
+                                  Text(
+                                    isSuspended
+                                        ? 'حساب المتجر معطل 🚫 - اضغط للتفاصيل'
+                                        : (auth.hasStore.value
+                                              ? 'إدارة المنتجات والطلبات'
+                                              : 'ابدأ مشروعك المنزلي الآن'),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: isSuspended
+                                          ? AppTheme.error
+                                          : AppTheme.textSecondary,
+                                      fontWeight: isSuspended
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSuspended
+                                    ? AppTheme.error
+                                    : AppTheme.primary,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusFull,
+                                ),
+                              ),
+                              child: Text(
+                                isSuspended ? 'معطل' : 'فتح',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: isSuspended ? AppTheme.error.withValues(alpha: 0.1) : AppTheme.primarySurface,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusMd,
-                              ),
-                            ),
-                            child: Icon(
-                              isSuspended ? Icons.no_accounts_rounded : Icons.storefront_rounded,
-                              color: isSuspended ? AppTheme.error : AppTheme.primary,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: AppTheme.space16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  auth.hasStore.value ? 'متجري' : 'إنشاء متجر',
-                                  style: theme.textTheme.titleLarge,
-                                ),
-                                Text(
-                                  isSuspended
-                                      ? 'حساب المتجر معطل 🚫 - اضغط للتفاصيل'
-                                      : (auth.hasStore.value
-                                          ? 'إدارة المنتجات والطلبات'
-                                          : 'ابدأ مشروعك المنزلي الآن'),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: isSuspended ? AppTheme.error : AppTheme.textSecondary,
-                                    fontWeight: isSuspended ? FontWeight.w600 : FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSuspended ? AppTheme.error : AppTheme.primary,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusFull,
-                              ),
-                            ),
-                            child: Text(
-                              isSuspended ? 'معطل' : 'فتح',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
 
             // ── Menu Items ─────────────────────────────────────────
@@ -239,13 +265,14 @@ class ProfileScreen extends StatelessWidget {
                         iconColor: AppTheme.accent,
                         title: 'الإشعارات',
                         trailing: Obx(() {
-                          final notifCtrl = Get.isRegistered<NotificationController>() 
-                              ? Get.find<NotificationController>() 
+                          final notifCtrl =
+                              Get.isRegistered<NotificationController>()
+                              ? Get.find<NotificationController>()
                               : Get.put(NotificationController());
-                          
+
                           final count = notifCtrl.unreadCount;
                           if (count == 0) return const SizedBox.shrink();
-                          
+
                           return Container(
                             width: 22,
                             height: 22,
@@ -328,7 +355,9 @@ class ProfileScreen extends StatelessWidget {
                     iconBg: const Color(0xFFF5F5F5),
                     iconColor: AppTheme.textSecondary,
                     title: isLoggedIn ? 'تسجيل الخروج' : 'تسجيل الدخول',
-                    titleColor: isLoggedIn ? AppTheme.textPrimary : AppTheme.primary,
+                    titleColor: isLoggedIn
+                        ? AppTheme.textPrimary
+                        : AppTheme.primary,
                     showArrow: false,
                     onTap: () {
                       if (isLoggedIn) {
@@ -450,7 +479,10 @@ class ProfileScreen extends StatelessWidget {
                       },
                       child: const Text(
                         'تأكيد الحذف النهائي',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -461,47 +493,6 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       isScrollControlled: true,
-    );
-  }
-}
-
-// ─── Stat Item ───────────────────────────────────────────────────
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatItem({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.white70, fontSize: 11),
-        ),
-      ],
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 28,
-      width: 1,
-      color: Colors.white.withValues(alpha: 0.2),
     );
   }
 }

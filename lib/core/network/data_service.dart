@@ -257,4 +257,14 @@ class DataService {
       return {};
     }
   }
+
+  // Fetch Active Advertisements
+  static Future<List<dynamic>> getAds() async {
+    try {
+      final response = await ApiClient.instance.get('/ads');
+      return response.data['data'] ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
 }

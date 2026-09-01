@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
+import '../../widgets/ad_carousel.dart';
 import '../../core/network/api_client.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/data_controller.dart';
@@ -123,6 +124,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+
+          // ── Advertisement Carousel ─────────────────────────────
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(top: AppTheme.space12),
+              child: AdCarousel(),
             ),
           ),
 
