@@ -75,6 +75,10 @@ class SellerDashboardController extends GetxController {
     }).length;
   }
 
+  int get revisionProductsCount {
+    return myProducts.where((p) => (p['status'] ?? '').toString().toUpperCase() == 'NEEDS_REVISION').length;
+  }
+
   bool get isBusinessSuspended {
     final auth = Get.find<AuthController>();
     final userBus = auth.currentUser['business'];

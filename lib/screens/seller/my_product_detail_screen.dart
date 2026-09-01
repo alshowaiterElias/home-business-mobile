@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
+import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
 
 class MyProductDetailScreen extends StatefulWidget {
@@ -56,6 +57,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
         return AppTheme.primary;
       case 'PENDING':
         return AppTheme.accent;
+      case 'NEEDS_REVISION':
+        return Colors.amber.shade800;
       case 'REJECTED':
         return AppTheme.error;
       default:
@@ -69,6 +72,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
         return 'مقبول ومعروض للسوق';
       case 'PENDING':
         return 'قيد مراجعة الإدارة';
+      case 'NEEDS_REVISION':
+        return 'بانتظار إجراء التعديلات من التاجر 📝';
       case 'REJECTED':
         return 'مرفوض من الإدارة';
       default:
@@ -164,6 +169,79 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                     ),
                   ),
 
+                  // Revision Alert if NEEDS_REVISION
+                  if (product['status'] == 'NEEDS_REVISION' &&
+                      product['revisionReason'] != null)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(AppTheme.space16),
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        border: Border.all(
+                          color: Colors.amber.shade400,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.edit_note_rounded,
+                                color: Colors.amber.shade900,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'ملاحظات الإدارة للتعديل المطلوب:',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amber.shade900,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${product['revisionReason']}',
+                                      style: TextStyle(
+                                        color: Colors.amber.shade950,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final res = await Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product)));
+                                if (res == true) {
+                                  _fetchFullDetails();
+                                }
+                              },
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: const Text('تعديل وإعادة التقديم للمراجعة'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amber.shade800,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   // Rejection Alert if rejected
                   if (product['status'] == 'REJECTED' &&
                       product['rejectionReason'] != null)
@@ -178,36 +256,59 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                           color: AppTheme.error.withValues(alpha: 0.4),
                         ),
                       ),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
-                            color: AppTheme.error,
-                            size: 24,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: AppTheme.error,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'سبب الرفض من الإدارة:',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.error,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${product['rejectionReason']}',
+                                      style: const TextStyle(
+                                        color: AppTheme.error,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'سبب الرفض من الإدارة:',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.error,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${product['rejectionReason']}',
-                                  style: const TextStyle(
-                                    color: AppTheme.error,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final res = await Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product)));
+                                if (res == true) {
+                                  _fetchFullDetails();
+                                }
+                              },
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: const Text('تعديل وإعادة التقديم للمراجعة'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                              ),
                             ),
                           ),
                         ],

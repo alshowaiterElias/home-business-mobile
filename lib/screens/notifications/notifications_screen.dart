@@ -3,6 +3,8 @@ import '../../core/theme/app_theme.dart';
 import 'package:get/get.dart';
 import '../../controllers/notification_controller.dart';
 
+import '../seller/seller_dashboard_screen.dart';
+
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
@@ -12,6 +14,8 @@ class NotificationsScreen extends StatelessWidget {
         return Icons.check_circle_outline;
       case 'PRODUCT_REJECTED':
         return Icons.cancel_outlined;
+      case 'PRODUCT_NEEDS_REVISION':
+        return Icons.edit_note_outlined;
       case 'NEW_REVIEW':
         return Icons.star_outline_rounded;
       case 'NEW_PRODUCT_RELEASE':
@@ -29,6 +33,8 @@ class NotificationsScreen extends StatelessWidget {
         return AppTheme.primary;
       case 'PRODUCT_REJECTED':
         return AppTheme.error;
+      case 'PRODUCT_NEEDS_REVISION':
+        return Colors.amber.shade800;
       case 'NEW_REVIEW':
         return AppTheme.accent;
       case 'NEW_PRODUCT_RELEASE':
@@ -207,6 +213,9 @@ class NotificationsScreen extends StatelessWidget {
                   child: ListTile(
                     onTap: () {
                       if (!isRead) controller.markAsRead(n['id']);
+                      if (type == 'PRODUCT_NEEDS_REVISION' || type == 'PRODUCT_REJECTED' || type == 'PRODUCT_APPROVED') {
+                        Get.to(() => const SellerDashboardScreen());
+                      }
                     },
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppTheme.space16,

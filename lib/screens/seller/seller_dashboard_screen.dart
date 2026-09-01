@@ -14,6 +14,7 @@ import '../../controllers/add_product_controller.dart';
 import '../../controllers/data_controller.dart';
 import '../../controllers/auth_controller.dart';
 import 'my_product_detail_screen.dart';
+import 'edit_product_screen.dart';
 import 'suspended_account_screen.dart';
 
 /// Seller's private dashboard to manage their business and products.
@@ -175,6 +176,15 @@ class SellerDashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     _QuickStat(
+                      label: 'تعديلات',
+                      value: '${controller.revisionProductsCount}',
+                      icon: Icons.edit_note_rounded,
+                      color: Colors.amber.shade800,
+                      isSelected: controller.selectedFilter.value == 'NEEDS_REVISION',
+                      onTap: () => controller.setFilter('NEEDS_REVISION'),
+                    ),
+                    const SizedBox(width: 8),
+                    _QuickStat(
                       label: 'مرفوضة',
                       value: '${controller.rejectedProductsCount}',
                       icon: Icons.cancel_outlined,
@@ -319,6 +329,7 @@ class _ProductTile extends StatelessWidget {
     switch (product['status']) {
       case 'APPROVED': return AppTheme.primary;
       case 'PENDING': return AppTheme.accent;
+      case 'NEEDS_REVISION': return Colors.amber.shade800;
       case 'REJECTED': 
       case 'SUSPENDED': return AppTheme.error;
       default: return AppTheme.textHint;
@@ -329,6 +340,7 @@ class _ProductTile extends StatelessWidget {
     switch (product['status']) {
       case 'APPROVED': return 'مقبول';
       case 'PENDING': return 'بالانتظار';
+      case 'NEEDS_REVISION': return 'طلب تعديل 📝';
       case 'REJECTED': return 'مرفوض';
       case 'SUSPENDED': return 'موقوف 🚫';
       default: return '';
@@ -353,7 +365,9 @@ class _ProductTile extends StatelessWidget {
           boxShadow: AppTheme.shadowSm,
           border: product['status'] == 'REJECTED'
               ? Border.all(color: AppTheme.error.withValues(alpha: 0.3))
-              : null,
+              : product['status'] == 'NEEDS_REVISION'
+                  ? Border.all(color: Colors.amber.withValues(alpha: 0.5))
+                  : null,
         ),
         child: Column(
           children: [
@@ -419,6 +433,49 @@ class _ProductTile extends StatelessWidget {
                 const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textHint),
               ],
             ),
+            if (product['status'] == 'NEEDS_REVISION' && product['revisionReason'] != null) ...[
+              const SizedBox(height: AppTheme.space8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppTheme.space12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.edit_note_rounded, size: 18, color: Colors.amber.shade900),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text('ملاحظات التعديل: ${product['revisionReason']}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.amber.shade950, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product))),
+                        icon: const Icon(Icons.edit, size: 14),
+                        label: const Text('تعديل وإعادة تقديم'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber.shade800,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (product['status'] == 'REJECTED' && product['rejectionReason'] != null) ...[
               const SizedBox(height: AppTheme.space8),
               Container(
@@ -428,16 +485,40 @@ class _ProductTile extends StatelessWidget {
                   color: const Color(0xFFFFEBEE),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline_rounded,
-                        size: 16, color: AppTheme.error),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text('سبب الرفض: ${product['rejectionReason']}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.error)),
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
+                            size: 16, color: AppTheme.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text('سبب الرفض: ${product['rejectionReason']}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.error)),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product))),
+                        icon: const Icon(Icons.edit, size: 14),
+                        label: const Text('تعديل وإعادة التقديم للمراجعة'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
                   ],
                 ),
               ),
