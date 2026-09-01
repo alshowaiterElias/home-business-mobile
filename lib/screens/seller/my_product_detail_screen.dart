@@ -179,9 +179,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       decoration: BoxDecoration(
                         color: Colors.amber.shade50,
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        border: Border.all(
-                          color: Colors.amber.shade400,
-                        ),
+                        border: Border.all(color: Colors.amber.shade400),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +209,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                     Text(
                                       '${product['revisionReason']}',
                                       style: TextStyle(
-                                        color: Colors.amber.shade950,
+                                        color: Colors.amber.shade900,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -225,13 +223,19 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                final res = await Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product)));
+                                final res = await Get.to(
+                                  () => EditProductScreen(
+                                    product: Map<String, dynamic>.from(product),
+                                  ),
+                                );
                                 if (res == true) {
                                   _fetchFullDetails();
                                 }
                               },
                               icon: const Icon(Icons.edit, size: 16),
-                              label: const Text('تعديل وإعادة التقديم للمراجعة'),
+                              label: const Text(
+                                'تعديل وإعادة التقديم للمراجعة',
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.amber.shade800,
                                 foregroundColor: Colors.white,
@@ -298,13 +302,19 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                final res = await Get.to(() => EditProductScreen(product: Map<String, dynamic>.from(product)));
+                                final res = await Get.to(
+                                  () => EditProductScreen(
+                                    product: Map<String, dynamic>.from(product),
+                                  ),
+                                );
                                 if (res == true) {
                                   _fetchFullDetails();
                                 }
                               },
                               icon: const Icon(Icons.edit, size: 16),
-                              label: const Text('تعديل وإعادة التقديم للمراجعة'),
+                              label: const Text(
+                                'تعديل وإعادة التقديم للمراجعة',
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primary,
                                 foregroundColor: Colors.white,
