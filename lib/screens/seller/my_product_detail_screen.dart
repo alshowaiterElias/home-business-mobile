@@ -165,6 +165,8 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                               fontSize: 14,
                             ),
                           ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -179,7 +181,7 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       border: Border.all(
                         color: product['isAvailable'] == false
                             ? AppTheme.error.withValues(alpha: 0.4)
-                            : AppTheme.border,
+                            : AppTheme.divider,
                       ),
                     ),
                     child: Row(

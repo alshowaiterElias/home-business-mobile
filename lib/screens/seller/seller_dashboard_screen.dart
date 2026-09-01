@@ -426,6 +426,7 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<SellerDashboardController>();
     final imageUrl = (product['images'] != null && product['images'].isNotEmpty)
         ? (product['images'][0]['imageUrl'] ?? '')
         : '';
@@ -899,8 +900,9 @@ class AddProductScreen extends StatelessWidget {
                                     )
                                     .toList(),
                                 onChanged: (val) {
-                                  if (val != null)
+                                  if (val != null) {
                                     controller.selectedUnit.value = val;
+                                  }
                                 },
                               );
                             }),
@@ -959,8 +961,9 @@ class AddProductScreen extends StatelessWidget {
                   );
                   if (parentCat == null ||
                       parentCat['children'] == null ||
-                      parentCat['children'].isEmpty)
+                      parentCat['children'].isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
