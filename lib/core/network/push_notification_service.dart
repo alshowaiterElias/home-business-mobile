@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import '../../controllers/notification_controller.dart';
 import 'api_client.dart';
 import 'storage_service.dart';
 
@@ -57,9 +58,7 @@ class PushNotificationService {
       await _localNotifications.initialize(
         initSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          if (response.payload != null && response.payload!.isNotEmpty) {
-            _handleNotificationTapPayload(response.payload!);
-          }
+          Get.toNamed('/notifications');
         },
       );
 
@@ -75,6 +74,20 @@ class PushNotificationService {
         if (kDebugMode) {
           debugPrint('[PushNotificationService] Foreground Message: ${message.notification?.title}');
         }
+
+        // Auto-refresh in-app notifications if controller is active
+        if (Get.isRegistered<NotificationController>()) {
+          Get.find<NotificationController>().fetchNotifications();
+        }
+
+        // Check if user has disabled notifications on this device
+        if (!StorageService.isNotificationsEnabled()) {
+          if (kDebugMode) {
+            debugPrint('[PushNotificationService] Push notification suppressed (Disabled in App Settings)');
+          }
+          return;
+        }
+
         RemoteNotification? notification = message.notification;
         AndroidNotification? android = message.notification?.android;
 
@@ -162,19 +175,12 @@ class PushNotificationService {
   }
 
   static void _handleNotificationMessageTap(RemoteMessage message) {
-    final data = message.data;
-    final type = data['type'] ?? '';
+    final type = message.data['type'] ?? '';
 
-    if (type == 'PRODUCT_APPROVED' || type == 'PRODUCT_REJECTED') {
-      Get.toNamed('/seller-dashboard');
-    } else if (type == 'NEW_REVIEW') {
+    if (type == 'PRODUCT_APPROVED' || type == 'PRODUCT_REJECTED' || type == 'PRODUCT_NEEDS_REVISION') {
       Get.toNamed('/seller-dashboard');
     } else {
       Get.toNamed('/notifications');
     }
-  }
-
-  static void _handleNotificationTapPayload(String payload) {
-    Get.toNamed('/notifications');
   }
 }

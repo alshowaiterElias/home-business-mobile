@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
 import 'package:get/get.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/network/data_service.dart';
 import '../../controllers/notification_controller.dart';
-
+import '../../models/dummy_data.dart';
+import '../product/product_details_screen.dart';
 import '../seller/seller_dashboard_screen.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  late final NotificationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.isRegistered<NotificationController>()
+        ? Get.find<NotificationController>()
+        : Get.put(NotificationController());
+
+    // Auto-refresh notifications every time the user enters this screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.fetchNotifications();
+    });
+  }
 
   IconData _getIconForType(String type) {
     switch (type) {
@@ -88,21 +110,96 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _handleNotificationTap(
+    BuildContext context,
+    Map<String, dynamic> n,
+  ) async {
+    final type = n['type'] ?? '';
+    final title = n['title'] ?? 'إشعار';
+    final body = n['body'] ?? '';
+    final productId = n['productId'] ?? n['targetId'];
+
+    if (type == 'PRODUCT_NEEDS_REVISION' ||
+        type == 'PRODUCT_REJECTED' ||
+        type == 'PRODUCT_APPROVED' ||
+        type == 'PRODUCT_SUSPENDED' ||
+        type == 'NEW_REVIEW') {
+      Get.to(() => const SellerDashboardScreen());
+      return;
+    }
+
+    if (type == 'NEW_PRODUCT_RELEASE' || productId != null) {
+      if (productId != null && productId.toString().isNotEmpty) {
+        Get.dialog(
+          const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false,
+        );
+        try {
+          final rawProduct = await DataService.getProductById(
+            productId.toString(),
+          );
+          if (Get.isDialogOpen ?? false) Get.back(); // Dismiss loading
+          if (rawProduct.isNotEmpty) {
+            final product = Product.fromJson(rawProduct);
+            Get.to(() => ProductDetailsScreen(product: product));
+            return;
+          }
+        } catch (e) {
+          if (Get.isDialogOpen ?? false) Get.back(); // Dismiss loading on error
+        }
+      }
+    }
+
+    // Default or SYSTEM_ALERT: Show notification details dialog
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
+        title: Row(
+          children: [
+            Icon(_getIconForType(type), color: _getColorForType(type)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          body.isNotEmpty ? body : 'لا توجد تفاصيل إضافية',
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إغلاق'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final controller = Get.put(NotificationController());
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('الإشعارات'),
         actions: [
           Obx(() {
-            if (controller.notifications.isEmpty) return const SizedBox();
+            if (_controller.notifications.isEmpty) return const SizedBox();
             return Row(
               children: [
                 TextButton(
-                  onPressed: () => controller.markAllAsRead(),
+                  onPressed: () => _controller.markAllAsRead(),
                   child: Text(
                     'مقروء الكل',
                     style: theme.textTheme.labelMedium?.copyWith(
@@ -116,7 +213,7 @@ class NotificationsScreen extends StatelessWidget {
                     color: AppTheme.error,
                   ),
                   tooltip: 'مسح الكل',
-                  onPressed: () => _showDeleteAllDialog(context, controller),
+                  onPressed: () => _showDeleteAllDialog(context, _controller),
                 ),
               ],
             );
@@ -124,11 +221,11 @@ class NotificationsScreen extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.notifications.isEmpty) {
+        if (_controller.isLoading.value && _controller.notifications.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (controller.notifications.isEmpty) {
+        if (_controller.notifications.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -151,15 +248,15 @@ class NotificationsScreen extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: controller.fetchNotifications,
+          onRefresh: _controller.fetchNotifications,
           child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: AppTheme.space8),
-            itemCount: controller.notifications.length,
+            itemCount: _controller.notifications.length,
             separatorBuilder: (_, __) =>
                 const Divider(height: 1, indent: 72, endIndent: 16),
             itemBuilder: (_, i) {
-              final n = controller.notifications[i];
+              final n = _controller.notifications[i];
               final isRead = n['isRead'] == true;
               final type = n['type'] ?? '';
               final color = _getColorForType(type);
@@ -198,7 +295,7 @@ class NotificationsScreen extends StatelessWidget {
                   ),
                 ),
                 onDismissed: (direction) {
-                  controller.deleteNotification(n['id']);
+                  _controller.deleteNotification(n['id']);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('تم حذف الإشعار'),
@@ -211,11 +308,9 @@ class NotificationsScreen extends StatelessWidget {
                       ? AppTheme.primarySurface.withValues(alpha: 0.2)
                       : Colors.transparent,
                   child: ListTile(
-                    onTap: () {
-                      if (!isRead) controller.markAsRead(n['id']);
-                      if (type == 'PRODUCT_NEEDS_REVISION' || type == 'PRODUCT_REJECTED' || type == 'PRODUCT_APPROVED') {
-                        Get.to(() => const SellerDashboardScreen());
-                      }
+                    onTap: () async {
+                      if (!isRead) _controller.markAsRead(n['id']);
+                      await _handleNotificationTap(context, n);
                     },
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppTheme.space16,

@@ -52,4 +52,15 @@ class StorageService {
   static Future<void> clearRecentSearches() async {
     await _prefs.remove(_recentSearchesKey);
   }
+
+  // Push notification preferences
+  static const String _notificationsEnabledKey = 'notifications_enabled';
+
+  static Future<void> setNotificationsEnabled(bool enabled) async {
+    await _prefs.setBool(_notificationsEnabledKey, enabled);
+  }
+
+  static bool isNotificationsEnabled() {
+    return _prefs.getBool(_notificationsEnabledKey) ?? true;
+  }
 }

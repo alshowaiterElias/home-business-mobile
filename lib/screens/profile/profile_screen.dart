@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/notification_controller.dart';
+import '../../core/network/storage_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,8 +11,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     final auth = Get.find<AuthController>();
+    final isPushEnabled = StorageService.isNotificationsEnabled().obs;
 
     return Obx(() {
       final isLoggedIn = auth.isLoggedIn.value;
@@ -293,6 +294,53 @@ class ProfileScreen extends StatelessWidget {
                           );
                         }),
                         onTap: () => Get.toNamed('/notifications'),
+                      ),
+                      const Divider(indent: 68, endIndent: 16, height: 1),
+                      _MenuItem(
+                        icon: Icons.notifications_active_outlined,
+                        iconBg: AppTheme.primarySurface,
+                        iconColor: AppTheme.primary,
+                        title: 'إشعارات التطبيق',
+                        showArrow: false,
+                        trailing: Obx(
+                          () => Switch.adaptive(
+                            value: isPushEnabled.value,
+                            activeColor: AppTheme.primary,
+                            onChanged: (val) async {
+                              isPushEnabled.value = val;
+                              await StorageService.setNotificationsEnabled(val);
+                              Get.snackbar(
+                                'إعدادات الإشعارات',
+                                val
+                                    ? 'تم تفعيل التنبيهات على هذا الجهاز'
+                                    : 'تم حظر كافة التنبيهات على هذا الجهاز',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: val
+                                    ? AppTheme.primary
+                                    : Colors.grey.shade800,
+                                colorText: Colors.white,
+                                duration: const Duration(seconds: 2),
+                              );
+                            },
+                          ),
+                        ),
+                        onTap: () async {
+                          final newVal = !isPushEnabled.value;
+                          isPushEnabled.value = newVal;
+                          await StorageService.setNotificationsEnabled(newVal);
+                          Get.snackbar(
+                            'إعدادات الإشعارات',
+                            newVal
+                                ? 'تم تفعيل التنبيهات على هذا الجهاز'
+                                : 'تم حظر كافة التنبيهات على هذا الجهاز',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: newVal
+                                ? AppTheme.primary
+                                : Colors.grey.shade800,
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 2),
+                          );
+                        },
                       ),
                       const Divider(indent: 68, endIndent: 16, height: 1),
                       _MenuItem(
