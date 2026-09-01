@@ -22,6 +22,7 @@ class MyProductDetailScreen extends StatefulWidget {
 class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
   late Map<String, dynamic> product;
   bool isLoading = true;
+  bool _isTogglingAvailability = false;
   int _activeImageIndex = 0;
 
   @override
@@ -225,51 +226,86 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             ],
                           ),
                         ),
-                        Switch.adaptive(
-                          value: product['isAvailable'] != false,
-                          activeColor: AppTheme.primary,
-                          onChanged: (val) async {
-                            try {
-                              final res = await DataService.toggleProductAvailability(
-                                product['id'],
-                              );
-                              if (res['success'] == true && res['data'] != null) {
-                                setState(() {
-                                  product = res['data'];
-                                });
-                                if (Get.isRegistered<SellerDashboardController>()) {
-                                  Get.find<SellerDashboardController>().fetchDashboardData();
-                                }
-                                if (Get.isRegistered<DataController>()) {
-                                  final dataCtrl = Get.find<DataController>();
-                                  dataCtrl.fetchLatestProducts();
-                                  dataCtrl.fetchFeaturedProducts();
-                                }
-                                final bool notificationSent = res['notificationSent'] ?? true;
-                                final Color snackColor = val
-                                    ? (notificationSent ? AppTheme.primary : Colors.amber.shade900)
-                                    : Colors.grey.shade800;
+                        _isTogglingAvailability
+                            ? const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                              )
+                            : Switch.adaptive(
+                                value: product['isAvailable'] != false,
+                                activeTrackColor: AppTheme.primary,
+                                activeThumbColor: Colors.white,
+                                onChanged: (val) async {
+                                  setState(() {
+                                    _isTogglingAvailability = true;
+                                  });
+                                  try {
+                                    final res =
+                                        await DataService.toggleProductAvailability(
+                                      product['id'],
+                                    );
+                                    if (res['success'] == true &&
+                                        res['data'] != null) {
+                                      if (mounted) {
+                                        setState(() {
+                                          product = res['data'];
+                                        });
+                                      }
+                                      if (Get.isRegistered<
+                                          SellerDashboardController>()) {
+                                        Get.find<SellerDashboardController>()
+                                            .fetchDashboardData();
+                                      }
+                                      if (Get.isRegistered<DataController>()) {
+                                        final dataCtrl = Get.find<DataController>();
+                                        dataCtrl.fetchLatestProducts();
+                                        dataCtrl.fetchFeaturedProducts();
+                                      }
+                                      final bool notificationSent =
+                                          res['notificationSent'] ?? true;
+                                      final Color snackColor = val
+                                          ? (notificationSent
+                                              ? AppTheme.primary
+                                              : Colors.amber.shade900)
+                                          : Colors.grey.shade800;
 
-                                Get.snackbar(
-                                  'تحديث التوفر',
-                                  res['message'] ?? 'تم تغيير حالة التوفر بنجاح',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: snackColor,
-                                  colorText: Colors.white,
-                                  duration: const Duration(seconds: 4),
-                                );
-                              }
-                            } catch (e) {
-                              Get.snackbar(
-                                'خطأ',
-                                'فشل في تغيير حالة التوفر: $e',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: AppTheme.error,
-                                colorText: Colors.white,
-                              );
-                            }
-                          },
-                        ),
+                                      Get.snackbar(
+                                        'تحديث التوفر',
+                                        res['message'] ??
+                                            'تم تغيير حالة التوفر بنجاح',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: snackColor,
+                                        colorText: Colors.white,
+                                        duration: const Duration(seconds: 4),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    Get.snackbar(
+                                      'خطأ',
+                                      'فشل في تغيير حالة التوفر: $e',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      backgroundColor: AppTheme.error,
+                                      colorText: Colors.white,
+                                    );
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isTogglingAvailability = false;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
                       ],
                     ),
                   ),
