@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../core/theme/app_theme.dart';
 import '../core/network/data_service.dart';
 import 'auth_controller.dart';
+import 'data_controller.dart';
 
 class SellerDashboardController extends GetxController {
   var isLoading = false.obs;
@@ -63,6 +64,11 @@ class SellerDashboardController extends GetxController {
           myProducts[index] = updated;
           myProducts.refresh();
           update();
+        }
+        if (Get.isRegistered<DataController>()) {
+          final dataCtrl = Get.find<DataController>();
+          dataCtrl.fetchLatestProducts();
+          dataCtrl.fetchFeaturedProducts();
         }
         Get.snackbar(
           'تحديث توفر المنتج',

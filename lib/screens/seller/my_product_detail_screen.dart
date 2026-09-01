@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../controllers/seller_dashboard_controller.dart';
+import '../../controllers/data_controller.dart';
 import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
 
@@ -238,6 +239,11 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                 });
                                 if (Get.isRegistered<SellerDashboardController>()) {
                                   Get.find<SellerDashboardController>().fetchDashboardData();
+                                }
+                                if (Get.isRegistered<DataController>()) {
+                                  final dataCtrl = Get.find<DataController>();
+                                  dataCtrl.fetchLatestProducts();
+                                  dataCtrl.fetchFeaturedProducts();
                                 }
                                 Get.snackbar(
                                   'تحديث التوفر',
