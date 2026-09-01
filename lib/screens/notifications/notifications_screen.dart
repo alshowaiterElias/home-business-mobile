@@ -14,6 +14,8 @@ class NotificationsScreen extends StatelessWidget {
         return Icons.cancel_outlined;
       case 'NEW_REVIEW':
         return Icons.star_outline_rounded;
+      case 'NEW_PRODUCT_RELEASE':
+        return Icons.shopping_bag_outlined;
       case 'SYSTEM_ALERT':
         return Icons.waving_hand_rounded;
       default:
@@ -29,6 +31,8 @@ class NotificationsScreen extends StatelessWidget {
         return AppTheme.error;
       case 'NEW_REVIEW':
         return AppTheme.accent;
+      case 'NEW_PRODUCT_RELEASE':
+        return AppTheme.primary;
       case 'SYSTEM_ALERT':
         return const Color(0xFF5C6BC0);
       default:
