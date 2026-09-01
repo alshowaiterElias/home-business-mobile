@@ -52,49 +52,6 @@ class _AdCarouselState extends State<AdCarousel> {
   bool _isUserInteracting = false;
   bool _isLoading = true;
 
-  static const List<AdItem> _defaultAds = [
-    AdItem(
-      id: 'ad_1',
-      imagePath: 'assets/ads/ad1.png',
-      title: 'عروض الحلويات الشرقية والمنزلية 🍩',
-      subtitle:
-          'احصل على خصم 25% على كافة أطباق الحلويات والمخبوزات المصنوعة منزلياً بكل حب.',
-      badgeText: 'خصم 25%',
-      badgeColor: Color(0xFFFF9800),
-      actionText: 'تصفح الحلويات',
-    ),
-    AdItem(
-      id: 'ad_2',
-      imagePath: 'assets/ads/ad2.png',
-      title: 'تشكيلة الحرف اليدوية والهدايا 🎨',
-      subtitle:
-          'قطع فخارية ومطرزات يدوية فريدة مصممة بدقة عالية لجميع المناسبات.',
-      badgeText: 'تشكيلة جديدة',
-      badgeColor: Color(0xFF8E24AA),
-      actionText: 'استكشف المنتجات',
-    ),
-    AdItem(
-      id: 'ad_3',
-      imagePath: 'assets/ads/ad3.png',
-      title: 'وجبات منزلية طازجة يومياً 🍲',
-      subtitle:
-          'استمتع بأشهى الأكلات الشعبية والغربية المحضرة طازجة من طهاة الأسر المنتجة.',
-      badgeText: 'الأكثر طلباً',
-      badgeColor: Color(0xFFE53935),
-      actionText: 'اطلب الآن',
-    ),
-    AdItem(
-      id: 'ad_4',
-      imagePath: 'assets/ads/ad4.png',
-      title: 'عرض التوصيل المجاني 🚚',
-      subtitle:
-          'استفد من التوصيل المجاني الفوري لجميع الطلبات في نهاية هذا الأسبوع!',
-      badgeText: 'توصيل مجاني',
-      badgeColor: Color(0xFF4CAF50),
-      actionText: 'تسوق الآن',
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -146,19 +103,17 @@ class _AdCarouselState extends State<AdCarousel> {
       } else {
         if (mounted) {
           setState(() {
-            _ads = _defaultAds;
+            _ads = [];
             _isLoading = false;
           });
-          _startTimer();
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _ads = _defaultAds;
+          _ads = [];
           _isLoading = false;
         });
-        _startTimer();
       }
     }
   }
@@ -253,16 +208,9 @@ class _AdCarouselState extends State<AdCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return SizedBox(
-        height: 165,
-        child: Center(
-          child: CircularProgressIndicator(color: AppTheme.primary),
-        ),
-      );
+    if (_isLoading || _ads.isEmpty) {
+      return const SizedBox.shrink();
     }
-
-    if (_ads.isEmpty) return const SizedBox.shrink();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
