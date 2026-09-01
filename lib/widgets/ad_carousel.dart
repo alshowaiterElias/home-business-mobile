@@ -208,7 +208,48 @@ class _AdCarouselState extends State<AdCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading || _ads.isEmpty) {
+    if (_isLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          height: 165,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(
+              color: AppTheme.divider.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'جاري تحميل العروض الإعلانية...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textHint,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_ads.isEmpty) {
       return const SizedBox.shrink();
     }
 
