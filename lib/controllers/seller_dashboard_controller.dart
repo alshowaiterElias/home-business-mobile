@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/theme/app_theme.dart';
 import '../core/network/data_service.dart';
 import 'auth_controller.dart';
 
@@ -49,6 +51,42 @@ class SellerDashboardController extends GetxController {
 
     debugPrint('🔍 [filteredProducts] Filter "$filter" matched ${list.length} / ${myProducts.length} items');
     return list;
+  }
+
+  Future<bool> toggleAvailability(String productId) async {
+    try {
+      final res = await DataService.toggleProductAvailability(productId);
+      if (res['success'] == true && res['data'] != null) {
+        final updated = res['data'];
+        final index = myProducts.indexWhere((p) => p['id'] == productId);
+        if (index != -1) {
+          myProducts[index] = updated;
+          myProducts.refresh();
+          update();
+        }
+        Get.snackbar(
+          'تحديث توفر المنتج',
+          res['message'] ?? 'تم تغيير حالة التوفر بنجاح',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: updated['isAvailable'] == true
+              ? AppTheme.primary
+              : Colors.grey.shade800,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      Get.snackbar(
+        'خطأ',
+        'فشل في تغيير حالة توفر المنتج: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppTheme.error,
+        colorText: Colors.white,
+      );
+      return false;
+    }
   }
 
   void setFilter(String filter) {

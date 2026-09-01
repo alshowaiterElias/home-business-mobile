@@ -513,7 +513,46 @@ class _ProductTile extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      product['isAvailable'] == false
+                          ? Icons.visibility_off_outlined
+                          : Icons.check_circle_outline_rounded,
+                      size: 16,
+                      color: product['isAvailable'] == false
+                          ? AppTheme.error
+                          : AppTheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      product['isAvailable'] == false
+                          ? 'غير متوفر (مخفي للعملاء)'
+                          : 'متوفر للبيع في التطبيق',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: product['isAvailable'] == false
+                            ? AppTheme.error
+                            : AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Switch.adaptive(
+                  value: product['isAvailable'] != false,
+                  activeColor: AppTheme.primary,
+                  onChanged: (val) {
+                    controller.toggleAvailability(product['id']);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
             const Divider(height: 1),
             const SizedBox(height: 8),
             Row(

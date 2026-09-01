@@ -287,4 +287,18 @@ class DataService {
       return [];
     }
   }
+
+  // Toggle Product Availability (Store owner)
+  static Future<Map<String, dynamic>> toggleProductAvailability(
+    String productId,
+  ) async {
+    try {
+      final response = await ApiClient.instance.patch(
+        '/products/$productId/availability',
+      );
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

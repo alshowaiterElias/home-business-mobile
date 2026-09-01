@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
+import '../../controllers/seller_dashboard_controller.dart';
 import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
 
@@ -164,6 +165,99 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                               fontSize: 14,
                             ),
                           ),
+                    ),
+                  ),
+
+                  // Availability Card
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      border: Border.all(
+                        color: product['isAvailable'] == false
+                            ? AppTheme.error.withValues(alpha: 0.4)
+                            : AppTheme.border,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          product['isAvailable'] == false
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded,
+                          color: product['isAvailable'] == false
+                              ? AppTheme.error
+                              : AppTheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product['isAvailable'] == false
+                                    ? 'المنتج غير متوفر (مخفي)'
+                                    : 'المنتج متوفر في المتجر',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: product['isAvailable'] == false
+                                      ? AppTheme.error
+                                      : null,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                product['isAvailable'] == false
+                                    ? 'تم إخفاء هذا المنتج مؤقتاً من السوق ونتائج البحث'
+                                    : 'يظهر هذا المنتج للعملاء في التطبيق ويمكنهم طلبه',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textHint,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch.adaptive(
+                          value: product['isAvailable'] != false,
+                          activeColor: AppTheme.primary,
+                          onChanged: (val) async {
+                            try {
+                              final res = await DataService.toggleProductAvailability(
+                                product['id'],
+                              );
+                              if (res['success'] == true && res['data'] != null) {
+                                setState(() {
+                                  product = res['data'];
+                                });
+                                if (Get.isRegistered<SellerDashboardController>()) {
+                                  Get.find<SellerDashboardController>().fetchDashboardData();
+                                }
+                                Get.snackbar(
+                                  'تحديث التوفر',
+                                  res['message'] ?? 'تم تغيير حالة التوفر بنجاح',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: val
+                                      ? AppTheme.primary
+                                      : Colors.grey.shade800,
+                                  colorText: Colors.white,
+                                  duration: const Duration(seconds: 3),
+                                );
+                              }
+                            } catch (e) {
+                              Get.snackbar(
+                                'خطأ',
+                                'فشل في تغيير حالة التوفر: $e',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: AppTheme.error,
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),
