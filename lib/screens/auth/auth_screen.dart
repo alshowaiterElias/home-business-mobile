@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
@@ -12,12 +13,16 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isOtpSent = false;
+  Timer? _timer;
+  int _resendSeconds = 60;
+  bool _canResend = false;
   final _phoneController = TextEditingController(text: '+967');
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _otpFocusNodes = List.generate(4, (_) => FocusNode());
 
   @override
   void dispose() {
+    _timer?.cancel();
     _phoneController.dispose();
     for (final c in _otpControllers) {
       c.dispose();
@@ -26,6 +31,30 @@ class _AuthScreenState extends State<AuthScreen> {
       f.dispose();
     }
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    _timer?.cancel();
+    setState(() {
+      _resendSeconds = 60;
+      _canResend = false;
+    });
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds > 0) {
+        if (mounted) {
+          setState(() {
+            _resendSeconds--;
+          });
+        }
+      } else {
+        _timer?.cancel();
+        if (mounted) {
+          setState(() {
+            _canResend = true;
+          });
+        }
+      }
+    });
   }
 
   String _getOtpCode() {
@@ -120,6 +149,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               final success = await auth.requestOTP(phone);
                               if (success) {
                                 setState(() => _isOtpSent = true);
+                                _startResendTimer();
                               }
                             },
                       child: auth.isLoading.value
@@ -168,7 +198,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       const SizedBox(width: AppTheme.space8),
                       GestureDetector(
-                        onTap: () => setState(() => _isOtpSent = false),
+                        onTap: () {
+                          _timer?.cancel();
+                          setState(() {
+                            _isOtpSent = false;
+                            _canResend = false;
+                          });
+                        },
                         child: const Icon(
                           Icons.edit_rounded,
                           size: 16,
@@ -277,14 +313,24 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     Text('لم يصلك الرمز؟', style: theme.textTheme.bodyMedium),
                     TextButton(
-                      onPressed: () {
-                        final auth = Get.find<AuthController>();
-                        auth.requestOTP(_phoneController.text.trim());
-                      },
+                      onPressed: _canResend
+                          ? () async {
+                              final auth = Get.find<AuthController>();
+                              final success = await auth.requestOTP(
+                                _phoneController.text.trim(),
+                              );
+                              if (success) {
+                                _startResendTimer();
+                              }
+                            }
+                          : null,
                       child: Text(
-                        'إعادة الإرسال',
+                        _canResend
+                            ? 'إعادة الإرسال'
+                            : 'إعادة الإرسال خلال (${_resendSeconds.toString().padLeft(2, '0')}ث)',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppTheme.primary,
+                          color: _canResend ? AppTheme.primary : AppTheme.textHint,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
