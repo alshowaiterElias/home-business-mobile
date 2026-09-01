@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/report_sheet.dart';
 import '../../core/network/data_service.dart';
+import '../../core/network/api_client.dart';
 import '../../core/network/whatsapp_service.dart';
 
 class StoreScreen extends StatefulWidget {
@@ -67,6 +68,11 @@ class _StoreScreenState extends State<StoreScreen> {
         ? DateTime.parse(_businessData!['createdAt']).year.toString()
         : '٢٠٢٤';
 
+    final logoUrl = _businessData?['logoUrl'] as String?;
+    final fullLogoUrl = (logoUrl != null && logoUrl.isNotEmpty)
+        ? ApiClient.getImageUrl(logoUrl)
+        : null;
+
     double totalRating = 0;
     int ratedCount = 0;
     for (var p in _products) {
@@ -87,7 +93,7 @@ class _StoreScreenState extends State<StoreScreen> {
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 220,
               pinned: true,
               backgroundColor: AppTheme.surface,
               actions: [
@@ -101,56 +107,118 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.primaryDark, AppTheme.primary],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 20),
-                        const CircleAvatar(
-                          radius: 36,
-                          backgroundColor: Colors.white24,
-                          child: Icon(
-                            Icons.storefront_rounded,
-                            color: Colors.white,
-                            size: 36,
-                          ),
-                        ),
-                        const SizedBox(height: AppTheme.space12),
-                        Text(
-                          businessName,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.location_on_outlined,
-                              size: 14,
-                              color: Colors.white70,
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Store image banner or default gradient background
+                    if (fullLogoUrl != null)
+                      Image.network(
+                        fullLogoUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppTheme.primaryDark, AppTheme.primary],
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              location,
-                              style: theme.textTheme.bodySmall?.copyWith(
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppTheme.primaryDark, AppTheme.primary],
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                          ),
+                        ),
+                      ),
+
+                    // Dark gradient overlay for clear contrast and readability
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withValues(alpha: 0.55),
+                            Colors.black.withValues(alpha: 0.85),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+
+                    // Centered Store Logo & Info
+                    SafeArea(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 38,
+                              backgroundColor: AppTheme.primaryDark,
+                              backgroundImage: fullLogoUrl != null
+                                  ? NetworkImage(fullLogoUrl)
+                                  : null,
+                              child: fullLogoUrl == null
+                                  ? const Icon(
+                                      Icons.storefront_rounded,
+                                      color: Colors.white,
+                                      size: 38,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.space8),
+                          Text(
+                            businessName,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                const Shadow(
+                                  color: Colors.black45,
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 14,
                                 color: Colors.white70,
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              const SizedBox(width: 4),
+                              Text(
+                                location,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
