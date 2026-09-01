@@ -264,7 +264,7 @@ class _StoreScreenState extends State<StoreScreen> {
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
-              expandedHeight: 220,
+              expandedHeight: 230,
               pinned: true,
               backgroundColor: AppTheme.surface,
               actions: [
@@ -324,7 +324,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           GestureDetector(
                             onTap: () {
                               if (fullLogoUrl != null) {
@@ -346,7 +346,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                     ],
                                   ),
                                   child: CircleAvatar(
-                                    radius: 38,
+                                    radius: 36,
                                     backgroundColor: AppTheme.primaryDark,
                                     backgroundImage: fullLogoUrl != null
                                         ? NetworkImage(fullLogoUrl)
@@ -355,7 +355,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                         ? const Icon(
                                             Icons.storefront_rounded,
                                             color: Colors.white,
-                                            size: 38,
+                                            size: 36,
                                           )
                                         : null,
                                   ),
@@ -412,6 +412,73 @@ class _StoreScreenState extends State<StoreScreen> {
                               ),
                             ],
                           ),
+                          // Subtle Animated Follow Button overlaying the background image
+                          GestureDetector(
+                            onTap: _followLoading ? null : _toggleFollow,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _isFollowed
+                                    ? Colors.teal.shade700.withValues(alpha: 0.95)
+                                    : Colors.black.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: _isFollowed ? Colors.teal.shade300 : Colors.white54,
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: _followLoading
+                                  ? const SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 250),
+                                      transitionBuilder: (child, animation) {
+                                        return ScaleTransition(
+                                          scale: animation,
+                                          child: FadeTransition(opacity: animation, child: child),
+                                        );
+                                      },
+                                      child: Row(
+                                        key: ValueKey<bool>(_isFollowed),
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            _isFollowed
+                                                ? Icons.check_circle_rounded
+                                                : Icons.person_add_alt_1_rounded,
+                                            size: 15,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _isFollowed ? 'مُتابَع' : 'متابعة المتجر',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -445,7 +512,7 @@ class _StoreScreenState extends State<StoreScreen> {
               ),
             ),
 
-            // Action Buttons: Follow, WhatsApp, Report
+            // Action Buttons: WhatsApp & Report
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -453,38 +520,8 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Follow Button
-                    Expanded(
-                      flex: 5,
-                      child: ElevatedButton.icon(
-                        onPressed: _followLoading ? null : _toggleFollow,
-                        icon: _followLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Icon(
-                                _isFollowed
-                                    ? Icons.check_circle_rounded
-                                    : Icons.person_add_alt_1_rounded,
-                                size: 18,
-                              ),
-                        label: Text(_isFollowed ? 'مُتابَع' : 'متابعة المتجر'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _isFollowed ? Colors.teal.shade700 : AppTheme.primary,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     // WhatsApp Button
                     Expanded(
-                      flex: 4,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           final phone = _businessData?['contactPhone'] ?? '';
@@ -503,15 +540,15 @@ class _StoreScreenState extends State<StoreScreen> {
                           );
                         },
                         icon: const Icon(Icons.chat_rounded, size: 18),
-                        label: const Text('واتساب'),
+                        label: const Text('تواصل عبر الواتساب'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.whatsapp,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     // Report Button
-                    OutlinedButton(
+                    OutlinedButton.icon(
                       onPressed: () {
                         showReportSheet(
                           context,
@@ -522,12 +559,12 @@ class _StoreScreenState extends State<StoreScreen> {
                           targetName: businessName,
                         );
                       },
+                      icon: const Icon(Icons.flag_outlined, size: 18),
+                      label: const Text('إبلاغ'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: const BorderSide(color: AppTheme.divider),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
                       ),
-                      child: const Icon(Icons.flag_outlined, size: 18),
                     ),
                   ],
                 ),
