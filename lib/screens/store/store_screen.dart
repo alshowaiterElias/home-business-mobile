@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/dummy_data.dart';
@@ -52,6 +53,143 @@ class _StoreScreenState extends State<StoreScreen> {
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showEnlargedImage(BuildContext context, String imageUrl, String storeName) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'إغلاق الصورة',
+      barrierColor: Colors.black.withValues(alpha: 0.85),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final scaleAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+        final fadeAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeIn,
+        );
+
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            child: FadeTransition(
+              opacity: fadeAnimation,
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.75,
+                    maxWidth: MediaQuery.of(context).size.width * 0.9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 25,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Zoomable Image
+                        InteractiveViewer(
+                          minScale: 0.8,
+                          maxScale: 4.0,
+                          child: Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Container(
+                              padding: const EdgeInsets.all(32),
+                              color: AppTheme.surface,
+                              child: const Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.broken_image_rounded,
+                                    size: 64,
+                                    color: Colors.white54,
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    'تعذر تحميل الصورة',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Store name header tag
+                        Positioned(
+                          top: 14,
+                          right: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                            ),
+                            child: Text(
+                              storeName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Close Button
+                        Positioned(
+                          top: 14,
+                          left: 14,
+                          child: GestureDetector(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white30,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -112,15 +250,18 @@ class _StoreScreenState extends State<StoreScreen> {
                   children: [
                     // Store image banner or default gradient background
                     if (fullLogoUrl != null)
-                      Image.network(
-                        fullLogoUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [AppTheme.primaryDark, AppTheme.primary],
-                              begin: Alignment.topRight,
-                              end: Alignment.bottomLeft,
+                      GestureDetector(
+                        onTap: () => _showEnlargedImage(context, fullLogoUrl, businessName),
+                        child: Image.network(
+                          fullLogoUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppTheme.primaryDark, AppTheme.primary],
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                              ),
                             ),
                           ),
                         ),
@@ -156,31 +297,59 @@ class _StoreScreenState extends State<StoreScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  blurRadius: 10,
+                          GestureDetector(
+                            onTap: () {
+                              if (fullLogoUrl != null) {
+                                _showEnlargedImage(context, fullLogoUrl, businessName);
+                              }
+                            },
+                            child: Stack(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.25),
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 38,
+                                    backgroundColor: AppTheme.primaryDark,
+                                    backgroundImage: fullLogoUrl != null
+                                        ? NetworkImage(fullLogoUrl)
+                                        : null,
+                                    child: fullLogoUrl == null
+                                        ? const Icon(
+                                            Icons.storefront_rounded,
+                                            color: Colors.white,
+                                            size: 38,
+                                          )
+                                        : null,
+                                  ),
                                 ),
+                                if (fullLogoUrl != null)
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.zoom_in_rounded,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
                               ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 38,
-                              backgroundColor: AppTheme.primaryDark,
-                              backgroundImage: fullLogoUrl != null
-                                  ? NetworkImage(fullLogoUrl)
-                                  : null,
-                              child: fullLogoUrl == null
-                                  ? const Icon(
-                                      Icons.storefront_rounded,
-                                      color: Colors.white,
-                                      size: 38,
-                                    )
-                                  : null,
                             ),
                           ),
                           const SizedBox(height: AppTheme.space8),
