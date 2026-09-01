@@ -70,15 +70,18 @@ class SellerDashboardController extends GetxController {
           dataCtrl.fetchLatestProducts();
           dataCtrl.fetchFeaturedProducts();
         }
+        final bool notificationSent = res['notificationSent'] ?? true;
+        final Color snackColor = updated['isAvailable'] == true
+            ? (notificationSent ? AppTheme.primary : Colors.amber.shade900)
+            : Colors.grey.shade800;
+
         Get.snackbar(
           'تحديث توفر المنتج',
           res['message'] ?? 'تم تغيير حالة التوفر بنجاح',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: updated['isAvailable'] == true
-              ? AppTheme.primary
-              : Colors.grey.shade800,
+          backgroundColor: snackColor,
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
         );
         return true;
       }

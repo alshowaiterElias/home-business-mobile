@@ -245,15 +245,18 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                   dataCtrl.fetchLatestProducts();
                                   dataCtrl.fetchFeaturedProducts();
                                 }
+                                final bool notificationSent = res['notificationSent'] ?? true;
+                                final Color snackColor = val
+                                    ? (notificationSent ? AppTheme.primary : Colors.amber.shade900)
+                                    : Colors.grey.shade800;
+
                                 Get.snackbar(
                                   'تحديث التوفر',
                                   res['message'] ?? 'تم تغيير حالة التوفر بنجاح',
                                   snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: val
-                                      ? AppTheme.primary
-                                      : Colors.grey.shade800,
+                                  backgroundColor: snackColor,
                                   colorText: Colors.white,
-                                  duration: const Duration(seconds: 3),
+                                  duration: const Duration(seconds: 4),
                                 );
                               }
                             } catch (e) {
