@@ -96,6 +96,26 @@ class DataService {
     }
   }
 
+  // Toggle Follow / Unfollow Store
+  static Future<Map<String, dynamic>> toggleFollowStore(String businessId) async {
+    try {
+      final response = await ApiClient.instance.post('/business/$businessId/follow');
+      return response.data['data'] ?? {};
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get Followed Stores List
+  static Future<List<dynamic>> getFollowedStores() async {
+    try {
+      final response = await ApiClient.instance.get('/business/followed');
+      return response.data['data'] ?? [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Fetch My Business Profile Dashboard (includes all products)
   static Future<Map<String, dynamic>> getMyBusinessDashboard() async {
     try {

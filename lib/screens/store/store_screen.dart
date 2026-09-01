@@ -20,6 +20,9 @@ class _StoreScreenState extends State<StoreScreen> {
   bool _isLoading = true;
   Map<String, dynamic>? _businessData;
   List<Product> _products = [];
+  bool _isFollowed = false;
+  int _followersCount = 0;
+  bool _followLoading = false;
 
   @override
   void initState() {
@@ -42,6 +45,8 @@ class _StoreScreenState extends State<StoreScreen> {
       if (mounted) {
         setState(() {
           _businessData = data;
+          _isFollowed = data['isFollowed'] == true;
+          _followersCount = data['followersCount'] as int? ?? 0;
           _products = productsData.map((p) {
             final productMap = Map<String, dynamic>.from(p);
             productMap['business'] = data;
@@ -52,6 +57,39 @@ class _StoreScreenState extends State<StoreScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    if (_followLoading) return;
+    final businessId = (Get.arguments as Map<String, dynamic>?)?['id'] as String? ?? _businessData?['id'] ?? '';
+    if (businessId.isEmpty) return;
+
+    setState(() => _followLoading = true);
+    try {
+      final result = await DataService.toggleFollowStore(businessId);
+      if (mounted) {
+        setState(() {
+          _isFollowed = result['isFollowed'] == true;
+          _followersCount = result['followersCount'] as int? ?? _followersCount;
+        });
+        Get.snackbar(
+          'تحديث',
+          _isFollowed ? 'تمت متابعة المتجر بنجاح 🌟' : 'تم إلغاء متابعة المتجر',
+          backgroundColor: AppTheme.primary,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'تنبيه',
+        'يرجى تسجيل الدخول أولاً لمتابعة هذا المتجر',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+    } finally {
+      if (mounted) setState(() => _followLoading = false);
     }
   }
 
@@ -103,7 +141,6 @@ class _StoreScreenState extends State<StoreScreen> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Zoomable Image
                         InteractiveViewer(
                           minScale: 0.8,
                           maxScale: 4.0,
@@ -133,8 +170,6 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                         ),
-
-                        // Store name header tag
                         Positioned(
                           top: 14,
                           right: 14,
@@ -154,8 +189,6 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                         ),
-
-                        // Close Button
                         Positioned(
                           top: 14,
                           left: 14,
@@ -248,7 +281,6 @@ class _StoreScreenState extends State<StoreScreen> {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Store image banner or default gradient background
                     if (fullLogoUrl != null)
                       GestureDetector(
                         onTap: () => _showEnlargedImage(context, fullLogoUrl, businessName),
@@ -276,8 +308,6 @@ class _StoreScreenState extends State<StoreScreen> {
                           ),
                         ),
                       ),
-
-                    // Dark gradient overlay for clear contrast and readability
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -290,8 +320,6 @@ class _StoreScreenState extends State<StoreScreen> {
                         ),
                       ),
                     ),
-
-                    // Centered Store Logo & Info
                     SafeArea(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -391,7 +419,8 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
               ),
             ),
-            // Stats
+
+            // Stats with clear Followers Count
             SliverToBoxAdapter(
               child: Container(
                 margin: const EdgeInsets.all(AppTheme.space16),
@@ -408,12 +437,15 @@ class _StoreScreenState extends State<StoreScreen> {
                     Container(width: 1, height: 30, color: AppTheme.divider),
                     _Stat(label: 'التقييم', value: storeRating),
                     Container(width: 1, height: 30, color: AppTheme.divider),
+                    _Stat(label: 'المتابعين', value: '$_followersCount'),
+                    Container(width: 1, height: 30, color: AppTheme.divider),
                     _Stat(label: 'منذ', value: activeSince),
                   ],
                 ),
               ),
             ),
-            // Contact
+
+            // Action Buttons: Follow, WhatsApp, Report
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -421,13 +453,48 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
                 child: Row(
                   children: [
+                    // Follow Button
                     Expanded(
+                      flex: 5,
+                      child: ElevatedButton.icon(
+                        onPressed: _followLoading ? null : _toggleFollow,
+                        icon: _followLoading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Icon(
+                                _isFollowed
+                                    ? Icons.check_circle_rounded
+                                    : Icons.person_add_alt_1_rounded,
+                                size: 18,
+                              ),
+                        label: Text(_isFollowed ? 'مُتابَع' : 'متابعة المتجر'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              _isFollowed ? Colors.teal.shade700 : AppTheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // WhatsApp Button
+                    Expanded(
+                      flex: 4,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           final phone = _businessData?['contactPhone'] ?? '';
                           if (phone.isEmpty) {
-                            Get.snackbar('تنبيه', 'رقم هاتف المتجر غير متوفر',
-                                backgroundColor: Colors.orange, colorText: Colors.white);
+                            Get.snackbar(
+                              'تنبيه',
+                              'رقم هاتف المتجر غير متوفر',
+                              backgroundColor: Colors.orange,
+                              colorText: Colors.white,
+                            );
                             return;
                           }
                           WhatsAppService.openWhatsAppForStore(
@@ -436,14 +503,15 @@ class _StoreScreenState extends State<StoreScreen> {
                           );
                         },
                         icon: const Icon(Icons.chat_rounded, size: 18),
-                        label: const Text('تواصل واتساب'),
+                        label: const Text('واتساب'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.whatsapp,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    OutlinedButton.icon(
+                    const SizedBox(width: 8),
+                    // Report Button
+                    OutlinedButton(
                       onPressed: () {
                         showReportSheet(
                           context,
@@ -454,17 +522,18 @@ class _StoreScreenState extends State<StoreScreen> {
                           targetName: businessName,
                         );
                       },
-                      icon: const Icon(Icons.flag_outlined, size: 18),
-                      label: const Text('إبلاغ'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: const BorderSide(color: AppTheme.divider),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                       ),
+                      child: const Icon(Icons.flag_outlined, size: 18),
                     ),
                   ],
                 ),
               ),
             ),
+
             // Products header
             SliverToBoxAdapter(
               child: Padding(
@@ -480,6 +549,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
               ),
             ),
+
             // Products grid
             _products.isEmpty
                 ? const SliverToBoxAdapter(
