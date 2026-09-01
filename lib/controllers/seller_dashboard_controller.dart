@@ -11,6 +11,9 @@ class SellerDashboardController extends GetxController {
   var businessData = {}.obs;
   var myProducts = <dynamic>[].obs;
   var selectedFilter = 'ALL'.obs; // ALL, APPROVED, PENDING, REJECTED, SUSPENDED
+  var togglingProductIds = <String>{}.obs;
+
+  bool isToggling(String productId) => togglingProductIds.contains(productId);
 
   @override
   void onInit() {
@@ -55,6 +58,7 @@ class SellerDashboardController extends GetxController {
   }
 
   Future<bool> toggleAvailability(String productId) async {
+    togglingProductIds.add(productId);
     try {
       final res = await DataService.toggleProductAvailability(productId);
       if (res['success'] == true && res['data'] != null) {
@@ -95,6 +99,8 @@ class SellerDashboardController extends GetxController {
         colorText: Colors.white,
       );
       return false;
+    } finally {
+      togglingProductIds.remove(productId);
     }
   }
 

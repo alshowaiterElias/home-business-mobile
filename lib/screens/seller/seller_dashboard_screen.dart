@@ -544,13 +544,30 @@ class _ProductTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                Switch.adaptive(
-                  value: product['isAvailable'] != false,
-                  activeColor: AppTheme.primary,
-                  onChanged: (val) {
-                    controller.toggleAvailability(product['id']);
-                  },
-                ),
+                Obx(() {
+                  final isToggling = controller.isToggling(product['id'] ?? '');
+                  if (isToggling) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    );
+                  }
+                  return Switch.adaptive(
+                    value: product['isAvailable'] != false,
+                    activeTrackColor: AppTheme.primary,
+                    activeThumbColor: Colors.white,
+                    onChanged: (val) {
+                      controller.toggleAvailability(product['id']);
+                    },
+                  );
+                }),
               ],
             ),
             const SizedBox(height: 6),
