@@ -198,6 +198,7 @@ class ProductCard extends StatelessWidget {
                               phoneNumber: product.sellerPhone,
                               storeName: product.sellerName,
                               productName: product.title,
+                              price: product.price,
                               imageUrl: product.imageUrl,
                             );
                           },

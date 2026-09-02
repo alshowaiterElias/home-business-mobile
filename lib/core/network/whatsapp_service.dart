@@ -48,18 +48,44 @@ class WhatsAppService {
     required String phoneNumber,
     required String storeName,
     required String productName,
+    double? price,
+    String? currency,
     String? imageUrl,
   }) async {
+    final formattedPrice = price != null ? _formatPrice(price) : '';
+    final curr = currency ?? 'ر.ي';
+
     final message = _getTemplate(
       'PRODUCT_INQUIRY',
       {
-        'store_name': storeName,
+        'productTitle': productName,
+        'productName': productName,
         'product_name': productName,
+        'productPrice': formattedPrice,
+        'price': formattedPrice,
+        'currency': curr,
+        'businessName': storeName,
+        'storeName': storeName,
+        'store_name': storeName,
+        'imageUrl': imageUrl ?? '',
         'image_url': imageUrl ?? '',
       },
-      "مرحباً متجر $storeName،\n\nأنا مهتم بالمنتج التالي:\nاسم المنتج: $productName\n${imageUrl != null && imageUrl.isNotEmpty ? 'صورة المنتج: $imageUrl\n' : ''}\nهل يمكنك توفير المزيد من المعلومات؟",
+      "السلام عليكم ورحمة الله، أنا مهتم بـ $productName المعروض بسعر $formattedPrice $curr عبر تطبيق السوق المنزلي. هل المنتج متوفر حالياً؟",
     );
     await _launchWhatsApp(phoneNumber, message);
+  }
+
+  static String _formatPrice(double price) {
+    if (price >= 1000) {
+      final formatted = price.toInt().toString();
+      final buffer = StringBuffer();
+      for (int i = 0; i < formatted.length; i++) {
+        if (i > 0 && (formatted.length - i) % 3 == 0) buffer.write(',');
+        buffer.write(formatted[i]);
+      }
+      return buffer.toString();
+    }
+    return price.toInt().toString();
   }
 
   static Future<void> openWhatsAppForStore({
@@ -68,8 +94,12 @@ class WhatsAppService {
   }) async {
     final message = _getTemplate(
       'STORE_INQUIRY',
-      {'store_name': storeName},
-      "مرحباً متجر $storeName،\n\nأود الاستفسار عن خدماتكم ومنتجاتكم. هل يمكنك تزويدي بمزيد من التفاصيل؟",
+      {
+        'businessName': storeName,
+        'storeName': storeName,
+        'store_name': storeName,
+      },
+      "السلام عليكم ورحمة الله، أتواصل معكم عبر تطبيق السوق المنزلي للاستفسار عن منتجات متجركم $storeName.",
     );
     await _launchWhatsApp(phoneNumber, message);
   }
