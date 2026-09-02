@@ -15,6 +15,8 @@ void showReportSheet(
       ? ['محتوى مخالف', 'صور غير لائقة', 'سعر مبالغ فيه', 'منتج وهمي', 'أخرى']
       : targetType == 'REVIEW'
       ? ['تعليق مسيء', 'تقييم غير عادل', 'محتوى مخالف', 'أخرى']
+      : targetType == 'MESSAGE'
+      ? ['رسالة احتيالية', 'محتوى مسيء', 'إزعاج/سبام', 'أخرى']
       : ['متجر احتيالي', 'معلومات خاطئة', 'سلوك غير لائق', 'أخرى'];
 
   String? selectedReason;
@@ -30,9 +32,9 @@ void showReportSheet(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: const BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppTheme.radiusXl),
             ),
           ),
@@ -48,7 +50,7 @@ void showReportSheet(
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppTheme.divider,
+                      color: context.colors.divider,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -61,12 +63,12 @@ void showReportSheet(
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFEBEE),
+                        color: context.colors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.flag_outlined,
-                        color: AppTheme.error,
+                        color: context.colors.error,
                         size: 20,
                       ),
                     ),
@@ -99,7 +101,7 @@ void showReportSheet(
                     // ignore: deprecated_member_use
                     groupValue: selectedReason,
                     title: Text(r, style: theme.textTheme.bodyLarge),
-                    activeColor: AppTheme.primary,
+                    activeColor: context.colors.primary,
                     contentPadding: EdgeInsets.zero,
                     // ignore: deprecated_member_use
                     onChanged: (v) => setState(() => selectedReason = v),
@@ -120,7 +122,7 @@ void showReportSheet(
                               Get.snackbar(
                                 'تم الإبلاغ',
                                 'شكراً لمساعدتنا في الحفاظ على جودة المنصة',
-                                backgroundColor: AppTheme.primary,
+                                backgroundColor: context.colors.primary,
                                 colorText: Colors.white,
                                 snackPosition: SnackPosition.BOTTOM,
                                 margin: const EdgeInsets.all(16),
@@ -130,7 +132,7 @@ void showReportSheet(
                               Get.snackbar(
                                 'خطأ',
                                 ApiErrorHandler.handle(e),
-                                backgroundColor: AppTheme.error,
+                                backgroundColor: context.colors.error,
                                 colorText: Colors.white,
                                 snackPosition: SnackPosition.BOTTOM,
                                 margin: const EdgeInsets.all(16),
@@ -139,8 +141,8 @@ void showReportSheet(
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.error,
-                      disabledBackgroundColor: AppTheme.divider,
+                      backgroundColor: context.colors.error,
+                      disabledBackgroundColor: context.colors.divider,
                     ),
                     child: const Text('إرسال البلاغ'),
                   ),

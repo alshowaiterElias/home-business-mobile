@@ -56,12 +56,12 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                       Container(
                         width: 90,
                         height: 90,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.background,
+                        decoration: BoxDecoration(
+                          color: context.colors.background,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.inventory_2_outlined,
-                            size: 44, color: AppTheme.textHint),
+                        child: Icon(Icons.inventory_2_outlined,
+                            size: 44, color: context.colors.textHint),
                       ),
                       const SizedBox(height: AppTheme.space24),
                       Text('لا توجد منتجات',

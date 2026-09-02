@@ -90,9 +90,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
         top: AppTheme.space16,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppTheme.space24,
       ),
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
       ),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -106,7 +106,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppTheme.divider,
+                  color: context.colors.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -243,7 +243,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   InputDecoration _dropdownDeco() {
     return InputDecoration(
       filled: true,
-      fillColor: AppTheme.background,
+      fillColor: context.colors.background,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -256,7 +256,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     return InputDecoration(
       hintText: hint,
       filled: true,
-      fillColor: AppTheme.background,
+      fillColor: context.colors.background,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),

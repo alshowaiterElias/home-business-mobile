@@ -28,7 +28,7 @@ class CategoriesScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.category_outlined, size: 64, color: AppTheme.textHint.withValues(alpha: 0.5)),
+                Icon(Icons.category_outlined, size: 64, color: context.colors.textHint.withValues(alpha: 0.5)),
                 const SizedBox(height: AppTheme.space16),
                 Text('لا توجد أقسام متاحة حالياً', style: theme.textTheme.titleMedium),
               ],
@@ -77,11 +77,11 @@ class _CategoryCardState extends State<_CategoryCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.space12),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.colors.isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -89,7 +89,7 @@ class _CategoryCardState extends State<_CategoryCard> {
         border: Border.all(
           color: _isExpanded
               ? category.color.withValues(alpha: 0.3)
-              : AppTheme.divider.withValues(alpha: 0.5),
+              : context.colors.divider.withValues(alpha: 0.5),
           width: _isExpanded ? 1.5 : 1.0,
         ),
       ),
@@ -158,13 +158,13 @@ class _CategoryCardState extends State<_CategoryCard> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.background,
+                                  color: context.colors.background,
                                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                                 ),
                                 child: Text(
                                   '${category.productCount} منتج',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.textSecondary,
+                                    color: context.colors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 11,
                                   ),
@@ -198,21 +198,21 @@ class _CategoryCardState extends State<_CategoryCard> {
                           decoration: BoxDecoration(
                             color: _isExpanded
                                 ? category.color.withValues(alpha: 0.12)
-                                : AppTheme.background,
+                                : context.colors.background,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.keyboard_arrow_down_rounded,
                             size: 22,
-                            color: _isExpanded ? category.color : AppTheme.textHint,
+                            color: _isExpanded ? category.color : context.colors.textHint,
                           ),
                         ),
                       )
                     else
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 16,
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                   ],
                 ),
@@ -293,7 +293,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.surface,
+                                  color: context.colors.surface,
                                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                                   border: Border.all(
                                     color: sub.color.withValues(alpha: 0.3),
@@ -314,7 +314,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                     Text(
                                       sub.productCount > 0 ? '${sub.nameAr} (${sub.productCount})' : sub.nameAr,
                                       style: theme.textTheme.labelMedium?.copyWith(
-                                        color: AppTheme.textPrimary,
+                                        color: context.colors.textPrimary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/notification_controller.dart';
+import '../../controllers/theme_controller.dart';
 import '../../core/network/storage_service.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -12,6 +13,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final auth = Get.find<AuthController>();
+    final themeCtrl = Get.find<ThemeController>();
     final isPushEnabled = StorageService.isNotificationsEnabled().obs;
 
     return Obx(() {
@@ -150,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(AppTheme.space16),
                         decoration: BoxDecoration(
-                          color: AppTheme.surface,
+                          color: context.colors.surface,
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusLg,
                           ),
@@ -254,7 +256,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: context.colors.surface,
                     borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                     boxShadow: AppTheme.shadowSm,
                   ),
@@ -344,8 +346,29 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const Divider(indent: 68, endIndent: 16, height: 1),
                       _MenuItem(
+                        icon: themeCtrl.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        iconBg: context.colors.iconBgSubtle,
+                        iconColor: context.colors.textPrimary,
+                        title: 'المظهر الداكن',
+                        showArrow: false,
+                        trailing: Obx(() => Switch.adaptive(
+                          value: themeCtrl.themeMode.value == ThemeMode.dark ||
+                                (themeCtrl.themeMode.value == ThemeMode.system && Get.isDarkMode),
+                          activeColor: AppTheme.primary,
+                          onChanged: (val) {
+                            themeCtrl.setTheme(val ? ThemeMode.dark : ThemeMode.light);
+                          },
+                        )),
+                        onTap: () {
+                          final isDark = themeCtrl.themeMode.value == ThemeMode.dark ||
+                                        (themeCtrl.themeMode.value == ThemeMode.system && Get.isDarkMode);
+                          themeCtrl.setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
+                        },
+                      ),
+                      const Divider(indent: 68, endIndent: 16, height: 1),
+                      _MenuItem(
                         icon: Icons.help_outline_rounded,
-                        iconBg: const Color(0xFFE8EAF6),
+                        iconBg: context.colors.isDark ? const Color(0xFF282A3A) : const Color(0xFFE8EAF6),
                         iconColor: const Color(0xFF5C6BC0),
                         title: 'المساعدة والدعم',
                         onTap: () => Get.toNamed('/support'),
@@ -353,7 +376,7 @@ class ProfileScreen extends StatelessWidget {
                       const Divider(indent: 68, endIndent: 16, height: 1),
                       _MenuItem(
                         icon: Icons.shield_outlined,
-                        iconBg: const Color(0xFFE8F5E9),
+                        iconBg: context.colors.isDark ? const Color(0xFF203223) : const Color(0xFFE8F5E9),
                         iconColor: const Color(0xFF2E7D32),
                         title: 'سياسة الخصوصية وحماية البيانات',
                         onTap: () => Get.toNamed('/privacy-policy'),
@@ -361,7 +384,7 @@ class ProfileScreen extends StatelessWidget {
                       const Divider(indent: 68, endIndent: 16, height: 1),
                       _MenuItem(
                         icon: Icons.info_outline_rounded,
-                        iconBg: const Color(0xFFE0F2F1),
+                        iconBg: context.colors.isDark ? const Color(0xFF20302E) : const Color(0xFFE0F2F1),
                         iconColor: const Color(0xFF26A69A),
                         title: 'عن التطبيق',
                         onTap: () => Get.toNamed('/about'),
@@ -370,7 +393,7 @@ class ProfileScreen extends StatelessWidget {
                         const Divider(indent: 68, endIndent: 16, height: 1),
                         _MenuItem(
                           icon: Icons.delete_forever_rounded,
-                          iconBg: const Color(0xFFFFEBEE),
+                          iconBg: context.colors.isDark ? const Color(0xFF3D2326) : const Color(0xFFFFEBEE),
                           iconColor: AppTheme.error,
                           title: 'حذف الحساب والبيانات',
                           titleColor: AppTheme.error,
@@ -394,14 +417,14 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: context.colors.surface,
                     borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                     boxShadow: AppTheme.shadowSm,
                   ),
                   child: _MenuItem(
                     icon: Icons.logout_rounded,
-                    iconBg: const Color(0xFFF5F5F5),
-                    iconColor: AppTheme.textSecondary,
+                    iconBg: context.colors.iconBgSubtle,
+                    iconColor: context.colors.textSecondary,
                     title: isLoggedIn ? 'تسجيل الخروج' : 'تسجيل الدخول',
                     titleColor: isLoggedIn
                         ? AppTheme.textPrimary
@@ -431,9 +454,9 @@ class ProfileScreen extends StatelessWidget {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(AppTheme.space24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -488,7 +511,7 @@ class ProfileScreen extends StatelessWidget {
                 controller: reasonController,
                 decoration: InputDecoration(
                   hintText: 'يرجى كتابة سبب طلب الحذف...',
-                  fillColor: Colors.grey.shade100,
+                  fillColor: context.colors.surfaceVariant,
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

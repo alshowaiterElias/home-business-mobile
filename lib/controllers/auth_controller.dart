@@ -4,6 +4,8 @@ import '../core/network/auth_service.dart';
 import '../core/network/storage_service.dart';
 import '../core/network/error_handler.dart';
 import '../core/network/push_notification_service.dart';
+import '../core/network/socket_service.dart';
+import 'chat_controller.dart';
 
 // =========================================================================
 // LEGACY: Firebase Phone Auth imports (commented out — pivoted to Evolution API)
@@ -16,6 +18,7 @@ class AuthController extends GetxController {
   var isLoading = false.obs;
 
   var currentUser = {}.obs;
+  var userId = ''.obs;
 
   // Current phone number being verified (used in OTP step)
   var currentPhone = ''.obs;
@@ -121,6 +124,7 @@ class AuthController extends GetxController {
         final user = response['user'];
         if (user != null) {
           currentUser.value = user;
+          userId.value = user['id']?.toString() ?? '';
           hasStore.value = user['business'] != null;
         } else {
           await fetchProfile();
@@ -279,6 +283,7 @@ class AuthController extends GetxController {
       if (response['success'] == true) {
         final user = response['data'];
         currentUser.value = user;
+        userId.value = user['id']?.toString() ?? '';
         isLoggedIn.value = true;
         hasStore.value = user['business'] != null;
       }
@@ -293,7 +298,15 @@ class AuthController extends GetxController {
     isLoggedIn.value = false;
     hasStore.value = false;
     currentUser.value = {};
+    userId.value = '';
     currentPhone.value = '';
+    
+    if (Get.isRegistered<ChatController>()) {
+      Get.find<ChatController>().conversations.clear();
+      Get.find<ChatController>().unreadCount.value = 0;
+    }
+    SocketService.instance.disconnect();
+
     Get.offAllNamed('/main');
   }
 
@@ -351,7 +364,14 @@ class AuthController extends GetxController {
         isLoggedIn.value = false;
         hasStore.value = false;
         currentUser.value = {};
+        userId.value = '';
         isLoading.value = false;
+
+        if (Get.isRegistered<ChatController>()) {
+          Get.find<ChatController>().conversations.clear();
+          Get.find<ChatController>().unreadCount.value = 0;
+        }
+        SocketService.instance.disconnect();
 
         Get.offAllNamed('/main');
         Get.snackbar(

@@ -21,7 +21,12 @@ import 'core/network/api_client.dart';
 import 'controllers/data_controller.dart';
 import 'controllers/favorites_controller.dart';
 import 'controllers/network_controller.dart';
+import 'controllers/theme_controller.dart';
+import 'controllers/chat_controller.dart';
 import 'core/network/whatsapp_service.dart';
+import 'core/network/socket_service.dart';
+import 'screens/chat/conversations_screen.dart';
+import 'screens/chat/chat_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -42,10 +47,33 @@ void main() async {
   await WhatsAppService.loadTemplates();
   await PushNotificationService.init();
 
+  Get.put(ThemeController(), permanent: true);
   Get.put(NetworkController(), permanent: true);
   Get.put(AuthController(), permanent: true);
   Get.put(DataController(), permanent: true);
   Get.put(FavoritesController(), permanent: true);
+
+  // Initialize Socket + Chat after auth is ready
+  final auth = Get.find<AuthController>();
+  ever(auth.isLoggedIn, (isLoggedIn) {
+    if (isLoggedIn) {
+      SocketService.instance.connect();
+      if (!Get.isRegistered<ChatController>()) {
+        Get.put(ChatController(), permanent: true);
+      } else {
+        Get.find<ChatController>().loadConversations(refresh: true);
+        Get.find<ChatController>().refreshUnreadCount();
+      }
+    } else {
+      SocketService.instance.disconnect();
+    }
+  });
+  // Connect immediately if already logged in
+  if (auth.isLoggedIn.value) {
+    SocketService.instance.connect();
+    Get.put(ChatController(), permanent: true);
+  }
+
   runApp(const HomeBusinessApp());
 }
 
@@ -54,10 +82,14 @@ class HomeBusinessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final themeCtrl = Get.find<ThemeController>();
+
+    return Obx(() => GetMaterialApp(
       title: 'السوق المنزلي',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeCtrl.themeMode.value,
 
       // Global RTL Support for Arabic
       localizationsDelegates: const [
@@ -94,7 +126,10 @@ class HomeBusinessApp extends StatelessWidget {
         GetPage(name: '/support', page: () => const SupportScreen()),
         GetPage(name: '/about', page: () => const AboutScreen()),
         GetPage(name: '/privacy-policy', page: () => const PrivacyPolicyScreen()),
+        // Chat routes
+        GetPage(name: '/conversations', page: () => const ConversationsScreen()),
+        GetPage(name: '/chat/:id', page: () => const ChatScreen()),
       ],
-    );
+    ));
   }
 }

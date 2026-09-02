@@ -47,9 +47,9 @@ class _StoreFilterSheetState extends State<StoreFilterSheet> {
         top: AppTheme.space16,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppTheme.space24,
       ),
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -61,7 +61,7 @@ class _StoreFilterSheetState extends State<StoreFilterSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.divider,
+                color: context.colors.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -78,7 +78,7 @@ class _StoreFilterSheetState extends State<StoreFilterSheet> {
             hint: const Text('جميع المحافظات'),
             decoration: InputDecoration(
               filled: true,
-              fillColor: AppTheme.background,
+              fillColor: context.colors.background,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 borderSide: BorderSide.none,

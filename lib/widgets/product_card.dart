@@ -33,9 +33,9 @@ class ProductCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          boxShadow: AppTheme.shadowSm,
+          boxShadow: context.colors.shadowSm,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,15 +58,15 @@ class ProductCard extends StatelessWidget {
                         memCacheWidth: 400,
                         fit: BoxFit.cover,
                         placeholder: (_, __) => Shimmer.fromColors(
-                          baseColor: Colors.grey[200]!,
-                          highlightColor: Colors.grey[50]!,
-                          child: Container(color: Colors.white),
+                          baseColor: context.colors.shimmerBase,
+                          highlightColor: context.colors.shimmerHighlight,
+                          child: Container(color: context.colors.surface),
                         ),
                         errorWidget: (_, __, ___) => Container(
-                          color: AppTheme.background,
+                          color: context.colors.background,
                           child: Icon(
                             Icons.image_not_supported_outlined,
-                            color: AppTheme.textHint,
+                            color: context.colors.textHint,
                             size: 28,
                           ),
                         ),
@@ -148,7 +148,7 @@ class ProductCard extends StatelessWidget {
                       Icon(
                         Icons.storefront_rounded,
                         size: 13,
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -261,7 +261,7 @@ class _FavBadge extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
+            color: context.colors.badgeBg,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
@@ -276,7 +276,7 @@ class _FavBadge extends StatelessWidget {
                 ? Icons.favorite_rounded
                 : Icons.favorite_outline_rounded,
             size: 17,
-            color: isFavorited ? AppTheme.error : AppTheme.textHint,
+            color: isFavorited ? AppTheme.error : context.colors.textHint,
           ),
         );
       }),

@@ -55,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
       });
     } catch (e) {
       Get.snackbar('خطأ', 'حدث خطأ أثناء البحث',
-          backgroundColor: AppTheme.error, colorText: Colors.white);
+          backgroundColor: context.colors.error, colorText: Colors.white);
     } finally {
       setState(() {
         _isLoading = false;
@@ -155,7 +155,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   StorageService.clearRecentSearches();
                   setState(() => _recentSearches.clear());
                 },
-                child: Text('مسح الكل', style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.error)),
+                child: Text('مسح الكل', style: theme.textTheme.labelMedium?.copyWith(color: context.colors.error)),
               ),
             ],
           ),
@@ -165,8 +165,8 @@ class _SearchScreenState extends State<SearchScreen> {
             runSpacing: AppTheme.space8,
             children: _recentSearches.map((query) => ActionChip(
               label: Text(query, style: theme.textTheme.bodyMedium),
-              backgroundColor: AppTheme.background,
-              side: const BorderSide(color: AppTheme.divider),
+              backgroundColor: context.colors.background,
+              side: BorderSide(color: context.colors.divider),
               onPressed: () {
                 _searchController.text = query;
                 _search(query);
@@ -188,9 +188,9 @@ class _SearchScreenState extends State<SearchScreen> {
               final id = cat['id'].toString();
               return ActionChip(
                 label: Text(name),
-                backgroundColor: AppTheme.primarySurface.withValues(alpha: 0.3),
+                backgroundColor: context.colors.primarySurface.withValues(alpha: 0.3),
                 side: BorderSide.none,
-                labelStyle: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primary),
+                labelStyle: theme.textTheme.bodyMedium?.copyWith(color: context.colors.primary),
                 onPressed: () {
                   _currentFilter = ProductFilter(categoryId: id);
                   _searchController.clear();
@@ -218,11 +218,11 @@ class _SearchScreenState extends State<SearchScreen> {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: AppTheme.background,
+                color: context.colors.background,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.search_off_rounded,
-                  size: 44, color: AppTheme.textHint),
+              child: Icon(Icons.search_off_rounded,
+                  size: 44, color: context.colors.textHint),
             ),
             const SizedBox(height: AppTheme.space24),
             Text('لا توجد نتائج', style: theme.textTheme.headlineSmall),

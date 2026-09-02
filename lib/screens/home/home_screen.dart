@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
             floating: true,
             snap: true,
             toolbarHeight: 64,
-            backgroundColor: AppTheme.surface,
+            backgroundColor: context.colors.surface,
             surfaceTintColor: Colors.transparent,
             title: Row(
               children: [
@@ -102,9 +102,9 @@ class HomeScreen extends StatelessWidget {
                     horizontal: AppTheme.space16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
+                    color: context.colors.background,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    border: Border.all(color: AppTheme.divider),
+                    border: Border.all(color: context.colors.divider),
                   ),
                   child: Row(
                     children: [
@@ -356,7 +356,7 @@ class HomeScreen extends StatelessWidget {
                             child: Container(
                               width: 140,
                               decoration: BoxDecoration(
-                                color: AppTheme.surface,
+                                color: context.colors.surface,
                                 borderRadius: BorderRadius.circular(
                                   AppTheme.radiusMd,
                                 ),
@@ -389,7 +389,7 @@ class HomeScreen extends StatelessWidget {
                                           child: CircleAvatar(
                                             radius: 34,
                                             backgroundColor:
-                                                AppTheme.background,
+                                                context.colors.background,
                                             backgroundImage: logoUrl != null
                                                 ? NetworkImage(
                                                     ApiClient.getImageUrl(
@@ -734,7 +734,7 @@ class _CategoryChip extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontSize: 11,
-                color: AppTheme.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
           ],
@@ -764,14 +764,14 @@ class _AppBarAction extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppTheme.background,
+          color: context.colors.background,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.colors.divider),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(icon, size: 20, color: AppTheme.textPrimary),
+            Icon(icon, size: 20, color: context.colors.textPrimary),
             if (badge > 0)
               Positioned(
                 top: 6,

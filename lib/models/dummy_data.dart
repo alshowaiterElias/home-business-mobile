@@ -83,6 +83,7 @@ class Product {
   final bool isFavorited;
   final String categoryName;
   final String businessId;
+  final String sellerUserId;
   final String sellerPhone;
   final DateTime createdAt;
 
@@ -100,6 +101,7 @@ class Product {
     this.isFavorited = false,
     this.categoryName = '',
     this.businessId = '',
+    this.sellerUserId = '',
     this.sellerPhone = '',
     DateTime? createdAt,
   }) : createdAt = createdAt ?? const _DefaultDate();
@@ -115,9 +117,11 @@ class Product {
     String seller = 'متجر';
     String loc = 'اليمن';
     String bizId = '';
+    String sUserId = '';
     String phone = '';
     if (json['business'] != null) {
       bizId = json['business']['id'] ?? '';
+      sUserId = json['business']['userId'] ?? '';
       seller = json['business']['businessName'] ?? seller;
       phone = json['business']['contactPhone'] ?? phone;
       if (json['business']['city'] != null) {
@@ -137,6 +141,7 @@ class Product {
       reviewCount: json['reviewsCount'] ?? 0,
       categoryName: json['category']?['nameAr'] ?? '',
       businessId: bizId,
+      sellerUserId: sUserId,
       sellerPhone: phone,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])

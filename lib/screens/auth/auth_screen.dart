@@ -66,7 +66,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -176,22 +176,22 @@ class _AuthScreenState extends State<AuthScreen> {
                     vertical: AppTheme.space12,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.primarySurface,
+                    color: context.colors.primarySurface,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.phone_android_rounded,
                         size: 18,
-                        color: AppTheme.primary,
+                        color: context.colors.primary,
                       ),
                       const SizedBox(width: AppTheme.space8),
                       Text(
                         _phoneController.text,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppTheme.primary,
+                          color: context.colors.primary,
                           letterSpacing: 1,
                         ),
                         textDirection: TextDirection.ltr,
@@ -205,10 +205,10 @@ class _AuthScreenState extends State<AuthScreen> {
                             _canResend = false;
                           });
                         },
-                        child: const Icon(
+                        child: Icon(
                           Icons.edit_rounded,
                           size: 16,
-                          color: AppTheme.primary,
+                          color: context.colors.primary,
                         ),
                       ),
                     ],
@@ -247,14 +247,14 @@ class _AuthScreenState extends State<AuthScreen> {
                             border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.circular(AppTheme.radiusMd),
-                              borderSide: const BorderSide(
-                                  color: AppTheme.divider, width: 1.5),
+                              borderSide: BorderSide(
+                                  color: context.colors.divider, width: 1.5),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.circular(AppTheme.radiusMd),
-                              borderSide: const BorderSide(
-                                  color: AppTheme.primary, width: 2),
+                              borderSide: BorderSide(
+                                  color: context.colors.primary, width: 2),
                             ),
                           ),
                           onChanged: (value) {
@@ -329,7 +329,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ? 'إعادة الإرسال'
                             : 'إعادة الإرسال خلال (${_resendSeconds.toString().padLeft(2, '0')}ث)',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: _canResend ? AppTheme.primary : AppTheme.textHint,
+                          color: _canResend ? context.colors.primary : context.colors.textHint,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -348,7 +348,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Text(
                   'تصفح كضيف',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textSecondary,
+                    color: context.colors.textSecondary,
                     decoration: TextDecoration.underline,
                   ),
                 ),

@@ -88,6 +88,20 @@ class PushNotificationService {
           return;
         }
 
+        // Suppress notification if we are actively viewing this conversation
+        if (message.data['conversationId'] != null) {
+          final targetConvId = message.data['conversationId'];
+          if (Get.currentRoute.startsWith('/chat/') || Get.currentRoute.startsWith('/chat?')) {
+            final activeConvId = Get.parameters['id'];
+            if (activeConvId == targetConvId) {
+              if (kDebugMode) {
+                debugPrint('[PushNotificationService] Suppressing notification for active chat');
+              }
+              return;
+            }
+          }
+        }
+
         RemoteNotification? notification = message.notification;
         AndroidNotification? android = message.notification?.android;
 

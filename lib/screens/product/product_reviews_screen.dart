@@ -37,7 +37,7 @@ class ProductReviewsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppTheme.space16),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: context.colors.background,
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       border: Border.all(
                         color: AppTheme.primary.withValues(alpha: 0.3),
@@ -66,7 +66,7 @@ class ProductReviewsScreen extends StatelessWidget {
                                   size: 32,
                                   color: i < controller.currentRating.value
                                       ? AppTheme.accent
-                                      : AppTheme.textHint,
+                                      : context.colors.textHint,
                                 ),
                               ),
                             ),
@@ -130,7 +130,7 @@ class ProductReviewsScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppTheme.space16),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
+                    color: context.colors.background,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
                   child: Column(
@@ -178,7 +178,7 @@ class ProductReviewsScreen extends StatelessWidget {
                     child: Text(
                       'لا توجد تقييمات بعد',
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                     ),
                   ),

@@ -7,7 +7,12 @@ import '../../widgets/product_card.dart';
 import '../../widgets/report_sheet.dart';
 import '../../core/network/data_service.dart';
 import '../../core/network/api_client.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/network/whatsapp_service.dart';
+import '../../core/network/chat_service.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/conversation_controller.dart';
+import '../../models/chat_models.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -126,7 +131,7 @@ class _StoreScreenState extends State<StoreScreen> {
                     maxWidth: MediaQuery.of(context).size.width * 0.9,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: context.colors.surface,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -151,7 +156,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Container(
                               padding: const EdgeInsets.all(32),
-                              color: AppTheme.surface,
+                              color: context.colors.surface,
                               child: const Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -266,7 +271,7 @@ class _StoreScreenState extends State<StoreScreen> {
             SliverAppBar(
               expandedHeight: 230,
               pinned: true,
-              backgroundColor: AppTheme.surface,
+              backgroundColor: context.colors.surface,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.share_outlined, color: Colors.white),
@@ -493,19 +498,19 @@ class _StoreScreenState extends State<StoreScreen> {
                 margin: const EdgeInsets.all(AppTheme.space16),
                 padding: const EdgeInsets.symmetric(vertical: AppTheme.space16),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
+                  color: context.colors.surface,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  boxShadow: AppTheme.shadowSm,
+                  boxShadow: context.colors.shadowSm,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _Stat(label: 'المنتجات', value: '${_products.length}'),
-                    Container(width: 1, height: 30, color: AppTheme.divider),
+                    Container(width: 1, height: 30, color: context.colors.divider),
                     _Stat(label: 'التقييم', value: storeRating),
-                    Container(width: 1, height: 30, color: AppTheme.divider),
+                    Container(width: 1, height: 30, color: context.colors.divider),
                     _Stat(label: 'المتابعين', value: '$_followersCount'),
-                    Container(width: 1, height: 30, color: AppTheme.divider),
+                    Container(width: 1, height: 30, color: context.colors.divider),
                     _Stat(label: 'منذ', value: activeSince),
                   ],
                 ),
@@ -521,8 +526,16 @@ class _StoreScreenState extends State<StoreScreen> {
                 child: Row(
                   children: [
                     // WhatsApp Button
-                    Expanded(
-                      child: ElevatedButton.icon(
+                    Container(
+                      height: 44,
+                      width: 44,
+                      decoration: BoxDecoration(
+                        color: AppTheme.whatsapp.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        border: Border.all(color: AppTheme.whatsapp.withValues(alpha: 0.3)),
+                      ),
+                      child: IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: AppTheme.whatsapp, size: 20),
                         onPressed: () {
                           final phone = _businessData?['contactPhone'] ?? '';
                           if (phone.isEmpty) {
@@ -539,10 +552,53 @@ class _StoreScreenState extends State<StoreScreen> {
                             storeName: businessName,
                           );
                         },
-                        icon: const Icon(Icons.chat_rounded, size: 18),
-                        label: const Text('تواصل عبر الواتساب'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.whatsapp,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // In-app Chat Button
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final auth = Get.find<AuthController>();
+                            if (!auth.isLoggedIn.value) {
+                              Get.toNamed('/auth');
+                              return;
+                            }
+
+                            final sellerUserId = _businessData?['userId'] as String?;
+                            if (sellerUserId == null || sellerUserId.isEmpty) return;
+
+                            if (auth.userId.value == sellerUserId) {
+                               Get.snackbar('تنبيه', 'لا يمكنك محادثة متجرك الخاص');
+                               return;
+                            }
+
+                            try {
+                              Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                              final convData = await ChatApiService.getOrCreateConversation(sellerUserId);
+                              Get.back();
+
+                              final conv = Conversation.fromJson(convData);
+                              Get.toNamed('/chat/${conv.id}', arguments: {'conversation': conv});
+
+                              // Send store reference message
+                              final chatCtrl = Get.put(ConversationController(conversationId: conv.id, currentUserId: auth.userId.value), tag: conv.id);
+                              chatCtrl.sendReferenceMessage(
+                                type: 'STORE_REFERENCE',
+                                referenceType: 'STORE',
+                                referenceId: _businessData!['id'],
+                                snapshotTitle: businessName,
+                                snapshotImage: logoUrl,
+                              );
+                            } catch (e) {
+                              if (Get.isDialogOpen ?? false) Get.back();
+                              Get.snackbar('خطأ', 'تعذر بدء المحادثة');
+                            }
+                          },
+                          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                          label: const Text('محادثة'),
                         ),
                       ),
                     ),
@@ -562,8 +618,8 @@ class _StoreScreenState extends State<StoreScreen> {
                       icon: const Icon(Icons.flag_outlined, size: 18),
                       label: const Text('إبلاغ'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.textSecondary,
-                        side: const BorderSide(color: AppTheme.divider),
+                        foregroundColor: context.colors.textSecondary,
+                        side: BorderSide(color: context.colors.divider),
                       ),
                     ),
                   ],

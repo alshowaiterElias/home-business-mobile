@@ -79,6 +79,9 @@ class ApiErrorHandler {
     if (message.contains('Too many requests')) {
       return 'تم تجاوز عدد المحاولات المسموح به. يرجى الانتظار والمحاولة لاحقاً.';
     }
+    if (message.contains('Invalid value for argument `targetType`')) {
+      return 'لا يدعم الخادم الحالي نوع البلاغ هذا، يرجى تحديث الخادم.';
+    }
     if (message.contains('Route not found')) {
       return 'الخدمة المطلوبة غير متوفرة.';
     }

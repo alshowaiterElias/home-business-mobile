@@ -9,6 +9,9 @@ import '../../widgets/report_sheet.dart';
 import '../../controllers/product_details_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../core/network/whatsapp_service.dart';
+import '../../core/network/chat_service.dart';
+import '../../models/chat_models.dart';
+import '../../controllers/conversation_controller.dart';
 import 'product_reviews_screen.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
@@ -38,7 +41,7 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.colors.surface,
       body: Stack(
         children: [
           // ── Scrollable Content ──────────────────────────────────
@@ -49,7 +52,7 @@ class ProductDetailsScreen extends StatelessWidget {
               SliverAppBar(
                 expandedHeight: 380,
                 pinned: true,
-                backgroundColor: AppTheme.surface,
+                backgroundColor: context.colors.surface,
                 surfaceTintColor: Colors.transparent,
                 leading: Padding(
                   padding: const EdgeInsets.all(8),
@@ -104,16 +107,16 @@ class ProductDetailsScreen extends StatelessWidget {
                       memCacheWidth: 800,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Shimmer.fromColors(
-                        baseColor: Colors.grey[200]!,
-                        highlightColor: Colors.grey[50]!,
-                        child: Container(color: Colors.white),
+                        baseColor: context.colors.shimmerBase,
+                        highlightColor: context.colors.shimmerHighlight,
+                        child: Container(color: context.colors.surface),
                       ),
                       errorWidget: (_, __, ___) => Container(
-                        color: AppTheme.background,
-                        child: const Icon(
+                        color: context.colors.background,
+                        child: Icon(
                           Icons.image_not_supported_outlined,
                           size: 50,
-                          color: AppTheme.textHint,
+                          color: context.colors.textHint,
                         ),
                       ),
                     ),
@@ -126,9 +129,9 @@ class ProductDetailsScreen extends StatelessWidget {
                 child: Transform.translate(
                   offset: const Offset(0, -24),
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppTheme.surface,
-                      borderRadius: BorderRadius.vertical(
+                    decoration: BoxDecoration(
+                      color: context.colors.surface,
+                      borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(AppTheme.radiusXl),
                       ),
                     ),
@@ -152,7 +155,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.primarySurface,
+                                    color: context.colors.primarySurface,
                                     borderRadius: BorderRadius.circular(
                                       AppTheme.radiusFull,
                                     ),
@@ -161,7 +164,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                     product.categoryName,
                                     style: theme.textTheme.labelMedium
                                         ?.copyWith(
-                                          color: AppTheme.primaryDark,
+                                          color: context.colors.primaryDark,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 11,
                                         ),
@@ -203,7 +206,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           Text(
                             '${_formatPrice(product.price)} ر.ي',
                             style: theme.textTheme.headlineMedium?.copyWith(
-                              color: AppTheme.primary,
+                              color: context.colors.primary,
                             ),
                           ),
                           const SizedBox(height: AppTheme.space24),
@@ -212,7 +215,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(AppTheme.space16),
                             decoration: BoxDecoration(
-                              color: AppTheme.background,
+                              color: context.colors.background,
                               borderRadius: BorderRadius.circular(
                                 AppTheme.radiusLg,
                               ),
@@ -225,10 +228,10 @@ class ProductDetailsScreen extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        AppTheme.primary.withValues(
+                                        context.colors.primary.withValues(
                                           alpha: 0.15,
                                         ),
-                                        AppTheme.primaryLight.withValues(
+                                        context.colors.primaryLight.withValues(
                                           alpha: 0.1,
                                         ),
                                       ],
@@ -237,9 +240,9 @@ class ProductDetailsScreen extends StatelessWidget {
                                       AppTheme.radiusMd,
                                     ),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.storefront_rounded,
-                                    color: AppTheme.primary,
+                                    color: context.colors.primary,
                                     size: 24,
                                   ),
                                 ),
@@ -256,10 +259,10 @@ class ProductDetailsScreen extends StatelessWidget {
                                       const SizedBox(height: 2),
                                       Row(
                                         children: [
-                                          const Icon(
+                                          Icon(
                                             Icons.location_on_outlined,
                                             size: 13,
-                                            color: AppTheme.textHint,
+                                            color: context.colors.textHint,
                                           ),
                                           const SizedBox(width: 3),
                                           Text(
@@ -304,7 +307,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           Text(
                             product.description,
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: context.colors.textSecondary,
                             ),
                           ),
                           const SizedBox(height: AppTheme.space24),
@@ -336,10 +339,10 @@ class ProductDetailsScreen extends StatelessWidget {
                 AppTheme.space12 + bottomPad,
               ),
               decoration: BoxDecoration(
-                color: AppTheme.surface,
+                color: context.colors.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: context.colors.isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.06),
                     blurRadius: 16,
                     offset: const Offset(0, -4),
                   ),
@@ -365,35 +368,91 @@ class ProductDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // WhatsApp CTA
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (product.sellerPhone.isEmpty) {
-                          Get.snackbar(
-                            'تنبيه',
-                            'رقم هاتف المتجر غير متوفر',
-                            backgroundColor: Colors.orange,
-                            colorText: Colors.white,
-                          );
-                          return;
-                        }
-                        WhatsAppService.openWhatsAppForProduct(
-                          phoneNumber: product.sellerPhone,
-                          storeName: product.sellerName,
-                          productName: product.title,
-                          price: product.price,
-                          imageUrl: product.imageUrl,
-                        );
-                      },
-                      icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
-                      label: const Text('تواصل عبر واتساب'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.whatsapp,
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                  // Action Buttons
+                  Row(
+                    children: [
+                      // WhatsApp Button
+                      Container(
+                        height: 44,
+                        width: 44,
+                        decoration: BoxDecoration(
+                          color: AppTheme.whatsapp.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                          border: Border.all(color: AppTheme.whatsapp.withValues(alpha: 0.3)),
+                        ),
+                        child: IconButton(
+                          icon: const FaIcon(FontAwesomeIcons.whatsapp, color: AppTheme.whatsapp, size: 20),
+                          onPressed: () {
+                            if (product.sellerPhone.isEmpty) {
+                              Get.snackbar(
+                                'تنبيه',
+                                'رقم هاتف المتجر غير متوفر',
+                                backgroundColor: Colors.orange,
+                                colorText: Colors.white,
+                              );
+                              return;
+                            }
+                            WhatsAppService.openWhatsAppForProduct(
+                              phoneNumber: product.sellerPhone,
+                              storeName: product.sellerName,
+                              productName: product.title,
+                              price: product.price,
+                              imageUrl: product.imageUrl,
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+
+                      // In-app chat button
+                      SizedBox(
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final auth = Get.find<AuthController>();
+                            if (!auth.isLoggedIn.value) {
+                              Get.toNamed('/auth');
+                              return;
+                            }
+                            
+                            // Prevent chatting with self
+                            if (auth.userId.value == product.sellerUserId) {
+                               Get.snackbar('تنبيه', 'لا يمكنك محادثة نفسك');
+                               return;
+                            }
+                            
+                            try {
+                              Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                              final convData = await ChatApiService.getOrCreateConversation(product.sellerUserId);
+                              Get.back(); // close dialog
+                              
+                              final conv = Conversation.fromJson(convData);
+                              
+                              Get.toNamed('/chat/${conv.id}', arguments: {'conversation': conv});
+                              
+                              // Send product reference message
+                              final chatCtrl = Get.put(ConversationController(conversationId: conv.id, currentUserId: auth.userId.value), tag: conv.id);
+                              chatCtrl.sendReferenceMessage(
+                                type: 'PRODUCT_REFERENCE',
+                                referenceType: 'PRODUCT',
+                                referenceId: product.id,
+                                snapshotTitle: product.title,
+                                snapshotPrice: _formatPrice(product.price),
+                                snapshotImage: product.imageUrl,
+                              );
+                            } catch (e) {
+                              if (Get.isDialogOpen ?? false) Get.back();
+                              Get.snackbar('خطأ', 'تعذر بدء المحادثة');
+                            }
+                          },
+                          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                          label: const Text('محادثة'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -434,17 +493,17 @@ class _CircleButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.92),
+          color: context.colors.badgeBg,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: context.colors.isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Icon(icon, size: 20, color: color ?? AppTheme.textPrimary),
+        child: Icon(icon, size: 20, color: color ?? context.colors.textPrimary),
       ),
     );
   }
@@ -476,7 +535,7 @@ class ReviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
-        color: isMine ? AppTheme.primarySurface : AppTheme.background,
+        color: isMine ? context.colors.primarySurface : context.colors.background,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: isMine
             ? Border.all(color: AppTheme.primary.withValues(alpha: 0.2))
@@ -489,11 +548,11 @@ class ReviewCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: isMine ? AppTheme.primary : AppTheme.divider,
+                backgroundColor: isMine ? AppTheme.primary : context.colors.divider,
                 child: Text(
                   name.isNotEmpty ? name.characters.first : '؟',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: isMine ? Colors.white : AppTheme.textSecondary,
+                    color: isMine ? Colors.white : context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -542,7 +601,7 @@ class ReviewCard extends StatelessWidget {
                         ? Icons.star_rounded
                         : Icons.star_outline_rounded,
                     size: 16,
-                    color: i < rating ? AppTheme.accent : AppTheme.textHint,
+                    color: i < rating ? AppTheme.accent : context.colors.textHint,
                   ),
                 ),
               ),
@@ -553,7 +612,7 @@ class ReviewCard extends StatelessWidget {
             Text(
               text,
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: AppTheme.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ],
@@ -610,7 +669,7 @@ class _ReviewsSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppTheme.space16),
                 decoration: BoxDecoration(
-                  color: AppTheme.background,
+                  color: context.colors.background,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   border: Border.all(
                     color: AppTheme.primary.withValues(alpha: 0.3),
@@ -636,7 +695,7 @@ class _ReviewsSection extends StatelessWidget {
                               size: 32,
                               color: i < controller.currentRating.value
                                   ? AppTheme.accent
-                                  : AppTheme.textHint,
+                                  : context.colors.textHint,
                             ),
                           ),
                         ),
@@ -702,7 +761,7 @@ class _ReviewsSection extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppTheme.space16),
               decoration: BoxDecoration(
-                color: AppTheme.background,
+                color: context.colors.background,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               ),
               child: Column(

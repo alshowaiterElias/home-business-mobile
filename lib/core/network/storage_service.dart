@@ -63,4 +63,13 @@ class StorageService {
   static bool isNotificationsEnabled() {
     return _prefs.getBool(_notificationsEnabledKey) ?? true;
   }
+
+  // Generic string persistence (used for theme mode, etc.)
+  static String? getString(String key) {
+    return _prefs.getString(key);
+  }
+
+  static Future<void> setString(String key, String value) async {
+    await _prefs.setString(key, value);
+  }
 }

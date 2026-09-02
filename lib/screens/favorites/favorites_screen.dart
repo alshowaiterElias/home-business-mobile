@@ -44,11 +44,11 @@ class FavoritesScreen extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             title: const Text('المفضلة والمتابعة'),
-            bottom: const TabBar(
-              indicatorColor: AppTheme.primary,
-              labelColor: AppTheme.primary,
-              unselectedLabelColor: AppTheme.textHint,
-              tabs: [
+            bottom: TabBar(
+              indicatorColor: context.colors.primary,
+              labelColor: context.colors.primary,
+              unselectedLabelColor: context.colors.textHint,
+              tabs: const [
                 Tab(
                   icon: Icon(Icons.favorite_rounded, size: 20),
                   text: 'المنتجات المفضلة',
@@ -194,14 +194,14 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
               Container(
                 width: 90,
                 height: 90,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primarySurface,
+                decoration: BoxDecoration(
+                  color: context.colors.primarySurface,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.storefront_outlined,
                   size: 44,
-                  color: AppTheme.primary,
+                  color: context.colors.primary,
                 ),
               ),
               const SizedBox(height: AppTheme.space20),
@@ -220,7 +220,7 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
 
     return RefreshIndicator(
       onRefresh: _fetchFollowedStores,
-      color: AppTheme.primary,
+      color: context.colors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.all(AppTheme.space16),
         itemCount: _stores.length,
@@ -240,7 +240,7 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
             ),
-            color: AppTheme.surface,
+            color: context.colors.surface,
             child: InkWell(
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               onTap: () {
@@ -274,16 +274,16 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.textHint),
+                              Icon(Icons.location_on_outlined, size: 14, color: context.colors.textHint),
                               const SizedBox(width: 2),
                               Text(location, style: theme.textTheme.bodySmall),
                               const SizedBox(width: 12),
-                              const Icon(Icons.people_outline_rounded, size: 14, color: AppTheme.primary),
+                              Icon(Icons.people_outline_rounded, size: 14, color: context.colors.primary),
                               const SizedBox(width: 2),
                               Text(
                                 '$followersCount متابع',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.primary,
+                                  color: context.colors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -292,7 +292,7 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppTheme.textHint),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textHint),
                   ],
                 ),
               ),
@@ -320,14 +320,14 @@ class _EmptyState extends StatelessWidget {
             Container(
               width: 100,
               height: 100,
-              decoration: const BoxDecoration(
-                color: AppTheme.primarySurface,
+              decoration: BoxDecoration(
+                color: context.colors.primarySurface,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.favorite_outline_rounded,
                 size: 48,
-                color: AppTheme.primary,
+                color: context.colors.primary,
               ),
             ),
             const SizedBox(height: AppTheme.space24),

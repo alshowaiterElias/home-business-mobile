@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/main_controller.dart';
+import '../../controllers/chat_controller.dart';
+import '../../controllers/auth_controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../home/home_screen.dart';
 import '../categories/categories_screen.dart';
 import '../favorites/favorites_screen.dart';
+import '../chat/conversations_screen.dart';
 import '../profile/profile_screen.dart';
 
 class MainScreen extends StatelessWidget {
@@ -17,16 +20,18 @@ class MainScreen extends StatelessWidget {
     const HomeScreen(),
     const CategoriesScreen(),
     const FavoritesScreen(),
+    const ConversationsScreen(),
     const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Make the status bar icons dark on light background
+    // Adapt status bar icons based on theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
+      SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
     );
 
@@ -37,14 +42,8 @@ class MainScreen extends StatelessWidget {
         body: IndexedStack(index: index, children: pages),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: AppTheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              ),
-            ],
+            color: context.colors.surface,
+            boxShadow: context.colors.shadowSm,
           ),
           child: SafeArea(
             child: Padding(
@@ -76,12 +75,27 @@ class MainScreen extends StatelessWidget {
                     isActive: index == 2,
                     onTap: () => controller.changeTab(2),
                   ),
+                  Obx(() {
+                    final auth = Get.find<AuthController>();
+                    int badge = 0;
+                    if (auth.isLoggedIn.value && Get.isRegistered<ChatController>()) {
+                      badge = Get.find<ChatController>().unreadCount.value;
+                    }
+                    return _NavItem(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      activeIcon: Icons.chat_bubble_rounded,
+                      label: 'المحادثات',
+                      isActive: index == 3,
+                      onTap: () => controller.changeTab(3),
+                      badge: badge,
+                    );
+                  }),
                   _NavItem(
                     icon: Icons.person_outline_rounded,
                     activeIcon: Icons.person_rounded,
                     label: 'حسابي',
-                    isActive: index == 3,
-                    onTap: () => controller.changeTab(3),
+                    isActive: index == 4,
+                    onTap: () => controller.changeTab(4),
                   ),
                 ],
               ),
@@ -100,6 +114,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
+  final int badge;
 
   const _NavItem({
     required this.icon,
@@ -107,6 +122,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.isActive,
     required this.onTap,
+    this.badge = 0,
   });
 
   @override
@@ -130,10 +146,33 @@ class _NavItem extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              size: 22,
-              color: isActive ? AppTheme.primary : AppTheme.textHint,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isActive ? activeIcon : icon,
+                  size: 22,
+                  color: isActive ? AppTheme.primary : context.colors.textHint,
+                ),
+                if (badge > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppTheme.error,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 14),
+                      child: Text(
+                        badge > 99 ? '99+' : '$badge',
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             if (isActive) ...[
               const SizedBox(width: 6),

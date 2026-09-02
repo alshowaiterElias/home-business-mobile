@@ -78,14 +78,14 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                       hintText: 'ابحث عن متجر...',
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
-                      fillColor: AppTheme.surface,
+                      fillColor: context.colors.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        borderSide: const BorderSide(color: AppTheme.divider),
+                        borderSide: BorderSide(color: context.colors.divider),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        borderSide: const BorderSide(color: AppTheme.divider),
+                        borderSide: BorderSide(color: context.colors.divider),
                       ),
                     ),
                   ),
@@ -97,13 +97,13 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: (_selectedGovernorateId != null) ? AppTheme.primary : AppTheme.surface,
+                      color: (_selectedGovernorateId != null) ? AppTheme.primary : context.colors.surface,
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                      border: Border.all(color: (_selectedGovernorateId != null) ? AppTheme.primary : AppTheme.divider),
+                      border: Border.all(color: (_selectedGovernorateId != null) ? AppTheme.primary : context.colors.divider),
                     ),
                     child: Icon(
                       Icons.tune_rounded,
-                      color: (_selectedGovernorateId != null) ? Colors.white : AppTheme.textSecondary,
+                      color: (_selectedGovernorateId != null) ? Colors.white : context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -122,9 +122,9 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.storefront_rounded, size: 64, color: AppTheme.divider),
+                      Icon(Icons.storefront_rounded, size: 64, color: context.colors.divider),
                       const SizedBox(height: 16),
-                      Text('لا توجد متاجر تطابق بحثك', style: theme.textTheme.titleMedium?.copyWith(color: AppTheme.textHint)),
+                      Text('لا توجد متاجر تطابق بحثك', style: theme.textTheme.titleMedium?.copyWith(color: context.colors.textHint)),
                     ],
                   ),
                 );
@@ -163,17 +163,17 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(AppTheme.space12),
                         decoration: BoxDecoration(
-                          color: AppTheme.surface,
+                          color: context.colors.surface,
                           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                          boxShadow: AppTheme.shadowSm,
+                          boxShadow: context.colors.shadowSm,
                         ),
                         child: Row(
                           children: [
                             CircleAvatar(
                               radius: 28,
-                              backgroundColor: AppTheme.background,
+                              backgroundColor: context.colors.background,
                               backgroundImage: logoUrl != null ? NetworkImage(ApiClient.getImageUrl(logoUrl)) : null,
-                              child: logoUrl == null ? const Icon(Icons.storefront_rounded, size: 28, color: AppTheme.textHint) : null,
+                              child: logoUrl == null ? Icon(Icons.storefront_rounded, size: 28, color: context.colors.textHint) : null,
                             ),
                             const SizedBox(width: AppTheme.space16),
                             Expanded(
@@ -184,7 +184,7 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      const Icon(Icons.location_on_rounded, size: 14, color: AppTheme.textHint),
+                                      Icon(Icons.location_on_rounded, size: 14, color: context.colors.textHint),
                                       const SizedBox(width: 4),
                                       Text(city, style: theme.textTheme.bodySmall),
                                     ],
