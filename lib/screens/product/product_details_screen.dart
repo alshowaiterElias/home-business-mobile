@@ -13,6 +13,7 @@ import '../../core/network/chat_service.dart';
 import '../../models/chat_models.dart';
 import '../../controllers/conversation_controller.dart';
 import 'product_reviews_screen.dart';
+import '../../widgets/ask_marketplace_ai_button.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -41,6 +42,17 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72.0),
+        child: AskMarketplaceAiButton(
+          contextData: {
+            'screen': 'product_details',
+            'productId': product.id,
+          }
+        ),
+      ),
+      // Move FAB up so it doesn't overlap the bottom action bar
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       backgroundColor: context.colors.surface,
       body: Stack(
         children: [

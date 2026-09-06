@@ -13,6 +13,7 @@ import '../../core/network/chat_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/chat_models.dart';
+import '../../widgets/ask_marketplace_ai_button.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -262,6 +263,12 @@ class _StoreScreenState extends State<StoreScreen> {
         : '0.0';
 
     return Scaffold(
+      floatingActionButton: AskMarketplaceAiButton(
+        contextData: {
+          'screen': 'store_details',
+          'storeId': _businessData?['id'],
+        }
+      ),
       body: RefreshIndicator(
         onRefresh: _fetchBusinessData,
         color: AppTheme.primary,

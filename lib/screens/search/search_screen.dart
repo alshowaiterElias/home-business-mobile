@@ -7,6 +7,7 @@ import '../../core/network/data_service.dart';
 import '../../core/network/storage_service.dart';
 import '../../controllers/data_controller.dart';
 import 'widgets/search_filter_sheet.dart';
+import '../../widgets/ask_marketplace_ai_button.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -90,6 +91,12 @@ class _SearchScreenState extends State<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      floatingActionButton: AskMarketplaceAiButton(
+        contextData: {
+          'screen': 'search',
+          'searchQuery': _searchController.text.trim().isNotEmpty ? _searchController.text.trim() : null
+        }
+      ),
       appBar: AppBar(
         titleSpacing: 0,
         leading: IconButton(

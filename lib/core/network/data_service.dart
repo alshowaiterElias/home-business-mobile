@@ -52,23 +52,68 @@ class DataService {
     }
   }
 
-  // Fetch Single Product
+  // In-memory caches to prevent redundant network requests and UI flickering
+  static final Map<String, Map<String, dynamic>> _productCache = {};
+  static final Map<String, Future<Map<String, dynamic>>> _inFlightProductRequests = {};
+
+  static final Map<String, Map<String, dynamic>> _businessCache = {};
+  static final Map<String, Future<Map<String, dynamic>>> _inFlightBusinessRequests = {};
+
+  // Fetch Single Product with in-memory caching & request deduplication
   static Future<Map<String, dynamic>> getProductById(String id) async {
+    if (_productCache.containsKey(id)) {
+      return _productCache[id]!;
+    }
+    if (_inFlightProductRequests.containsKey(id)) {
+      return _inFlightProductRequests[id]!;
+    }
+
+    final future = _fetchAndCacheProduct(id);
+    _inFlightProductRequests[id] = future;
+    return future;
+  }
+
+  static Future<Map<String, dynamic>> _fetchAndCacheProduct(String id) async {
     try {
       final response = await ApiClient.instance.get('/products/$id');
-      return response.data['data'] ?? {};
+      final data = (response.data['data'] as Map<String, dynamic>?) ?? {};
+      if (data.isNotEmpty) {
+        _productCache[id] = data;
+      }
+      return data;
     } catch (e) {
       rethrow;
+    } finally {
+      _inFlightProductRequests.remove(id);
     }
   }
 
-  // Fetch Business Profile
+  // Fetch Business Profile with in-memory caching & request deduplication
   static Future<Map<String, dynamic>> getBusinessById(String id) async {
+    if (_businessCache.containsKey(id)) {
+      return _businessCache[id]!;
+    }
+    if (_inFlightBusinessRequests.containsKey(id)) {
+      return _inFlightBusinessRequests[id]!;
+    }
+
+    final future = _fetchAndCacheBusiness(id);
+    _inFlightBusinessRequests[id] = future;
+    return future;
+  }
+
+  static Future<Map<String, dynamic>> _fetchAndCacheBusiness(String id) async {
     try {
       final response = await ApiClient.instance.get('/business/$id');
-      return response.data['data'] ?? {};
+      final data = (response.data['data'] as Map<String, dynamic>?) ?? {};
+      if (data.isNotEmpty) {
+        _businessCache[id] = data;
+      }
+      return data;
     } catch (e) {
       rethrow;
+    } finally {
+      _inFlightBusinessRequests.remove(id);
     }
   }
 

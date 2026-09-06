@@ -10,6 +10,7 @@ import '../../controllers/data_controller.dart';
 import '../product/all_products_screen.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/main_controller.dart';
+import '../../widgets/ask_marketplace_ai_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,6 +20,7 @@ class HomeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      floatingActionButton: const AskMarketplaceAiButton(contextData: {'screen': 'home'}),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),

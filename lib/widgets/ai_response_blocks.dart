@@ -1,0 +1,231 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:home_business_mobile/core/network/data_service.dart';
+import 'package:home_business_mobile/models/ai_models.dart';
+import 'package:home_business_mobile/models/dummy_data.dart';
+import 'package:home_business_mobile/widgets/product_card.dart';
+
+class AiBlockRenderer extends StatelessWidget {
+  final AiBlock block;
+
+  const AiBlockRenderer({Key? key, required this.block}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (block.type == 'product' && block.productId != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: CachedProductBlockCard(
+            key: ValueKey('ai-product-${block.productId}'),
+            productId: block.productId!,
+          ),
+        ),
+      );
+    } else if (block.type == 'store' && block.storeId != null) {
+      return CachedStoreBlockCard(
+        key: ValueKey('ai-store-${block.storeId}'),
+        storeId: block.storeId!,
+      );
+    } else if (block.type == 'comparison' && block.productIds != null && block.productIds!.isNotEmpty) {
+      return _buildComparisonBlock(block.productIds!);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildComparisonBlock(List<String> productIds) {
+    return SizedBox(
+      height: 245,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: productIds.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) => CachedProductBlockCard(
+          key: ValueKey('ai-comparison-${productIds[index]}'),
+          productId: productIds[index],
+        ),
+      ),
+    );
+  }
+}
+
+/// Dedicated Stateful Product Card with AutomaticKeepAlive & single-init Future
+/// to prevent rebuild loops and image flickering on user interactions.
+class CachedProductBlockCard extends StatefulWidget {
+  final String productId;
+
+  const CachedProductBlockCard({
+    Key? key,
+    required this.productId,
+  }) : super(key: key);
+
+  @override
+  State<CachedProductBlockCard> createState() => _CachedProductBlockCardState();
+}
+
+class _CachedProductBlockCardState extends State<CachedProductBlockCard>
+    with AutomaticKeepAliveClientMixin {
+  late Future<Map<String, dynamic>> _productFuture;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _productFuture = DataService.getProductById(widget.productId);
+  }
+
+  @override
+  void didUpdateWidget(covariant CachedProductBlockCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.productId != widget.productId) {
+      _productFuture = DataService.getProductById(widget.productId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _productFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 175,
+            height: 240,
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox(
+            width: 175,
+            height: 100,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Center(
+                  child: Text(
+                    'هذا المنتج غير متاح حالياً',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        try {
+          final product = Product.fromJson(snapshot.data!);
+          return SizedBox(
+            width: 175,
+            height: 240,
+            child: ProductCard(
+              product: product,
+              heroTagPrefix: 'ai-${product.id}-',
+            ),
+          );
+        } catch (e) {
+          return const SizedBox(
+            width: 175,
+            height: 100,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Center(
+                  child: Text(
+                    'عذرًا، حدث خطأ في عرض المنتج',
+                    style: TextStyle(fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
+/// Dedicated Stateful Store Block with AutomaticKeepAlive
+class CachedStoreBlockCard extends StatefulWidget {
+  final String storeId;
+
+  const CachedStoreBlockCard({
+    Key? key,
+    required this.storeId,
+  }) : super(key: key);
+
+  @override
+  State<CachedStoreBlockCard> createState() => _CachedStoreBlockCardState();
+}
+
+class _CachedStoreBlockCardState extends State<CachedStoreBlockCard>
+    with AutomaticKeepAliveClientMixin {
+  late Future<Map<String, dynamic>> _storeFuture;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _storeFuture = DataService.getBusinessById(widget.storeId);
+  }
+
+  @override
+  void didUpdateWidget(covariant CachedStoreBlockCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.storeId != widget.storeId) {
+      _storeFuture = DataService.getBusinessById(widget.storeId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _storeFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('هذا المتجر غير متاح حالياً', style: TextStyle(color: Colors.red)),
+            ),
+          );
+        }
+
+        final store = snapshot.data!;
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            leading: const Icon(Icons.storefront, color: Colors.blue),
+            title: Text(store['businessName'] ?? 'متجر'),
+            subtitle: Text(store['city']?['nameAr'] ?? ''),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            onTap: () {
+              Get.toNamed('/store', arguments: {'id': widget.storeId});
+            },
+          ),
+        );
+      },
+    );
+  }
+}
