@@ -488,39 +488,184 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
   }
 
   Widget _buildEmptyState() {
-    final suggestions = [
-      'ابحث عن كيك وحلويات 🍰',
-      'أريد بخور وعطور فاخرة 🌸',
-      'جلابيات وملابس مطرزة للعيد 👗',
-      'بهارات وحوايج يمنية طازجة 🌶️',
-      'أريد بوكس هدية للعروس 🎁',
-      'ما هي الوجبات الشعبية المتاحة؟ 🍲',
-    ];
+    final screen = widget.contextData['screen'] as String? ?? 'home';
+    final productTitle = widget.contextData['productTitle'] as String?;
+    final storeName = widget.contextData['storeName'] as String?;
+    final searchQuery = widget.contextData['searchQuery'] as String?;
+
+    Widget? contextBadge;
+    String subtitle;
+    List<String> suggestions;
+
+    switch (screen) {
+      case 'product_details':
+        subtitle = 'اسألني عن تفاصيل هذا المنتج، طريقة طلبه، أو منتجات أخرى مشابهة:';
+        contextBadge = Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.purple.withOpacity(0.09),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.purple.withOpacity(0.25)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.shopping_bag_outlined, size: 16, color: Colors.purple),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  productTitle != null && productTitle.isNotEmpty
+                      ? 'أنت تتصفح: $productTitle'
+                      : 'أنت تتصفح تفاصيل المنتج',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+        suggestions = [
+          'ما هي تفاصيل ومواصفات هذا المنتج؟ 📋',
+          'كيف أتواصل مع المتجر لطلبه مباشرة؟ 💬',
+          'هل توجد خدمة توصيل لهذا المنتج؟ 🚚',
+          'اقترح لي منتجات مشابهة من نفس القسم ✨',
+          'ما هي خيارات الأسعار أو العروض المتاحة؟ 💰',
+          'معلومات عن المتجر والتقييمات 🏪',
+        ];
+        break;
+
+      case 'store_details':
+        subtitle = 'اسألني عن منتجات هذا المتجر، الأسعار، أو التنسيق مع البائع:';
+        contextBadge = Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.indigo.withOpacity(0.09),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.indigo.withOpacity(0.25)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.storefront_rounded, size: 16, color: Colors.indigo),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  storeName != null && storeName.isNotEmpty
+                      ? 'أنت تتصفح متجر: $storeName'
+                      : 'أنت تتصفح صفحة المتجر',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+        suggestions = [
+          'ما هي أفضل المنتجات في هذا المتجر؟ 🌟',
+          'ما هي أسعار المنتجات المتوفرة هنا؟ 💰',
+          'كيف أتواصل مباشرة مع صاحب المتجر؟ 💬',
+          'هل يقدم هذا المتجر خدمة توصيل؟ 🚚',
+          'أقسام وتخصص هذا المتجر 🏷️',
+        ];
+        break;
+
+      case 'search':
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          subtitle = 'اسألني لمساعدتك في العثور على أفضل خيارات "$searchQuery":';
+          contextBadge = Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.09),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.blue.withOpacity(0.25)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.search_rounded, size: 16, color: Colors.blue),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'نتائج البحث لـ: "$searchQuery"',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          );
+          suggestions = [
+            'أفضل خيارات "$searchQuery" المتاحة 🌟',
+            'أرخص أسعار "$searchQuery" في المتاجر 🏷️',
+            'هل توجد خدمة توصيل لـ "$searchQuery"؟ 🚚',
+            'المتاجر الأكثر تميزاً في "$searchQuery" 🏪',
+          ];
+        } else {
+          subtitle = 'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
+          suggestions = [
+            'ابحث عن كيك وحلويات 🍰',
+            'أريد بخور وعطور فاخرة 🌸',
+            'جلابيات وملابس مطرزة للعيد 👗',
+            'بهارات وحوايج يمنية طازجة 🌶️',
+          ];
+        }
+        break;
+
+      case 'home':
+      default:
+        subtitle = 'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
+        suggestions = [
+          'ابحث عن كيك وحلويات 🍰',
+          'أريد بخور وعطور فاخرة 🌸',
+          'جلابيات وملابس مطرزة للعيد 👗',
+          'بهارات وحوايج يمنية طازجة 🌶️',
+          'أريد بوكس هدية للعروس 🎁',
+          'هل توجد خدمة توصيل في التطبيق؟ 🚚',
+          'كيف طريقة الطلب والشراء؟ 📱',
+        ];
+        break;
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
+          if (contextBadge != null) contextBadge,
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: Colors.purple.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.forum_outlined, size: 52, color: Colors.purple),
+            child: const Icon(Icons.auto_awesome, size: 44, color: Colors.purple),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           const Text(
             'مرحباً بك في المساعد الذكي للسوق 👋',
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.',
-            style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -540,7 +685,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 backgroundColor: Theme.of(context).cardColor,
                 side: BorderSide(color: Colors.purple.withOpacity(0.2)),
                 label: Text(s, style: const TextStyle(fontSize: 12.5)),
-                onPressed: () => _submit(s),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  _submit(s);
+                },
               );
             }).toList(),
           )

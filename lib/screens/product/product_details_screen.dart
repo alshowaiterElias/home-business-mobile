@@ -48,6 +48,9 @@ class ProductDetailsScreen extends StatelessWidget {
           contextData: {
             'screen': 'product_details',
             'productId': product.id,
+            'productTitle': product.title,
+            'storeName': product.sellerName,
+            'categoryName': product.categoryName,
           }
         ),
       ),

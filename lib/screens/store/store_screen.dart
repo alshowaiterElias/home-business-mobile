@@ -267,6 +267,7 @@ class _StoreScreenState extends State<StoreScreen> {
         contextData: {
           'screen': 'store_details',
           'storeId': _businessData?['id'],
+          'storeName': _businessData?['businessName'],
         }
       ),
       body: RefreshIndicator(
