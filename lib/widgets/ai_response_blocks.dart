@@ -20,6 +20,7 @@ class AiBlockRenderer extends StatelessWidget {
           child: CachedProductBlockCard(
             key: ValueKey('ai-product-${block.productId}'),
             productId: block.productId!,
+            initialProductData: block.productData,
           ),
         ),
       );
@@ -51,14 +52,16 @@ class AiBlockRenderer extends StatelessWidget {
   }
 }
 
-/// Dedicated Stateful Product Card with AutomaticKeepAlive & single-init Future
-/// to prevent rebuild loops and image flickering on user interactions.
+/// Dedicated Stateful Product Card with AutomaticKeepAlive & synchronous preloaded data
+/// to eliminate network requests, rebuild loops, and image flickering.
 class CachedProductBlockCard extends StatefulWidget {
   final String productId;
+  final Map<String, dynamic>? initialProductData;
 
   const CachedProductBlockCard({
     Key? key,
     required this.productId,
+    this.initialProductData,
   }) : super(key: key);
 
   @override
@@ -67,7 +70,8 @@ class CachedProductBlockCard extends StatefulWidget {
 
 class _CachedProductBlockCardState extends State<CachedProductBlockCard>
     with AutomaticKeepAliveClientMixin {
-  late Future<Map<String, dynamic>> _productFuture;
+  Product? _cachedProduct;
+  Future<Map<String, dynamic>>? _productFuture;
 
   @override
   bool get wantKeepAlive => true;
@@ -75,14 +79,28 @@ class _CachedProductBlockCardState extends State<CachedProductBlockCard>
   @override
   void initState() {
     super.initState();
-    _productFuture = DataService.getProductById(widget.productId);
+    _initProduct();
+  }
+
+  void _initProduct() {
+    if (widget.initialProductData != null) {
+      try {
+        _cachedProduct = Product.fromJson(widget.initialProductData!);
+      } catch (e) {
+        _cachedProduct = null;
+      }
+    }
+    if (_cachedProduct == null) {
+      _productFuture = DataService.getProductById(widget.productId);
+    }
   }
 
   @override
   void didUpdateWidget(covariant CachedProductBlockCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.productId != widget.productId) {
-      _productFuture = DataService.getProductById(widget.productId);
+    if (oldWidget.productId != widget.productId ||
+        oldWidget.initialProductData != widget.initialProductData) {
+      _initProduct();
     }
   }
 
@@ -90,6 +108,19 @@ class _CachedProductBlockCardState extends State<CachedProductBlockCard>
   Widget build(BuildContext context) {
     super.build(context);
 
+    // 1. If we have preloaded synchronous product data, render immediately with 0 delay!
+    if (_cachedProduct != null) {
+      return SizedBox(
+        width: 175,
+        height: 240,
+        child: ProductCard(
+          product: _cachedProduct!,
+          heroTagPrefix: 'ai-${_cachedProduct!.id}-',
+        ),
+      );
+    }
+
+    // 2. Fallback to asynchronous fetch if not preloaded in block
     return FutureBuilder<Map<String, dynamic>>(
       future: _productFuture,
       builder: (context, snapshot) {

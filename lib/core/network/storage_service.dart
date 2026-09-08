@@ -72,4 +72,19 @@ class StorageService {
   static Future<void> setString(String key, String value) async {
     await _prefs.setString(key, value);
   }
+
+  // AI Chat History persistence
+  static const String _aiChatHistoryKey = 'ai_chat_history_v1';
+
+  static Future<void> saveAiChatHistory(String jsonString) async {
+    await _prefs.setString(_aiChatHistoryKey, jsonString);
+  }
+
+  static String? getAiChatHistory() {
+    return _prefs.getString(_aiChatHistoryKey);
+  }
+
+  static Future<void> clearAiChatHistory() async {
+    await _prefs.remove(_aiChatHistoryKey);
+  }
 }

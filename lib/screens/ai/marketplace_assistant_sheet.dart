@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:home_business_mobile/controllers/ai_assistant_controller.dart';
 import 'package:home_business_mobile/core/network/ai_service.dart';
 import 'package:home_business_mobile/models/ai_models.dart';
+import 'package:home_business_mobile/widgets/ai_markdown_message.dart';
 import 'package:home_business_mobile/widgets/ai_response_blocks.dart';
 
 class MarketplaceAssistantSheet extends StatefulWidget {
@@ -27,7 +29,6 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
       Get.put(AiAssistantController(AiService()));
     }
     _controller = Get.find<AiAssistantController>();
-    _controller.clear();
 
     _messagesSubscription = _controller.messages.listen((_) {
       _scrollToBottom();
@@ -116,6 +117,13 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                   ],
                 ),
                 const Spacer(),
+                Obx(() => _controller.hasMessages
+                    ? IconButton(
+                        icon: const Icon(Icons.refresh_rounded, size: 22),
+                        tooltip: 'محادثة جديدة',
+                        onPressed: () => _controller.startNewChat(),
+                      )
+                    : const SizedBox.shrink()),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
@@ -192,7 +200,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
   }
 
   Widget _buildAssistantBubble(ChatMessage message) {
-    if (message.isLoading) {
+    if (message.isLoading && message.text.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12, right: 40),
         child: Align(
@@ -204,18 +212,18 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.purple.withOpacity(0.2)),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.purple),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Text(
-                  'جاري البحث والتحليل في السوق...',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  message.statusText ?? 'جاري البحث والتحليل في السوق...',
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
               ],
             ),
@@ -284,27 +292,113 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
         children: [
           // Text response container
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.purple.withOpacity(0.2)),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: Colors.purple.withOpacity(0.18),
+                width: 1.2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: Colors.purple.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 )
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Response Text
-                Text(
-                  message.text,
-                  style: const TextStyle(fontSize: 14.5, height: 1.5),
+                // Top assistant badge & copy button
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        color: Colors.purple,
+                        size: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'المساعد الذكي',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple.shade400,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (!message.isLoading && message.text.isNotEmpty)
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: message.text));
+                          HapticFeedback.lightImpact();
+                          Get.snackbar(
+                            'تم النسخ',
+                            'تم نسخ نص الرد إلى الحافظة',
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(seconds: 1),
+                            backgroundColor: Colors.black87,
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(16),
+                            borderRadius: 10,
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.copy_rounded,
+                            size: 14,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+                const SizedBox(height: 8),
+
+                // Rich Markdown & Store-linked Response Text
+                AiMarkdownMessage(
+                  text: message.text,
+                  storeNameToId: _controller.getAllKnownStores(message),
+                  onStoreTap: (storeName, storeId) => _controller.openStore(storeName, storeId),
+                  isStreaming: message.isLoading,
+                ),
+
+                if (message.isLoading) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Colors.purple,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'يكتب الآن...',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.purple.shade400,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
