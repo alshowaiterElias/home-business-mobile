@@ -159,7 +159,24 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                     final ratingStr = ratedCount > 0 ? (totalRating / ratedCount).toStringAsFixed(1) : '0.0';
 
                     return GestureDetector(
-                      onTap: () => Get.toNamed('/store', arguments: {'id': id}),
+                      onTap: () {
+                        final storeMap = Map<String, dynamic>.from(store);
+                        DataService.cacheBusiness(id, storeMap);
+                        Get.toNamed('/store', arguments: {
+                          'id': id,
+                          'store': storeMap,
+                          'businessName': store['businessName'],
+                        })?.then((_) {
+                          final cached = DataService.getCachedBusiness(id);
+                          if (cached != null) {
+                            store['isFollowed'] = cached['isFollowed'];
+                            if (cached['followersCount'] != null) {
+                              store['followersCount'] = cached['followersCount'];
+                            }
+                            _stores.refresh();
+                          }
+                        });
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(AppTheme.space12),
                         decoration: BoxDecoration(

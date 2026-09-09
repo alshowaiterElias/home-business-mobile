@@ -182,26 +182,42 @@ class _AdCarouselState extends State<AdCarousel> {
     );
   }
 
-  Widget _buildAdImage(String path) {
+  Widget _buildAdImage(BuildContext context, String path) {
     if (path.startsWith('assets/')) {
       return Image.asset(
         path,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(context),
       );
     }
     return Image.network(
       path,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: context.colors.surface,
+          child: Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: context.colors.primary,
+              ),
+            ),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(context),
     );
   }
 
-  Widget _buildPlaceholderImage() {
+  Widget _buildPlaceholderImage(BuildContext context) {
     return Container(
-      color: AppTheme.primaryDark,
-      child: const Center(
-        child: Icon(Icons.campaign_rounded, size: 48, color: Colors.white54),
+      color: context.colors.primarySurface,
+      child: Center(
+        child: Icon(Icons.campaign_rounded, size: 48, color: context.colors.primary),
       ),
     );
   }
@@ -215,10 +231,10 @@ class _AdCarouselState extends State<AdCarousel> {
           height: 165,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppTheme.radiusLg),
             border: Border.all(
-              color: AppTheme.divider.withValues(alpha: 0.5),
+              color: context.colors.divider.withValues(alpha: 0.5),
             ),
           ),
           child: Center(
@@ -230,7 +246,7 @@ class _AdCarouselState extends State<AdCarousel> {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: AppTheme.primary,
+                    color: context.colors.primary,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -238,7 +254,7 @@ class _AdCarouselState extends State<AdCarousel> {
                   'جاري تحميل العروض الإعلانية...',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textHint,
+                    color: context.colors.textHint,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -307,7 +323,7 @@ class _AdCarouselState extends State<AdCarousel> {
                             fit: StackFit.expand,
                             children: [
                               // Background Image (Asset or Network)
-                              _buildAdImage(ad.imagePath),
+                              _buildAdImage(context, ad.imagePath),
 
                               // Gradient overlay for text readability
                               DecoratedBox(
@@ -466,7 +482,7 @@ class _AdCarouselState extends State<AdCarousel> {
               height: 6,
               width: isSelected ? 22 : 6,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primary : AppTheme.divider,
+                color: isSelected ? context.colors.primary : context.colors.divider,
                 borderRadius: BorderRadius.circular(3),
               ),
             );
@@ -483,28 +499,44 @@ class _AdOverlayDialog extends StatelessWidget {
 
   const _AdOverlayDialog({required this.ad});
 
-  Widget _buildAdImage(String path) {
+  Widget _buildAdImage(BuildContext context, String path) {
     if (path.startsWith('assets/')) {
       return Image.asset(
         path,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
       );
     }
     return Image.network(
       path,
       width: double.infinity,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: context.colors.surface,
+          child: Center(
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: context.colors.primary,
+              ),
+            ),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
-      color: AppTheme.primaryDark,
-      child: const Center(
-        child: Icon(Icons.campaign_rounded, size: 64, color: Colors.white54),
+      color: context.colors.primarySurface,
+      child: Center(
+        child: Icon(Icons.campaign_rounded, size: 64, color: context.colors.primary),
       ),
     );
   }
@@ -520,7 +552,7 @@ class _AdOverlayDialog extends StatelessWidget {
       child: Container(
         constraints: BoxConstraints(maxHeight: maxHeight),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -544,7 +576,7 @@ class _AdOverlayDialog extends StatelessWidget {
                       tag: 'ad-banner-${ad.id}',
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: _buildAdImage(ad.imagePath),
+                        child: _buildAdImage(context, ad.imagePath),
                       ),
                     ),
 
@@ -619,14 +651,14 @@ class _AdOverlayDialog extends StatelessWidget {
                           ?.copyWith(
                             fontSize: 19,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                     ),
                     const SizedBox(height: AppTheme.space12),
                     Text(
                       ad.subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: context.colors.textSecondary,
                         height: 1.5,
                         fontSize: 13,
                       ),
@@ -639,7 +671,7 @@ class _AdOverlayDialog extends StatelessWidget {
                       height: 48,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: context.colors.primary,
                           foregroundColor: Colors.white,
                           elevation: 2,
                           shape: RoundedRectangleBorder(

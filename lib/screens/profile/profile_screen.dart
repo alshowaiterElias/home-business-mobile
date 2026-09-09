@@ -427,7 +427,7 @@ class ProfileScreen extends StatelessWidget {
                     iconColor: context.colors.textSecondary,
                     title: isLoggedIn ? 'تسجيل الخروج' : 'تسجيل الدخول',
                     titleColor: isLoggedIn
-                        ? AppTheme.textPrimary
+                        ? context.colors.textPrimary
                         : AppTheme.primary,
                     showArrow: false,
                     onTap: () {

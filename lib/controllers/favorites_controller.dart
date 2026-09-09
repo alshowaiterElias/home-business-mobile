@@ -6,24 +6,65 @@ import 'auth_controller.dart';
 
 class FavoritesController extends GetxController {
   var favorites = <Product>[].obs;
+  var followedStores = <dynamic>[].obs;
+  var followedStoreIds = <String>{}.obs;
   var isLoading = false.obs;
+  var isLoadingStores = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Listen to auth changes to fetch favorites when user logs in
+    // Listen to auth changes to fetch favorites & followed stores when user logs in
     final auth = Get.find<AuthController>();
     ever(auth.isLoggedIn, (bool loggedIn) {
       if (loggedIn) {
         fetchFavorites();
+        fetchFollowedStores();
       } else {
         favorites.clear();
+        followedStores.clear();
+        followedStoreIds.clear();
+        DataService.clearFollowedStores();
       }
     });
     
     if (auth.isLoggedIn.value) {
       fetchFavorites();
+      fetchFollowedStores();
     }
+  }
+
+  bool isStoreFollowed(String storeId) {
+    return followedStoreIds.contains(storeId);
+  }
+
+  Future<void> fetchFollowedStores() async {
+    final auth = Get.find<AuthController>();
+    if (!auth.isLoggedIn.value) return;
+
+    isLoadingStores.value = true;
+    try {
+      final stores = await DataService.getFollowedStores();
+      followedStores.assignAll(stores);
+      followedStoreIds.assignAll(stores.map((s) => s['id'].toString()));
+    } catch (e) {
+      debugPrint('Error fetching followed stores: $e');
+    } finally {
+      isLoadingStores.value = false;
+    }
+  }
+
+  void setStoreFollowed(String storeId, bool followed, [Map<String, dynamic>? storeData]) {
+    if (followed) {
+      followedStoreIds.add(storeId);
+      if (storeData != null && !followedStores.any((s) => s['id'] == storeId)) {
+        followedStores.insert(0, storeData);
+      }
+    } else {
+      followedStoreIds.remove(storeId);
+      followedStores.removeWhere((s) => s['id'] == storeId);
+    }
+    DataService.setStoreFollowed(storeId, followed);
   }
 
   Future<void> fetchFavorites() async {

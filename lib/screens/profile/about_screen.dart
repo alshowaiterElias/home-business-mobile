@@ -40,23 +40,11 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: AppTheme.space24),
 
             // App Logo
-            Container(
+            Image.asset(
+              'assets/icon/app_logo.png',
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primaryLight],
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                ),
-                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                boxShadow: AppTheme.shadowMd,
-              ),
-              child: const Icon(
-                Icons.store_rounded,
-                color: Colors.white,
-                size: 50,
-              ),
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: AppTheme.space16),
             Text('السوق المنزلي', style: theme.textTheme.headlineLarge),
@@ -68,13 +56,16 @@ class AboutScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppTheme.space16),
               decoration: BoxDecoration(
-                color: AppTheme.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                border: Border.all(color: AppTheme.divider),
+                border: Border.all(color: context.colors.divider),
               ),
               child: Text(
                 'السوق المنزلي هو منصة إلكترونية تهدف إلى دعم وتمكين الأسر المنتجة وأصحاب المشاريع المنزلية في اليمن. نسعى لتوفير بيئة تسوق آمنة وسهلة تربط المشترين بأفضل المنتجات المحلية المصنوعة بحب.',
-                style: theme.textTheme.bodyLarge?.copyWith(height: 1.8),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  height: 1.8,
+                  color: context.colors.textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -85,7 +76,9 @@ class AboutScreen extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 'المطور والتواصل الفني',
-                style: theme.textTheme.titleLarge,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: AppTheme.space12),
@@ -98,10 +91,10 @@ class AboutScreen extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.all(AppTheme.space16),
                 decoration: BoxDecoration(
-                  color: AppTheme.primarySurface,
+                  color: context.colors.primarySurface,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   border: Border.all(
-                    color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                    color: context.colors.primary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(
@@ -110,7 +103,7 @@ class AboutScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 26,
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: context.colors.primary,
                           child: Text(
                             'E',
                             style: theme.textTheme.headlineMedium?.copyWith(
@@ -125,12 +118,14 @@ class AboutScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'تم تطوير التطبيق بواسطة',
-                                style: theme.textTheme.bodySmall,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: context.colors.textSecondary,
+                                ),
                               ),
                               Text(
                                 'Elias Al-Showaiter',
                                 style: theme.textTheme.titleLarge?.copyWith(
-                                  color: AppTheme.primaryDark,
+                                  color: context.colors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -140,7 +135,7 @@ class AboutScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: AppTheme.space16),
-                    const Divider(),
+                    Divider(color: context.colors.divider),
                     const SizedBox(height: AppTheme.space8),
 
                     // Contact Buttons Row
@@ -167,15 +162,15 @@ class AboutScreen extends StatelessWidget {
                         // Call Button
                         TextButton.icon(
                           onPressed: () => _launchUrl('tel:$devPhone'),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.phone_rounded,
-                            color: AppTheme.primary,
+                            color: context.colors.primary,
                             size: 20,
                           ),
-                          label: const Text(
+                          label: Text(
                             'اتصال',
                             style: TextStyle(
-                              color: AppTheme.primary,
+                              color: context.colors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -204,7 +199,12 @@ class AboutScreen extends StatelessWidget {
             }),
 
             const SizedBox(height: AppTheme.space48),
-            Text('جميع الحقوق محفوظة © 2026', style: theme.textTheme.bodySmall),
+            Text(
+              'جميع الحقوق محفوظة © 2026',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
             const SizedBox(height: AppTheme.space24),
           ],
         ),

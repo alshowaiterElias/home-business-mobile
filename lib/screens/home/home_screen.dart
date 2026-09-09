@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/ad_carousel.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/data_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/data_controller.dart';
 import '../product/all_products_screen.dart';
@@ -35,22 +36,11 @@ class HomeScreen extends StatelessWidget {
             surfaceTintColor: Colors.transparent,
             title: Row(
               children: [
-                Container(
+                Image.asset(
+                  'assets/icon/app_logo.png',
                   width: 38,
                   height: 38,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.primary, AppTheme.primaryLight],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                    ),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                  ),
-                  child: const Icon(
-                    Icons.store_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(width: AppTheme.space12),
                 Column(
@@ -112,14 +102,14 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.search_rounded,
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                         size: 20,
                       ),
                       const SizedBox(width: AppTheme.space12),
                       Text(
                         'ابحث عن منتج أو متجر...',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textHint,
+                          color: context.colors.textHint,
                         ),
                       ),
                     ],
@@ -353,7 +343,13 @@ class HomeScreen extends StatelessWidget {
 
                           return GestureDetector(
                             onTap: () {
-                              Get.toNamed('/store', arguments: {'id': id});
+                              final storeMap = Map<String, dynamic>.from(store);
+                              DataService.cacheBusiness(id, storeMap);
+                              Get.toNamed('/store', arguments: {
+                                'id': id,
+                                'store': storeMap,
+                                'businessName': store['businessName'],
+                              });
                             },
                             child: Container(
                               width: 140,
@@ -687,13 +683,13 @@ class _SectionHeader extends StatelessWidget {
                   'عرض الكل',
                   style: Theme.of(
                     context,
-                  ).textTheme.labelMedium?.copyWith(color: AppTheme.primary),
+                  ).textTheme.labelMedium?.copyWith(color: context.colors.primary),
                 ),
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 12,
-                  color: AppTheme.primary,
+                  color: context.colors.primary,
                 ),
               ],
             ),

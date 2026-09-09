@@ -127,7 +127,22 @@ class StoreReferenceCard extends StatelessWidget {
         : null;
 
     return GestureDetector(
-      onTap: () => Get.toNamed('/store', arguments: {'id': reference.referenceId}),
+      onTap: () {
+        final storeMap = {
+          'id': reference.referenceId,
+          'businessName': reference.snapshotTitle,
+          'logoUrl': reference.snapshotImage,
+          if (reference.snapshotMeta != null) ...reference.snapshotMeta!,
+        };
+        if (DataService.getCachedBusiness(reference.referenceId) == null) {
+          DataService.cacheBusiness(reference.referenceId, storeMap);
+        }
+        Get.toNamed('/store', arguments: {
+          'id': reference.referenceId,
+          'businessName': reference.snapshotTitle,
+          'store': DataService.getCachedBusiness(reference.referenceId) ?? storeMap,
+        });
+      },
       child: Container(
         width: 220,
         padding: const EdgeInsets.all(12),

@@ -18,6 +18,7 @@ class AiAssistantController extends GetxController {
 
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   final RxMap<String, String> knownStores = <String, String>{}.obs;
+  final Map<String, Map<String, dynamic>> knownStoreObjects = {};
 
   final _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
@@ -50,12 +51,24 @@ class AiAssistantController extends GetxController {
         final dataCtrl = Get.find<DataController>();
         for (final s in dataCtrl.topStores) {
           if (s is Map && s['id'] != null && s['businessName'] != null) {
-            knownStores[s['businessName'].toString().trim()] = s['id'].toString();
+            final name = s['businessName'].toString().trim();
+            final id = s['id'].toString();
+            knownStores[name] = id;
+            final mapData = Map<String, dynamic>.from(s);
+            knownStoreObjects[id] = mapData;
+            knownStoreObjects[name] = mapData;
+            DataService.cacheBusiness(id, mapData);
           }
         }
         for (final s in dataCtrl.featuredStores) {
           if (s is Map && s['id'] != null && s['businessName'] != null) {
-            knownStores[s['businessName'].toString().trim()] = s['id'].toString();
+            final name = s['businessName'].toString().trim();
+            final id = s['id'].toString();
+            knownStores[name] = id;
+            final mapData = Map<String, dynamic>.from(s);
+            knownStoreObjects[id] = mapData;
+            knownStoreObjects[name] = mapData;
+            DataService.cacheBusiness(id, mapData);
           }
         }
       }
@@ -65,10 +78,20 @@ class AiAssistantController extends GetxController {
     DataService.getBusinesses().then((storeList) {
       for (final s in storeList) {
         if (s is Map && s['id'] != null && s['businessName'] != null) {
-          knownStores[s['businessName'].toString().trim()] = s['id'].toString();
+          final name = s['businessName'].toString().trim();
+          final id = s['id'].toString();
+          knownStores[name] = id;
+          final mapData = Map<String, dynamic>.from(s);
+          knownStoreObjects[id] = mapData;
+          knownStoreObjects[name] = mapData;
+          DataService.cacheBusiness(id, mapData);
         }
       }
     }).catchError((_) {});
+  }
+
+  Map<String, dynamic>? getKnownStoreObject(String idOrName) {
+    return knownStoreObjects[idOrName.trim()];
   }
 
   void _extractStoresFromMessage(ChatMessage m) {
@@ -80,12 +103,26 @@ class AiAssistantController extends GetxController {
     for (final b in m.blocks) {
       final biz = b.productData?['business'];
       if (biz is Map && biz['id'] != null && biz['businessName'] != null) {
-        knownStores[biz['businessName'].toString().trim()] = biz['id'].toString();
+        final name = biz['businessName'].toString().trim();
+        final id = biz['id'].toString();
+        knownStores[name] = id;
+        final mapData = Map<String, dynamic>.from(biz);
+        knownStoreObjects[id] = mapData;
+        knownStoreObjects[name] = mapData;
+        DataService.cacheBusiness(id, mapData);
       }
       final storeName = b.productData?['storeName'];
       final storeId = b.productData?['storeId'] ?? b.storeId;
       if (storeName != null && storeId != null) {
-        knownStores[storeName.toString().trim()] = storeId.toString();
+        final name = storeName.toString().trim();
+        final id = storeId.toString();
+        knownStores[name] = id;
+        if (b.productData?['business'] is Map) {
+          final mapData = Map<String, dynamic>.from(b.productData!['business']);
+          knownStoreObjects[id] = mapData;
+          knownStoreObjects[name] = mapData;
+          DataService.cacheBusiness(id, mapData);
+        }
       }
     }
   }
@@ -119,9 +156,46 @@ class AiAssistantController extends GetxController {
       resolvedId = knownStores[storeName.trim()];
     }
 
+    final storeObj = (resolvedId != null ? knownStoreObjects[resolvedId] : null) ??
+        knownStoreObjects[storeName.trim()];
+
     if (resolvedId != null && resolvedId.isNotEmpty) {
-      Get.toNamed('/store', arguments: {'id': resolvedId});
+      if (storeObj != null) {
+        DataService.cacheBusiness(resolvedId, storeObj);
+      }
+      Get.toNamed('/store', arguments: {
+        'id': resolvedId,
+        if (storeObj != null) 'store': storeObj,
+        'businessName': storeName.trim(),
+      });
       return;
+    }
+
+    // Check DataController synchronously before hitting network
+    if (Get.isRegistered<DataController>()) {
+      final dataCtrl = Get.find<DataController>();
+      final localMatch = dataCtrl.topStores.firstWhereOrNull(
+        (s) => s is Map && s['businessName'] != null &&
+            s['businessName'].toString().trim().toLowerCase() == storeName.trim().toLowerCase(),
+      ) ?? dataCtrl.featuredStores.firstWhereOrNull(
+        (s) => s is Map && s['businessName'] != null &&
+            s['businessName'].toString().trim().toLowerCase() == storeName.trim().toLowerCase(),
+      );
+
+      if (localMatch != null && localMatch['id'] != null) {
+        final id = localMatch['id'].toString();
+        final mapData = Map<String, dynamic>.from(localMatch as Map);
+        knownStores[storeName.trim()] = id;
+        knownStoreObjects[id] = mapData;
+        knownStoreObjects[storeName.trim()] = mapData;
+        DataService.cacheBusiness(id, mapData);
+        Get.toNamed('/store', arguments: {
+          'id': id,
+          'store': mapData,
+          'businessName': storeName.trim(),
+        });
+        return;
+      }
     }
 
     try {
@@ -132,7 +206,15 @@ class AiAssistantController extends GetxController {
       if (match != null && match['id'] != null) {
         final id = match['id'].toString();
         knownStores[storeName.trim()] = id;
-        Get.toNamed('/store', arguments: {'id': id});
+        final mapData = Map<String, dynamic>.from(match);
+        knownStoreObjects[id] = mapData;
+        knownStoreObjects[storeName.trim()] = mapData;
+        DataService.cacheBusiness(id, mapData);
+        Get.toNamed('/store', arguments: {
+          'id': id,
+          'store': mapData,
+          'businessName': storeName.trim(),
+        });
         return;
       }
     } catch (_) {}

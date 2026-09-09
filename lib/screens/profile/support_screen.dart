@@ -65,18 +65,29 @@ class SupportScreen extends StatelessWidget {
             Container(
               width: 100,
               height: 100,
-              decoration: const BoxDecoration(
-                color: AppTheme.primarySurface,
+              decoration: BoxDecoration(
+                color: context.colors.primarySurface,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.support_agent_rounded, size: 50, color: AppTheme.primary),
+              child: Icon(
+                Icons.support_agent_rounded,
+                size: 50,
+                color: context.colors.primary,
+              ),
             ),
             const SizedBox(height: AppTheme.space24),
-            Text('كيف يمكننا مساعدتك؟', style: theme.textTheme.headlineMedium),
+            Text(
+              'كيف يمكننا مساعدتك؟',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: context.colors.textPrimary,
+              ),
+            ),
             const SizedBox(height: AppTheme.space8),
             Text(
               'فريق الدعم الفني متواجد للإجابة على استفساراتك وحل أي مشكلة تواجهك في التطبيق.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: context.colors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppTheme.space48),
@@ -100,7 +111,7 @@ class SupportScreen extends StatelessWidget {
                     icon: Icons.phone_in_talk_rounded,
                     title: 'اتصال هاتفي مباشر',
                     subtitle: phone,
-                    color: AppTheme.primary,
+                    color: context.colors.primary,
                     onTap: () => _launchPhoneCall(phone),
                   ),
                   const SizedBox(height: AppTheme.space16),
@@ -116,12 +127,14 @@ class SupportScreen extends StatelessWidget {
             }),
 
             const SizedBox(height: AppTheme.space48),
-            const Divider(),
+            Divider(color: context.colors.divider),
             const SizedBox(height: AppTheme.space16),
             
             Text(
               'أوقات الدعم والاستجابة: متواجدون على مدار 24 ساعة لخدمتكم', 
-              style: theme.textTheme.bodySmall, 
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ), 
               textAlign: TextAlign.center,
             ),
           ],
@@ -154,9 +167,9 @@ class _ContactOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppTheme.space16),
         decoration: BoxDecoration(
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.colors.divider),
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          color: AppTheme.surface,
+          color: context.colors.surface,
         ),
         child: Row(
           children: [
@@ -173,17 +186,29 @@ class _ContactOption extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle, 
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 0.5), 
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      letterSpacing: 0.5,
+                      color: context.colors.textSecondary,
+                    ), 
                     textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppTheme.textHint),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: context.colors.textHint,
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/network/api_client.dart';
+import '../core/utils/category_icon_helper.dart';
 
 /// Centralised category model used across the entire app.
 class Category {
@@ -20,26 +21,6 @@ class Category {
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    // Map backend icon string to Flutter IconData
-    IconData getIcon(String? iconName) {
-      switch (iconName) {
-        case 'restaurant':
-          return Icons.restaurant_rounded;
-        case 'checkroom':
-          return Icons.checkroom_rounded;
-        case 'spa':
-          return Icons.spa_rounded;
-        case 'palette':
-          return Icons.palette_rounded;
-        case 'weekend':
-          return Icons.weekend_rounded;
-        case 'face':
-          return Icons.face_retouching_natural;
-        default:
-          return Icons.category_rounded;
-      }
-    }
-
     // Map some generic colors based on ID or Name
     final colors = [
       const Color(0xFFFF7043),
@@ -60,7 +41,7 @@ class Category {
     return Category(
       id: json['id'] ?? '',
       nameAr: json['nameAr'] ?? '',
-      icon: getIcon(json['iconUrl']),
+      icon: CategoryIconHelper.getIcon(json['iconUrl']),
       color: color,
       productCount: json['_count']?['products'] ?? 0,
       children: children,

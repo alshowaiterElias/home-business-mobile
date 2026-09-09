@@ -59,6 +59,28 @@ class DataService {
   static final Map<String, Map<String, dynamic>> _businessCache = {};
   static final Map<String, Future<Map<String, dynamic>>> _inFlightBusinessRequests = {};
 
+  // Track globally followed store IDs for instant 0ms follow state resolution
+  static final Set<String> _followedStoreIds = {};
+  static bool hasLoadedFollowedStores = false;
+
+  static bool? isStoreFollowed(String storeId) {
+    if (!hasLoadedFollowedStores) return null;
+    return _followedStoreIds.contains(storeId);
+  }
+
+  static void setStoreFollowed(String storeId, bool followed) {
+    if (followed) {
+      _followedStoreIds.add(storeId);
+    } else {
+      _followedStoreIds.remove(storeId);
+    }
+  }
+
+  static void clearFollowedStores() {
+    _followedStoreIds.clear();
+    hasLoadedFollowedStores = false;
+  }
+
   // Fetch Single Product with in-memory caching & request deduplication
   static Future<Map<String, dynamic>> getProductById(String id) async {
     if (_productCache.containsKey(id)) {
@@ -89,8 +111,11 @@ class DataService {
   }
 
   // Fetch Business Profile with in-memory caching & request deduplication
-  static Future<Map<String, dynamic>> getBusinessById(String id) async {
-    if (_businessCache.containsKey(id)) {
+  static Future<Map<String, dynamic>> getBusinessById(
+    String id, {
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _businessCache.containsKey(id)) {
       return _businessCache[id]!;
     }
     if (_inFlightBusinessRequests.containsKey(id)) {
@@ -100,6 +125,18 @@ class DataService {
     final future = _fetchAndCacheBusiness(id);
     _inFlightBusinessRequests[id] = future;
     return future;
+  }
+
+  /// Get synchronously cached business data if present
+  static Map<String, dynamic>? getCachedBusiness(String id) {
+    return _businessCache[id];
+  }
+
+  /// Prime or update the business cache in memory
+  static void cacheBusiness(String id, Map<String, dynamic> data) {
+    if (data.isNotEmpty) {
+      _businessCache[id] = Map<String, dynamic>.from(data);
+    }
   }
 
   static Future<Map<String, dynamic>> _fetchAndCacheBusiness(String id) async {
@@ -145,7 +182,25 @@ class DataService {
   static Future<Map<String, dynamic>> toggleFollowStore(String businessId) async {
     try {
       final response = await ApiClient.instance.post('/business/$businessId/follow');
-      return response.data['data'] ?? {};
+      final data = (response.data['data'] as Map<String, dynamic>?) ?? {};
+      final isFollowed = data['isFollowed'] == true;
+
+      setStoreFollowed(businessId, isFollowed);
+
+      // Keep cache in sync so store screen retains follow state upon revisit
+      if (_businessCache.containsKey(businessId)) {
+        _businessCache[businessId]!['isFollowed'] = isFollowed;
+        if (data['followersCount'] != null) {
+          _businessCache[businessId]!['followersCount'] = data['followersCount'];
+        }
+      } else {
+        _businessCache[businessId] = {
+          'id': businessId,
+          'isFollowed': isFollowed,
+          if (data['followersCount'] != null) 'followersCount': data['followersCount'],
+        };
+      }
+      return data;
     } catch (e) {
       rethrow;
     }
@@ -155,7 +210,21 @@ class DataService {
   static Future<List<dynamic>> getFollowedStores() async {
     try {
       final response = await ApiClient.instance.get('/business/followed');
-      return response.data['data'] ?? [];
+      final list = (response.data['data'] as List<dynamic>?) ?? [];
+      _followedStoreIds.clear();
+      for (final s in list) {
+        if (s is Map && s['id'] != null) {
+          final id = s['id'].toString();
+          _followedStoreIds.add(id);
+          // Prime individual store cache as well
+          cacheBusiness(id, {
+            ...s,
+            'isFollowed': true,
+          });
+        }
+      }
+      hasLoadedFollowedStores = true;
+      return list;
     } catch (e) {
       rethrow;
     }
@@ -220,6 +289,20 @@ class DataService {
       );
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // Fetch Report Reasons
+  static Future<List<String>> getReportReasons(String targetType) async {
+    try {
+      final response = await ApiClient.instance.get(
+        '/taxonomy/report-reasons',
+        queryParameters: {'targetType': targetType},
+      );
+      final List data = response.data['data'] ?? [];
+      return data.map((item) => item['reasonAr'].toString()).toList();
+    } catch (e) {
+      return [];
     }
   }
 

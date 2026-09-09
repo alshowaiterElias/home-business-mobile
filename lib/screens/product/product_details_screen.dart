@@ -7,6 +7,7 @@ import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/report_sheet.dart';
 import '../../controllers/product_details_controller.dart';
+import '../../core/network/data_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../core/network/whatsapp_service.dart';
 import '../../core/network/chat_service.dart';
@@ -290,10 +291,26 @@ class ProductDetailsScreen extends StatelessWidget {
                                   ),
                                 ),
                                 OutlinedButton(
-                                  onPressed: () => Get.toNamed(
-                                    '/store',
-                                    arguments: {'id': product.businessId},
-                                  ),
+                                  onPressed: () {
+                                    final storeMap = {
+                                      'id': product.businessId,
+                                      'businessName': product.sellerName,
+                                      'logoUrl': product.sellerAvatar,
+                                      'contactPhone': product.sellerPhone,
+                                      'city': {'nameAr': product.location},
+                                    };
+                                    if (DataService.getCachedBusiness(product.businessId) == null) {
+                                      DataService.cacheBusiness(product.businessId, storeMap);
+                                    }
+                                    Get.toNamed(
+                                      '/store',
+                                      arguments: {
+                                        'id': product.businessId,
+                                        'businessName': product.sellerName,
+                                        'store': DataService.getCachedBusiness(product.businessId) ?? storeMap,
+                                      },
+                                    );
+                                  },
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,

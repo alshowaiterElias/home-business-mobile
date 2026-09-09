@@ -135,12 +135,16 @@ class CreateStoreScreen extends StatelessWidget {
                   horizontal: AppTheme.space16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.background,
+                  color: context.colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  border: Border.all(color: AppTheme.divider),
+                  border: Border.all(color: context.colors.divider),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    dropdownColor: context.colors.surface,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
                     isExpanded: true,
                     menuMaxHeight: 250,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -150,19 +154,24 @@ class CreateStoreScreen extends StatelessWidget {
                     hint: Text(
                       'اختر المحافظة',
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: AppTheme.textHint,
+                      color: context.colors.textHint,
                     ),
                     items: controller.locations.map<DropdownMenuItem<String>>((
                       gov,
                     ) {
                       return DropdownMenuItem<String>(
                         value: gov['id'],
-                        child: Text(gov['nameAr']),
+                        child: Text(
+                          gov['nameAr'],
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: context.colors.textPrimary,
+                          ),
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -188,12 +197,16 @@ class CreateStoreScreen extends StatelessWidget {
                     horizontal: AppTheme.space16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
+                    color: context.colors.surfaceVariant,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    border: Border.all(color: AppTheme.divider),
+                    border: Border.all(color: context.colors.divider),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
+                      dropdownColor: context.colors.surface,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: context.colors.textPrimary,
+                      ),
                       isExpanded: true,
                       menuMaxHeight: 250,
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -203,12 +216,12 @@ class CreateStoreScreen extends StatelessWidget {
                       hint: Text(
                         'اختر المدينة',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.textHint,
+                          color: context.colors.textHint,
                         ),
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                       items: () {
                         final gov = controller.locations.firstWhere(
@@ -220,7 +233,12 @@ class CreateStoreScreen extends StatelessWidget {
                         return cities.map<DropdownMenuItem<String>>((city) {
                           return DropdownMenuItem<String>(
                             value: city['id'],
-                            child: Text(city['nameAr']),
+                            child: Text(
+                              city['nameAr'],
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
                           );
                         }).toList();
                       }(),

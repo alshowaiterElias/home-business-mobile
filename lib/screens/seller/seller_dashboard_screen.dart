@@ -757,17 +757,17 @@ class AddProductScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 180,
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: context.colors.surfaceVariant,
                       borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                      border: Border.all(color: AppTheme.divider, width: 1.5),
+                      border: Border.all(color: context.colors.divider, width: 1.5),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.add_photo_alternate_outlined,
                           size: 48,
-                          color: AppTheme.textHint,
+                          color: context.colors.textHint,
                         ),
                         const SizedBox(height: AppTheme.space8),
                         Text(
@@ -794,16 +794,16 @@ class AddProductScreen extends StatelessWidget {
                             width: 100,
                             margin: const EdgeInsets.only(left: 12),
                             decoration: BoxDecoration(
-                              color: AppTheme.background,
+                              color: context.colors.surfaceVariant,
                               borderRadius: BorderRadius.circular(
                                 AppTheme.radiusMd,
                               ),
-                              border: Border.all(color: AppTheme.divider),
+                              border: Border.all(color: context.colors.divider),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.add,
-                                color: AppTheme.textHint,
+                                color: context.colors.textHint,
                                 size: 32,
                               ),
                             ),
@@ -885,11 +885,11 @@ class AddProductScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
-                            color: AppTheme.background,
+                            color: context.colors.surfaceVariant,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusMd,
                             ),
-                            border: Border.all(color: AppTheme.divider),
+                            border: Border.all(color: context.colors.divider),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: Obx(() {
@@ -902,6 +902,10 @@ class AddProductScreen extends StatelessWidget {
                                     availableUnits.first;
                               }
                               return DropdownButton<String>(
+                                dropdownColor: context.colors.surface,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: context.colors.textPrimary,
+                                ),
                                 isExpanded: true,
                                 menuMaxHeight: 250,
                                 borderRadius: BorderRadius.circular(
@@ -912,7 +916,12 @@ class AddProductScreen extends StatelessWidget {
                                     .map(
                                       (u) => DropdownMenuItem<String>(
                                         value: u,
-                                        child: Text(u),
+                                        child: Text(
+                                          u,
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            color: context.colors.textPrimary,
+                                          ),
+                                        ),
                                       ),
                                     )
                                     .toList(),
@@ -940,24 +949,38 @@ class AddProductScreen extends StatelessWidget {
                   horizontal: AppTheme.space16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.background,
+                  color: context.colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  border: Border.all(color: AppTheme.divider),
+                  border: Border.all(color: context.colors.divider),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    dropdownColor: context.colors.surface,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
                     isExpanded: true,
                     menuMaxHeight: 250,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     value: controller.selectedCategoryId.value.isEmpty
                         ? null
                         : controller.selectedCategoryId.value,
-                    hint: const Text('اختر القسم'),
+                    hint: Text(
+                      'اختر القسم',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: context.colors.textHint,
+                      ),
+                    ),
                     items: dataController.categories
                         .map(
                           (c) => DropdownMenuItem<String>(
                             value: c['id'],
-                            child: Text(c['nameAr']),
+                            child: Text(
+                              c['nameAr'],
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
                           ),
                         )
                         .toList(),
@@ -996,14 +1019,18 @@ class AddProductScreen extends StatelessWidget {
                           horizontal: AppTheme.space16,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.background,
+                          color: context.colors.surfaceVariant,
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusMd,
                           ),
-                          border: Border.all(color: AppTheme.divider),
+                          border: Border.all(color: context.colors.divider),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
+                            dropdownColor: context.colors.surface,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: context.colors.textPrimary,
+                            ),
                             isExpanded: true,
                             menuMaxHeight: 250,
                             borderRadius: BorderRadius.circular(
@@ -1013,12 +1040,22 @@ class AddProductScreen extends StatelessWidget {
                                 controller.selectedSubCategoryId.value.isEmpty
                                 ? null
                                 : controller.selectedSubCategoryId.value,
-                            hint: const Text('بدون قسم فرعي'),
+                            hint: Text(
+                              'بدون قسم فرعي',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: context.colors.textHint,
+                              ),
+                            ),
                             items: (parentCat['children'] as List<dynamic>)
                                 .map(
                                   (c) => DropdownMenuItem<String>(
                                     value: c['id'],
-                                    child: Text(c['nameAr']),
+                                    child: Text(
+                                      c['nameAr'],
+                                      style: theme.textTheme.bodyLarge?.copyWith(
+                                        color: context.colors.textPrimary,
+                                      ),
+                                    ),
                                   ),
                                 )
                                 .toList(),
@@ -1044,12 +1081,16 @@ class AddProductScreen extends StatelessWidget {
                   horizontal: AppTheme.space16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.background,
+                  color: context.colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  border: Border.all(color: AppTheme.divider),
+                  border: Border.all(color: context.colors.divider),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    dropdownColor: context.colors.surface,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
                     isExpanded: true,
                     menuMaxHeight: 250,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -1058,7 +1099,12 @@ class AddProductScreen extends StatelessWidget {
                         .map(
                           (c) => DropdownMenuItem<String>(
                             value: c,
-                            child: Text(c),
+                            child: Text(
+                              c,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
                           ),
                         )
                         .toList(),
@@ -1400,12 +1446,16 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                   horizontal: AppTheme.space16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.background,
+                  color: context.colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  border: Border.all(color: AppTheme.divider),
+                  border: Border.all(color: context.colors.divider),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    dropdownColor: context.colors.surface,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
                     isExpanded: true,
                     menuMaxHeight: 250,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -1413,18 +1463,23 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                     hint: Text(
                       'اختر المحافظة',
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: AppTheme.textHint,
+                      color: context.colors.textHint,
                     ),
                     items: dataController.locations
                         .map<DropdownMenuItem<String>>((gov) {
                           return DropdownMenuItem<String>(
                             value: gov['id'],
-                            child: Text(gov['nameAr']),
+                            child: Text(
+                              gov['nameAr'],
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
                           );
                         })
                         .toList(),
@@ -1461,12 +1516,16 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                     horizontal: AppTheme.space16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
+                    color: context.colors.surfaceVariant,
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    border: Border.all(color: AppTheme.divider),
+                    border: Border.all(color: context.colors.divider),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
+                      dropdownColor: context.colors.surface,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: context.colors.textPrimary,
+                      ),
                       isExpanded: true,
                       menuMaxHeight: 250,
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -1474,17 +1533,22 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                       hint: Text(
                         'اختر المدينة',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.textHint,
+                          color: context.colors.textHint,
                         ),
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: AppTheme.textHint,
+                        color: context.colors.textHint,
                       ),
                       items: cities.map<DropdownMenuItem<String>>((city) {
                         return DropdownMenuItem<String>(
                           value: city['id'],
-                          child: Text(city['nameAr']),
+                          child: Text(
+                            city['nameAr'],
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: context.colors.textPrimary,
+                            ),
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {

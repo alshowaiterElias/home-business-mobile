@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/data_service.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/chat_models.dart';
@@ -90,7 +91,21 @@ class _ChatScreenState extends State<ChatScreen> {
           onTap: () {
             // Navigate to store/profile if business
             if (otherUser?.business != null) {
-              Get.toNamed('/store', arguments: {'id': otherUser!.business!.id});
+              final b = otherUser!.business!;
+              final storeMap = {
+                'id': b.id,
+                'businessName': b.businessName,
+                'logoUrl': b.logoUrl,
+                'contactPhone': b.contactPhone,
+              };
+              if (DataService.getCachedBusiness(b.id) == null) {
+                DataService.cacheBusiness(b.id, storeMap);
+              }
+              Get.toNamed('/store', arguments: {
+                'id': b.id,
+                'businessName': b.businessName,
+                'store': DataService.getCachedBusiness(b.id) ?? storeMap,
+              });
             }
           },
           child: Row(

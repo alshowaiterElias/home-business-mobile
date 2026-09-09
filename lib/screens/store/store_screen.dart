@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
@@ -12,6 +13,9 @@ import '../../core/network/whatsapp_service.dart';
 import '../../core/network/chat_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/conversation_controller.dart';
+import '../../controllers/data_controller.dart';
+import '../../controllers/ai_assistant_controller.dart';
+import '../../controllers/favorites_controller.dart';
 import '../../models/chat_models.dart';
 import '../../widgets/ask_marketplace_ai_button.dart';
 
@@ -24,64 +28,260 @@ class StoreScreen extends StatefulWidget {
 
 class _StoreScreenState extends State<StoreScreen> {
   bool _isLoading = true;
+  bool _isFetchingProducts = true;
   Map<String, dynamic>? _businessData;
   List<Product> _products = [];
-  bool _isFollowed = false;
+  bool? _isFollowed;
   int _followersCount = 0;
   bool _followLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _initFromCacheOrArgs();
     _fetchBusinessData();
+  }
+
+  void _initFromCacheOrArgs() {
+    final args = Get.arguments as Map<String, dynamic>?;
+    final businessId = args?['id'] as String? ?? '';
+    final passedStore = args?['store'] as Map<String, dynamic>?;
+    final fallbackName = args?['businessName'] as String?;
+
+    final auth = Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    final isLoggedIn = auth?.isLoggedIn.value == true;
+
+    // Resolve follow status accurately and synchronously
+    bool? resolvedFollow;
+    if (!isLoggedIn) {
+      resolvedFollow = false;
+    } else if (businessId.isNotEmpty) {
+      // 1. Check DataService global followed stores
+      final fromDataService = DataService.isStoreFollowed(businessId);
+      if (fromDataService != null) {
+        resolvedFollow = fromDataService;
+      }
+
+      // 2. Check FavoritesController
+      if (resolvedFollow == null && Get.isRegistered<FavoritesController>()) {
+        final favCtrl = Get.find<FavoritesController>();
+        if (favCtrl.followedStoreIds.isNotEmpty) {
+          resolvedFollow = favCtrl.isStoreFollowed(businessId);
+        }
+      }
+
+      // 3. Check DataService cached business
+      final cached = DataService.getCachedBusiness(businessId);
+      if (resolvedFollow == null && cached != null && cached['isFollowed'] is bool) {
+        resolvedFollow = cached['isFollowed'] as bool;
+      }
+
+      // 4. Check passedStore arguments
+      if (resolvedFollow == null && passedStore != null && passedStore['isFollowed'] is bool) {
+        resolvedFollow = passedStore['isFollowed'] as bool;
+      }
+    }
+    _isFollowed = resolvedFollow;
+
+    // 1. Start with explicitly passed store object if available
+    Map<String, dynamic>? sourceData = passedStore != null
+        ? Map<String, dynamic>.from(passedStore)
+        : null;
+
+    // 2. Overlay or populate from DataService synchronous in-memory cache
+    final cached = businessId.isNotEmpty ? DataService.getCachedBusiness(businessId) : null;
+    if (cached != null) {
+      if (sourceData == null) {
+        sourceData = Map<String, dynamic>.from(cached);
+      } else {
+        if (cached['followersCount'] != null) {
+          sourceData['followersCount'] = cached['followersCount'];
+        }
+        if (sourceData['products'] == null && cached['products'] != null) {
+          sourceData['products'] = cached['products'];
+        }
+      }
+    }
+
+    // 3. Populate from DataController topStores if still empty
+    if (sourceData == null && businessId.isNotEmpty && Get.isRegistered<DataController>()) {
+      final dataCtrl = Get.find<DataController>();
+      for (final s in dataCtrl.topStores) {
+        if (s is Map && s['id'] == businessId) {
+          sourceData = Map<String, dynamic>.from(s);
+          break;
+        }
+      }
+    }
+
+    // 4. Populate from AiAssistantController known stores if still empty
+    if (sourceData == null && businessId.isNotEmpty && Get.isRegistered<AiAssistantController>()) {
+      sourceData = Get.find<AiAssistantController>().getKnownStoreObject(businessId);
+    }
+
+    // 5. Fallback lookup by store name in AiAssistantController
+    if (sourceData == null && fallbackName != null && fallbackName.isNotEmpty && Get.isRegistered<AiAssistantController>()) {
+      sourceData = Get.find<AiAssistantController>().getKnownStoreObject(fallbackName);
+    }
+
+    if (_isFollowed == null && sourceData != null && sourceData['isFollowed'] is bool) {
+      _isFollowed = sourceData['isFollowed'] as bool;
+    }
+
+    if (sourceData != null) {
+      _applyBusinessData(sourceData);
+      _isLoading = false;
+      if (_products.isNotEmpty) {
+        _isFetchingProducts = false;
+      }
+    } else if (fallbackName != null && fallbackName.isNotEmpty) {
+      // Partial initialization: show header immediately while data fetches
+      _businessData = {
+        'id': businessId,
+        'businessName': fallbackName,
+      };
+      _isLoading = false;
+    }
+  }
+
+  void _applyBusinessData(Map<String, dynamic> data) {
+    _businessData = data;
+
+    // Only update _isFollowed if the incoming data has an explicit boolean
+    if (data['isFollowed'] is bool) {
+      final newFollow = data['isFollowed'] as bool;
+      _isFollowed = newFollow;
+      final bizId = (data['id'] ?? _businessData?['id'])?.toString();
+      if (bizId != null && bizId.isNotEmpty) {
+        DataService.setStoreFollowed(bizId, newFollow);
+        if (Get.isRegistered<FavoritesController>()) {
+          Get.find<FavoritesController>().setStoreFollowed(bizId, newFollow, data);
+        }
+      }
+    }
+
+    _followersCount = data['followersCount'] as int? ??
+        (data['_count']?['followers'] as int? ?? _followersCount);
+
+    final productsData = data['products'] as List<dynamic>? ?? [];
+    if (productsData.isNotEmpty) {
+      _products = productsData.map((p) {
+        if (p is Product) return p;
+        final productMap = Map<String, dynamic>.from(p as Map);
+        productMap['business'] = data;
+        return Product.fromJson(productMap);
+      }).toList();
+    }
   }
 
   Future<void> _fetchBusinessData() async {
     final args = Get.arguments as Map<String, dynamic>?;
-    final businessId = args?['id'] as String? ?? '';
+    final businessId = args?['id'] as String? ?? _businessData?['id'] as String? ?? '';
 
     if (businessId.isEmpty) {
-      if (mounted) setState(() => _isLoading = false);
-      return;
-    }
-    try {
-      final data = await DataService.getBusinessById(businessId);
-      final productsData = data['products'] as List<dynamic>? ?? [];
-
       if (mounted) {
         setState(() {
-          _businessData = data;
-          _isFollowed = data['isFollowed'] == true;
-          _followersCount = data['followersCount'] as int? ?? 0;
-          _products = productsData.map((p) {
-            final productMap = Map<String, dynamic>.from(p);
-            productMap['business'] = data;
-            return Product.fromJson(productMap);
-          }).toList();
           _isLoading = false;
+          _isFetchingProducts = false;
+        });
+      }
+      return;
+    }
+
+    try {
+      final data = await DataService.getBusinessById(businessId, forceRefresh: true);
+      if (mounted) {
+        setState(() {
+          _applyBusinessData(data);
+          _isLoading = false;
+          _isFetchingProducts = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          if (_businessData == null) _isLoading = false;
+          _isFetchingProducts = false;
+        });
+      }
     }
   }
 
   Future<void> _toggleFollow() async {
     if (_followLoading) return;
-    final businessId = (Get.arguments as Map<String, dynamic>?)?['id'] as String? ?? _businessData?['id'] ?? '';
+    final businessId = _businessData?['id'] as String? ??
+        (Get.arguments as Map<String, dynamic>?)?['id'] as String? ??
+        '';
     if (businessId.isEmpty) return;
+
+    final auth = Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    if (auth?.isLoggedIn.value != true) {
+      Get.snackbar(
+        'تنبيه',
+        'يرجى تسجيل الدخول أولاً لمتابعة هذا المتجر',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
     setState(() => _followLoading = true);
     try {
       final result = await DataService.toggleFollowStore(businessId);
       if (mounted) {
+        final newFollowState = result['isFollowed'] == true;
+        final currentCount = _followersCount;
+        final newFollowersCount = result['followersCount'] as int? ??
+            (_isFollowed == true
+                ? (currentCount > 0 ? currentCount - 1 : 0)
+                : currentCount + 1);
+
         setState(() {
-          _isFollowed = result['isFollowed'] == true;
-          _followersCount = result['followersCount'] as int? ?? _followersCount;
+          _isFollowed = newFollowState;
+          _followersCount = newFollowersCount;
+          if (_businessData != null) {
+            _businessData!['isFollowed'] = newFollowState;
+            _businessData!['followersCount'] = newFollowersCount;
+          }
         });
+
+        // Keep DataService & FavoritesController synchronized
+        DataService.cacheBusiness(businessId, {
+          if (_businessData != null) ..._businessData!,
+          'id': businessId,
+          'isFollowed': newFollowState,
+          'followersCount': newFollowersCount,
+        });
+        DataService.setStoreFollowed(businessId, newFollowState);
+
+        if (Get.isRegistered<FavoritesController>()) {
+          Get.find<FavoritesController>().setStoreFollowed(
+            businessId,
+            newFollowState,
+            _businessData,
+          );
+        }
+
+        // Keep DataController topStores synchronized if present
+        if (Get.isRegistered<DataController>()) {
+          final dataCtrl = Get.find<DataController>();
+          for (var s in dataCtrl.topStores) {
+            if (s is Map && s['id'] == businessId) {
+              s['isFollowed'] = newFollowState;
+              s['followersCount'] = newFollowersCount;
+            }
+          }
+          for (var s in dataCtrl.featuredStores) {
+            if (s is Map && s['id'] == businessId) {
+              s['isFollowed'] = newFollowState;
+              s['followersCount'] = newFollowersCount;
+            }
+          }
+        }
+
         Get.snackbar(
           'تحديث',
-          _isFollowed ? 'تمت متابعة المتجر بنجاح 🌟' : 'تم إلغاء متابعة المتجر',
+          newFollowState ? 'تمت متابعة المتجر بنجاح 🌟' : 'تم إلغاء متابعة المتجر',
           backgroundColor: AppTheme.primary,
           colorText: Colors.white,
           duration: const Duration(seconds: 2),
@@ -89,9 +289,9 @@ class _StoreScreenState extends State<StoreScreen> {
       }
     } catch (e) {
       Get.snackbar(
-        'تنبيه',
-        'يرجى تسجيل الدخول أولاً لمتابعة هذا المتجر',
-        backgroundColor: Colors.orange,
+        'خطأ',
+        'تعذر تحديث المتابعة، يرجى المحاولة لاحقاً',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
@@ -236,11 +436,45 @@ class _StoreScreenState extends State<StoreScreen> {
     final theme = Theme.of(context);
 
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return _buildStoreSkeleton(context);
+    }
+
+    if (_businessData == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.storefront_outlined, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('تعذر تحميل بيانات المتجر'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                    _isFetchingProducts = true;
+                  });
+                  _fetchBusinessData();
+                },
+                child: const Text('إعادة المحاولة'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final businessName = _businessData?['businessName'] ?? 'متجر غير معروف';
     final location = _businessData?['city']?['nameAr'] ?? 'غير محدد';
+    final isFollowKnown = _isFollowed != null;
+    final isFollowing = _isFollowed == true;
     final activeSince = _businessData?['createdAt'] != null
         ? DateTime.parse(_businessData!['createdAt']).year.toString()
         : '٢٠٢٤';
@@ -425,21 +659,27 @@ class _StoreScreenState extends State<StoreScreen> {
                               ),
                             ],
                           ),
-                          // Subtle Animated Follow Button overlaying the background image
+                          // Subtle Animated Follow Button with immediate true-state rendering
                           GestureDetector(
-                            onTap: _followLoading ? null : _toggleFollow,
+                            onTap: (_followLoading || !isFollowKnown) ? null : _toggleFollow,
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
+                              duration: const Duration(milliseconds: 250),
                               curve: Curves.easeInOut,
                               margin: const EdgeInsets.only(top: 8),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                               decoration: BoxDecoration(
-                                color: _isFollowed
-                                    ? Colors.teal.shade700.withValues(alpha: 0.95)
-                                    : Colors.black.withValues(alpha: 0.55),
+                                color: !isFollowKnown
+                                    ? Colors.black.withValues(alpha: 0.35)
+                                    : isFollowing
+                                        ? Colors.teal.shade700.withValues(alpha: 0.95)
+                                        : Colors.black.withValues(alpha: 0.55),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: _isFollowed ? Colors.teal.shade300 : Colors.white54,
+                                  color: !isFollowKnown
+                                      ? Colors.white24
+                                      : isFollowing
+                                          ? Colors.teal.shade300
+                                          : Colors.white54,
                                   width: 1.2,
                                 ),
                                 boxShadow: [
@@ -459,37 +699,42 @@ class _StoreScreenState extends State<StoreScreen> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : AnimatedSwitcher(
-                                      duration: const Duration(milliseconds: 250),
-                                      transitionBuilder: (child, animation) {
-                                        return ScaleTransition(
-                                          scale: animation,
-                                          child: FadeTransition(opacity: animation, child: child),
-                                        );
-                                      },
-                                      child: Row(
-                                        key: ValueKey<bool>(_isFollowed),
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            _isFollowed
-                                                ? Icons.check_circle_rounded
-                                                : Icons.person_add_alt_1_rounded,
-                                            size: 15,
-                                            color: Colors.white,
+                                  : !isFollowKnown
+                                      ? const SizedBox(
+                                          width: 60,
+                                          height: 16,
+                                        )
+                                      : AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 250),
+                                          transitionBuilder: (child, animation) {
+                                            return ScaleTransition(
+                                              scale: animation,
+                                              child: FadeTransition(opacity: animation, child: child),
+                                            );
+                                          },
+                                          child: Row(
+                                            key: ValueKey<bool>(isFollowing),
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                isFollowing
+                                                    ? Icons.check_circle_rounded
+                                                    : Icons.person_add_alt_1_rounded,
+                                                size: 15,
+                                                color: Colors.white,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                isFollowing ? 'مُتابَع' : 'متابعة المتجر',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            _isFollowed ? 'مُتابَع' : 'متابعة المتجر',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                        ),
                             ),
                           ),
                         ],
@@ -652,34 +897,137 @@ class _StoreScreenState extends State<StoreScreen> {
             ),
 
             // Products grid
-            _products.isEmpty
-                ? const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Center(child: Text('لا يوجد منتجات حاليا')),
+            if (_products.isEmpty && _isFetchingProducts)
+              _buildProductGridSkeleton(context)
+            else if (_products.isEmpty)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: Text('لا يوجد منتجات حاليا')),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.all(AppTheme.space16),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => ProductCard(
+                      product: _products[i],
+                      heroTagPrefix: 'store-',
                     ),
-                  )
-                : SliverPadding(
-                    padding: const EdgeInsets.all(AppTheme.space16),
-                    sliver: SliverGrid(
-                      delegate: SliverChildBuilderDelegate(
-                        (_, i) => ProductCard(
-                          product: _products[i],
-                          heroTagPrefix: 'store-',
-                        ),
-                        childCount: _products.length,
-                      ),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.60,
-                            crossAxisSpacing: 14,
-                            mainAxisSpacing: 14,
-                          ),
-                    ),
+                    childCount: _products.length,
                   ),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.60,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductGridSkeleton(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(AppTheme.space16),
+      sliver: SliverGrid(
+        delegate: SliverChildBuilderDelegate(
+          (_, __) => Shimmer.fromColors(
+            baseColor: context.colors.shimmerBase,
+            highlightColor: context.colors.shimmerHighlight,
+            child: Container(
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              ),
+            ),
+          ),
+          childCount: 4,
+        ),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.60,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreSkeleton(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 230,
+            pinned: true,
+            backgroundColor: context.colors.surface,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Shimmer.fromColors(
+                baseColor: context.colors.shimmerBase,
+                highlightColor: context.colors.shimmerHighlight,
+                child: Container(
+                  color: context.colors.surface,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 16),
+                        Container(
+                          width: 76,
+                          height: 76,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: 140,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 80,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: context.colors.shimmerBase,
+              highlightColor: context.colors.shimmerHighlight,
+              child: Container(
+                margin: const EdgeInsets.all(AppTheme.space16),
+                height: 70,
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                ),
+              ),
+            ),
+          ),
+          _buildProductGridSkeleton(context),
+        ],
       ),
     );
   }

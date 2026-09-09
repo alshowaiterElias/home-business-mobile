@@ -159,17 +159,35 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
   @override
   void initState() {
     super.initState();
+    if (Get.isRegistered<FavoritesController>()) {
+      final favCtrl = Get.find<FavoritesController>();
+      if (favCtrl.followedStores.isNotEmpty) {
+        _stores = List<dynamic>.from(favCtrl.followedStores);
+        _isLoading = false;
+      }
+    }
     _fetchFollowedStores();
   }
 
   Future<void> _fetchFollowedStores() async {
     try {
-      final stores = await DataService.getFollowedStores();
-      if (mounted) {
-        setState(() {
-          _stores = stores;
-          _isLoading = false;
-        });
+      if (Get.isRegistered<FavoritesController>()) {
+        final favCtrl = Get.find<FavoritesController>();
+        await favCtrl.fetchFollowedStores();
+        if (mounted) {
+          setState(() {
+            _stores = List<dynamic>.from(favCtrl.followedStores);
+            _isLoading = false;
+          });
+        }
+      } else {
+        final stores = await DataService.getFollowedStores();
+        if (mounted) {
+          setState(() {
+            _stores = stores;
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
@@ -244,7 +262,14 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
             child: InkWell(
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               onTap: () {
-                Get.toNamed('/store', arguments: {'id': store['id']})?.then((_) {
+                final storeMap = Map<String, dynamic>.from(store);
+                storeMap['isFollowed'] = true;
+                DataService.cacheBusiness(store['id'], storeMap);
+                Get.toNamed('/store', arguments: {
+                  'id': store['id'],
+                  'store': storeMap,
+                  'businessName': store['businessName'],
+                })?.then((_) {
                   _fetchFollowedStores();
                 });
               },

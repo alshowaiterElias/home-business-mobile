@@ -44,7 +44,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   end: Alignment.bottomLeft,
                 ),
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                boxShadow: AppTheme.shadowSm,
+                boxShadow: context.colors.shadowSm,
               ),
               child: Column(
                 children: [
@@ -87,7 +87,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildSectionCard(
               context,
               icon: Icons.assignment_outlined,
-              iconColor: AppTheme.primary,
+              iconColor: context.colors.primary,
               title: '١. المعلومات التي نجمعها',
               content:
                   '• رقم الهاتف: يُستخدم فقط للتحقق من هويتك عبر Firebase Authentication آمن.\n'
@@ -137,10 +137,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: _openWebPrivacyPolicy,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.surface,
-                  foregroundColor: AppTheme.primary,
+                  backgroundColor: context.colors.surface,
+                  foregroundColor: context.colors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: AppTheme.primary),
+                  side: BorderSide(color: context.colors.primary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
@@ -172,10 +172,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(color: AppTheme.divider),
-        boxShadow: AppTheme.shadowSm,
+        border: Border.all(color: context.colors.divider),
+        boxShadow: context.colors.shadowSm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +189,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),
@@ -199,7 +199,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           Text(
             content,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+              color: context.colors.textSecondary,
               height: 1.6,
             ),
           ),

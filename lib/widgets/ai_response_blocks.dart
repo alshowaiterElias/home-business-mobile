@@ -252,7 +252,12 @@ class _CachedStoreBlockCardState extends State<CachedStoreBlockCard>
             subtitle: Text(store['city']?['nameAr'] ?? ''),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
             onTap: () {
-              Get.toNamed('/store', arguments: {'id': widget.storeId});
+              DataService.cacheBusiness(widget.storeId, store);
+              Get.toNamed('/store', arguments: {
+                'id': widget.storeId,
+                'store': store,
+                'businessName': store['businessName'],
+              });
             },
           ),
         );

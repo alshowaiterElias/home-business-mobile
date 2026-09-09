@@ -67,26 +67,11 @@ class _SplashScreenState extends State<SplashScreen>
               scale: _scaleAnimation,
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                    child: Image.asset(
-                      'assets/icon/app_icon.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                child: Image.asset(
+                  'assets/icon/app_logo.png',
+                  width: 135,
+                  height: 135,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -128,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: AppTheme.space16),
                     Text(
-                      'الإصدار 1.0.0+15',
+                      'الإصدار 1.0.0+16',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,

@@ -77,20 +77,11 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 60),
 
               // Brand Logo
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                  boxShadow: AppTheme.shadowMd,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                  child: Image.asset(
-                    'assets/icon/app_icon.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
+              Image.asset(
+                'assets/icon/app_logo.png',
+                width: 90,
+                height: 90,
+                fit: BoxFit.contain,
               ),
               const SizedBox(height: AppTheme.space24),
               Text('السوق المنزلي', style: theme.textTheme.headlineLarge),

@@ -13,7 +13,8 @@ class MarketplaceAssistantSheet extends StatefulWidget {
   const MarketplaceAssistantSheet({super.key, required this.contextData});
 
   @override
-  State<MarketplaceAssistantSheet> createState() => _MarketplaceAssistantSheetState();
+  State<MarketplaceAssistantSheet> createState() =>
+      _MarketplaceAssistantSheetState();
 }
 
 class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
@@ -90,7 +91,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.15))),
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.withOpacity(0.15)),
+              ),
             ),
             child: Row(
               children: [
@@ -100,7 +103,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                     color: Colors.purple.withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.auto_awesome, color: Colors.purple, size: 20),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: Colors.purple,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Column(
@@ -108,7 +115,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                   children: [
                     Text(
                       'المساعد الذكي للسوق',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       'مدعوم بالذكاء الاصطناعي لاكتشاف المنتجات',
@@ -117,17 +127,19 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                   ],
                 ),
                 const Spacer(),
-                Obx(() => _controller.hasMessages
-                    ? IconButton(
-                        icon: const Icon(Icons.refresh_rounded, size: 22),
-                        tooltip: 'محادثة جديدة',
-                        onPressed: () => _controller.startNewChat(),
-                      )
-                    : const SizedBox.shrink()),
+                Obx(
+                  () => _controller.hasMessages
+                      ? IconButton(
+                          icon: const Icon(Icons.refresh_rounded, size: 22),
+                          tooltip: 'محادثة جديدة',
+                          onPressed: () => _controller.startNewChat(),
+                        )
+                      : const SizedBox.shrink(),
+                ),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
-                )
+                ),
               ],
             ),
           ),
@@ -141,7 +153,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
 
               return ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 itemCount: _controller.messages.length,
                 itemBuilder: (context, index) {
                   final message = _controller.messages[index];
@@ -187,12 +202,16 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 color: Colors.purple.withOpacity(0.15),
                 blurRadius: 6,
                 offset: const Offset(0, 3),
-              )
+              ),
             ],
           ),
           child: Text(
             message.text,
-            style: const TextStyle(color: Colors.white, fontSize: 14.5, height: 1.4),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14.5,
+              height: 1.4,
+            ),
           ),
         ),
       ),
@@ -218,7 +237,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.purple),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.purple,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -249,11 +271,16 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 18),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        message.errorMessage ?? 'تعذر الحصول على رد من المساعد.',
+                        message.errorMessage ??
+                            'تعذر الحصول على رد من المساعد.',
                         style: const TextStyle(color: Colors.red, fontSize: 13),
                       ),
                     ),
@@ -263,7 +290,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 InkWell(
                   onTap: () => _controller.retry(),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
@@ -273,11 +303,18 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                       children: [
                         Icon(Icons.refresh, size: 14, color: Colors.red),
                         SizedBox(width: 4),
-                        Text('إعادة المحاولة', style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text(
+                          'إعادة المحاولة',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -305,7 +342,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                   color: Colors.purple.withOpacity(0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
-                )
+                ),
               ],
             ),
             child: Column(
@@ -370,7 +407,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 AiMarkdownMessage(
                   text: message.text,
                   storeNameToId: _controller.getAllKnownStores(message),
-                  onStoreTap: (storeName, storeId) => _controller.openStore(storeName, storeId),
+                  onStoreTap: (storeName, storeId) =>
+                      _controller.openStore(storeName, storeId),
                   isStreaming: message.isLoading,
                 ),
 
@@ -410,7 +448,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               padding: EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 'المنتجات المقترحة:',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.purple),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purple,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -424,25 +466,40 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               spacing: 8,
               runSpacing: 6,
               children: message.recommendations.map((rec) {
-                final prompt = rec.text.replaceAll('اقتراح من الذكاء الاصطناعي: ', '').trim();
+                final prompt = rec.text
+                    .replaceAll('اقتراح من الذكاء الاصطناعي: ', '')
+                    .trim();
                 return InkWell(
                   onTap: () => _submit(prompt),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.purple.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.purple.withOpacity(0.25)),
+                      border: Border.all(
+                        color: Colors.purple.withOpacity(0.25),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.auto_awesome, color: Colors.purple, size: 14),
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: Colors.purple,
+                          size: 14,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           prompt,
-                          style: const TextStyle(fontSize: 12, color: Colors.purple, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.purple,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -457,7 +514,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
   }
 
   Widget _buildBlocksSection(List<AiBlock> blocks) {
-    final productBlocks = blocks.where((b) => b.type == 'product' && b.productId != null).toList();
+    final productBlocks = blocks
+        .where((b) => b.type == 'product' && b.productId != null)
+        .toList();
     final otherBlocks = blocks.where((b) => b.type != 'product').toList();
 
     return Column(
@@ -499,7 +558,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
 
     switch (screen) {
       case 'product_details':
-        subtitle = 'اسألني عن تفاصيل هذا المنتج، طريقة طلبه، أو منتجات أخرى مشابهة:';
+        subtitle =
+            'اسألني عن تفاصيل هذا المنتج، طريقة طلبه، أو منتجات أخرى مشابهة:';
         contextBadge = Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -511,7 +571,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.shopping_bag_outlined, size: 16, color: Colors.purple),
+              const Icon(
+                Icons.shopping_bag_outlined,
+                size: 16,
+                color: Colors.purple,
+              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -540,7 +604,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
         break;
 
       case 'store_details':
-        subtitle = 'اسألني عن منتجات هذا المتجر، الأسعار، أو التنسيق مع البائع:';
+        subtitle =
+            'اسألني عن منتجات هذا المتجر، الأسعار، أو التنسيق مع البائع:';
         contextBadge = Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -552,7 +617,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.storefront_rounded, size: 16, color: Colors.indigo),
+              const Icon(
+                Icons.storefront_rounded,
+                size: 16,
+                color: Colors.indigo,
+              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -581,7 +650,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
 
       case 'search':
         if (searchQuery != null && searchQuery.isNotEmpty) {
-          subtitle = 'اسألني لمساعدتك في العثور على أفضل خيارات "$searchQuery":';
+          subtitle =
+              'اسألني لمساعدتك في العثور على أفضل خيارات "$searchQuery":';
           contextBadge = Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -616,7 +686,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             'المتاجر الأكثر تميزاً في "$searchQuery" 🏪',
           ];
         } else {
-          subtitle = 'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
+          subtitle =
+              'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
           suggestions = [
             'ابحث عن كيك وحلويات 🍰',
             'أريد بخور وعطور فاخرة 🌸',
@@ -628,7 +699,8 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
 
       case 'home':
       default:
-        subtitle = 'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
+        subtitle =
+            'اسألني عن أي منتج، أسعار، أو استكشف الأقسام المتاحة وسأقترح لك أفضل الخيارات.';
         suggestions = [
           'ابحث عن كيك وحلويات 🍰',
           'أريد بخور وعطور فاخرة 🌸',
@@ -654,7 +726,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               color: Colors.purple.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_awesome, size: 44, color: Colors.purple),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 44,
+              color: Colors.purple,
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -665,7 +741,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: const TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+              height: 1.4,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -673,7 +753,11 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             alignment: Alignment.centerRight,
             child: Text(
               'اقتراحات لبدء المحادثة:',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -691,7 +775,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 },
               );
             }).toList(),
-          )
+          ),
         ],
       ),
     );
@@ -712,7 +796,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -729,25 +813,35 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 ),
                 filled: true,
                 fillColor: Colors.grey.withOpacity(0.1),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
               ),
               onSubmitted: (_) => _submit(),
             ),
           ),
           const SizedBox(width: 8),
-          Obx(() => CircleAvatar(
-            backgroundColor: _controller.isLoading ? Colors.grey : Colors.purple,
-            child: IconButton(
-              icon: _controller.isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Icon(Icons.send, color: Colors.white, size: 20),
-              onPressed: _controller.isLoading ? null : () => _submit(),
+          Obx(
+            () => CircleAvatar(
+              backgroundColor: _controller.isLoading
+                  ? Colors.grey
+                  : Colors.purple,
+              child: IconButton(
+                icon: _controller.isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.send, color: Colors.white, size: 20),
+                onPressed: _controller.isLoading ? null : () => _submit(),
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );

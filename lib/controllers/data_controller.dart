@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
 import '../core/network/error_handler.dart';
+import 'auth_controller.dart';
 
 class DataController extends GetxController {
   var isLoadingCategories = false.obs;
@@ -28,6 +29,13 @@ class DataController extends GetxController {
   void onInit() {
     super.onInit();
     fetchInitialData();
+    if (Get.isRegistered<AuthController>()) {
+      final auth = Get.find<AuthController>();
+      ever(auth.isLoggedIn, (_) {
+        fetchTopStores();
+        fetchFeaturedStores();
+      });
+    }
   }
 
   Future<void> fetchInitialData() async {
