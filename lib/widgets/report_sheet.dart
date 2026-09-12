@@ -139,18 +139,22 @@ void showReportSheet(
                   ),
                   const SizedBox(height: AppTheme.space12),
 
-                  ...reasons.map(
-                    (r) => RadioListTile<String>(
-                      value: r,
-                      groupValue: selectedReason,
-                      title: Text(r, style: theme.textTheme.bodyLarge),
-                      activeColor: context.colors.primary,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (v) {
-                        setState(() {
-                          selectedReason = v;
-                        });
-                      },
+                  RadioGroup<String>(
+                    groupValue: selectedReason,
+                    onChanged: (v) {
+                      setState(() {
+                        selectedReason = v;
+                      });
+                    },
+                    child: Column(
+                      children: reasons.map(
+                        (r) => RadioListTile<String>(
+                          value: r,
+                          title: Text(r, style: theme.textTheme.bodyLarge),
+                          activeColor: context.colors.primary,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ).toList(),
                     ),
                   ),
 

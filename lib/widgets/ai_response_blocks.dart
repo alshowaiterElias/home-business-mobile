@@ -9,7 +9,7 @@ import 'package:home_business_mobile/widgets/verified_badge.dart';
 class AiBlockRenderer extends StatelessWidget {
   final AiBlock block;
 
-  const AiBlockRenderer({Key? key, required this.block}) : super(key: key);
+  const AiBlockRenderer({super.key, required this.block});
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +60,10 @@ class CachedProductBlockCard extends StatefulWidget {
   final Map<String, dynamic>? initialProductData;
 
   const CachedProductBlockCard({
-    Key? key,
+    super.key,
     required this.productId,
     this.initialProductData,
-  }) : super(key: key);
+  });
 
   @override
   State<CachedProductBlockCard> createState() => _CachedProductBlockCardState();
@@ -196,9 +196,9 @@ class CachedStoreBlockCard extends StatefulWidget {
   final String storeId;
 
   const CachedStoreBlockCard({
-    Key? key,
+    super.key,
     required this.storeId,
-  }) : super(key: key);
+  });
 
   @override
   State<CachedStoreBlockCard> createState() => _CachedStoreBlockCardState();

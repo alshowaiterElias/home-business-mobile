@@ -117,10 +117,10 @@ class AiMarkdownMessage extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 2, left: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                   decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
+                    color: primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: primaryColor.withOpacity(0.25),
+                      color: primaryColor.withValues(alpha: 0.25),
                       width: 0.8,
                     ),
                   ),
@@ -169,7 +169,7 @@ class AiMarkdownMessage extends StatelessWidget {
                     color: isDark ? Colors.purple.shade300 : primaryColor,
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.3),
+                        color: primaryColor.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 1),
                       )

@@ -140,8 +140,9 @@ class AiService {
                 yield AiErrorEvent(err);
               }
             } catch (e) {
-              if (kDebugMode)
+              if (kDebugMode) {
                 debugPrint('⚠️ [SSE Parse Warning] $e for data: $rawData');
+              }
             }
           }
           currentEvent = 'message';

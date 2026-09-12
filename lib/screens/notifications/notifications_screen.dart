@@ -152,6 +152,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     // Default or SYSTEM_ALERT: Show notification details dialog
+    if (!context.mounted) return;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

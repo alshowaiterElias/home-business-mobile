@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'api_client.dart';
 import 'storage_service.dart';
@@ -57,18 +58,18 @@ class SocketService {
     _socket!.onConnect((_) {
       _isConnected = true;
       _connectionStatusController.add(true);
-      print('🔌 Socket connected');
+      debugPrint('🔌 Socket connected');
     });
 
     _socket!.onDisconnect((_) {
       _isConnected = false;
       _connectionStatusController.add(false);
-      print('🔌 Socket disconnected');
+      debugPrint('🔌 Socket disconnected');
     });
 
     _socket!.onConnectError((error) {
       _isConnected = false;
-      print('🔌 Socket connect error: $error');
+      debugPrint('🔌 Socket connect error: $error');
     });
 
     // ── Listen for real-time events ────────────────────────────────

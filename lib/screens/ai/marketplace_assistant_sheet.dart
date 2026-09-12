@@ -82,7 +82,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -92,7 +92,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey.withOpacity(0.15)),
+                bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
               ),
             ),
             child: Row(
@@ -100,7 +100,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.12),
+                    color: Colors.purple.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -199,7 +199,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.purple.withOpacity(0.15),
+                color: Colors.purple.withValues(alpha: 0.15),
                 blurRadius: 6,
                 offset: const Offset(0, 3),
               ),
@@ -229,7 +229,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.purple.withOpacity(0.2)),
+              border: Border.all(color: Colors.purple.withValues(alpha: 0.2)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -262,9 +262,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.06),
+              color: Colors.red.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,7 +295,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.12),
+                      color: Colors.red.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
@@ -334,12 +334,12 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: Colors.purple.withOpacity(0.18),
+                color: Colors.purple.withValues(alpha: 0.18),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.purple.withOpacity(0.04),
+                  color: Colors.purple.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -354,7 +354,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
+                        color: Colors.purple.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -478,10 +478,10 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.08),
+                      color: Colors.purple.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.purple.withOpacity(0.25),
+                        color: Colors.purple.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Row(
@@ -564,9 +564,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.09),
+            color: Colors.purple.withValues(alpha: 0.09),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.purple.withOpacity(0.25)),
+            border: Border.all(color: Colors.purple.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -610,9 +610,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.indigo.withOpacity(0.09),
+            color: Colors.indigo.withValues(alpha: 0.09),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.indigo.withOpacity(0.25)),
+            border: Border.all(color: Colors.indigo.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -656,9 +656,9 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.09),
+              color: Colors.blue.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.blue.withOpacity(0.25)),
+              border: Border.all(color: Colors.blue.withValues(alpha: 0.25)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -723,7 +723,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.purple.withOpacity(0.08),
+              color: Colors.purple.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -813,7 +813,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -832,7 +832,7 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey.withOpacity(0.1),
+                fillColor: Colors.grey.withValues(alpha: 0.1),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 10,

@@ -68,7 +68,7 @@ class ProductCard extends StatelessWidget {
                   if (product.isBoosted)
                     Positioned(
                       top: AppTheme.space8,
-                      left: AppTheme.space8,
+                      right: AppTheme.space8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 7,
@@ -78,7 +78,9 @@ class ProductCard extends StatelessWidget {
                           gradient: const LinearGradient(
                             colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
                           ),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusFull,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.deepOrange.withValues(alpha: 0.35),

@@ -1,5 +1,6 @@
 /// Data models for the chat system.
 /// All classes have `fromJson` factories matching the backend API response shape.
+library;
 
 class ChatParticipant {
   final String id;

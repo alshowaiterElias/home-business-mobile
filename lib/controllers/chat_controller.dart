@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../models/chat_models.dart';
 import '../core/network/chat_service.dart';
@@ -90,7 +91,7 @@ class ChatController extends GetxController {
       _nextCursor = result['nextCursor'];
       _hasMore = _nextCursor != null;
     } catch (e) {
-      print('Error loading conversations: $e');
+      debugPrint('Error loading conversations: $e');
     } finally {
       isLoading.value = false;
     }
@@ -101,7 +102,7 @@ class ChatController extends GetxController {
     try {
       unreadCount.value = await ChatApiService.getUnreadCount();
     } catch (e) {
-      print('Error refreshing unread count: $e');
+      debugPrint('Error refreshing unread count: $e');
     }
   }
 

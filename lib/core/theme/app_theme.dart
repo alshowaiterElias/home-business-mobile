@@ -285,12 +285,12 @@ class AppTheme {
 // ─── Context Extension for theme-aware colors ─────────────────────
 /// Use `context.colors` to access theme-aware colors anywhere in widgets.
 extension AppColorsExtension on BuildContext {
-  _AppColors get colors => _AppColors(Theme.of(this).brightness == Brightness.dark);
+  AppColors get colors => AppColors(Theme.of(this).brightness == Brightness.dark);
 }
 
-class _AppColors {
+class AppColors {
   final bool isDark;
-  const _AppColors(this.isDark);
+  const AppColors(this.isDark);
   
   // Brand
   Color get primary => isDark ? AppTheme.primaryLight : AppTheme.primary;

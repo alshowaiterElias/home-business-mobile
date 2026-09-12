@@ -338,7 +338,8 @@ class ProfileScreen extends StatelessWidget {
                         trailing: Obx(
                           () => Switch.adaptive(
                             value: isPushEnabled.value,
-                            activeColor: AppTheme.primary,
+                            activeTrackColor: AppTheme.primary,
+                            activeThumbColor: Colors.white,
                             onChanged: (val) async {
                               isPushEnabled.value = val;
                               await StorageService.setNotificationsEnabled(val);
@@ -385,7 +386,8 @@ class ProfileScreen extends StatelessWidget {
                         trailing: Obx(() => Switch.adaptive(
                           value: themeCtrl.themeMode.value == ThemeMode.dark ||
                                 (themeCtrl.themeMode.value == ThemeMode.system && Get.isDarkMode),
-                          activeColor: AppTheme.primary,
+                          activeTrackColor: AppTheme.primary,
+                          activeThumbColor: Colors.white,
                           onChanged: (val) {
                             themeCtrl.setTheme(val ? ThemeMode.dark : ThemeMode.light);
                           },

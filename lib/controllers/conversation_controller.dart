@@ -172,7 +172,7 @@ class ConversationController extends GetxController with WidgetsBindingObserver 
         }
       }
     } catch (e) {
-      print('Error loading messages: $e');
+      debugPrint('Error loading messages: $e');
     } finally {
       isLoading.value = false;
     }
