@@ -457,9 +457,10 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 const phone = '+967772546343';
-                                WhatsAppService.openWhatsAppForStore(
+                                WhatsAppService.openWhatsAppForBoostInquiry(
                                   phoneNumber: phone,
-                                  storeName: 'إدارة تطبيق الأسر المنتجة',
+                                  productTitle: product['title']?.toString() ?? 'منتج',
+                                  productId: product['id']?.toString() ?? '',
                                 );
                               },
                               icon: const Icon(Icons.support_agent_rounded, size: 18),

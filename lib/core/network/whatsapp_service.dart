@@ -121,6 +121,16 @@ class WhatsAppService {
     await _launchWhatsApp(phoneNumber, message);
   }
 
+  static Future<void> openWhatsAppForBoostInquiry({
+    required String phoneNumber,
+    required String productTitle,
+    required String productId,
+  }) async {
+    final message =
+        "السلام عليكم ورحمة الله، أرغب في ترويج منتجي عبر تطبيق الأسر المنتجة ليظهر في الصدارة 🚀\n\nاسم المنتج: $productTitle\nمعرّف المنتج (ID): $productId\n\nيرجى تزويدي بالباقات والأسعار المتاحة لتفعيل الترويج.";
+    await _launchWhatsApp(phoneNumber, message);
+  }
+
   static Future<void> _launchWhatsApp(String phone, String message) async {
     // Format phone number: remove non-digits, add country code if needed
     String formattedPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
