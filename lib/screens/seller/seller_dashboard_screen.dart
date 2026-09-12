@@ -1,11 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart' as dio;
 import '../../core/theme/app_theme.dart';
-import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../core/network/error_handler.dart';
 import '../../core/utils/image_compressor.dart';
@@ -16,6 +14,9 @@ import '../../controllers/auth_controller.dart';
 import 'my_product_detail_screen.dart';
 import 'edit_product_screen.dart';
 import 'suspended_account_screen.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
+import '../../widgets/app_cached_image.dart';
 
 /// Seller's private dashboard to manage their business and products.
 class SellerDashboardScreen extends StatelessWidget {
@@ -60,7 +61,7 @@ class SellerDashboardScreen extends StatelessWidget {
           child: GetBuilder<SellerDashboardController>(
             builder: (cnt) {
               if (cnt.isLoading.value && cnt.myProducts.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
+                return const SellerDashboardSkeleton();
               }
 
               final products = cnt.filteredProducts;
@@ -86,37 +87,39 @@ class SellerDashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        CircleAvatar(
+                        AppCachedAvatar(
+                          imageUrl: controller.businessData['logoUrl'],
                           radius: 28,
                           backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          backgroundImage:
-                              controller.businessData['logoUrl'] != null
-                              ? CachedNetworkImageProvider(
-                                  ApiClient.getImageUrl(
-                                    controller.businessData['logoUrl'],
-                                  ),
-                                )
-                              : null,
-                          child: controller.businessData['logoUrl'] == null
-                              ? const Icon(
-                                  Icons.storefront_rounded,
-                                  color: Colors.white,
-                                  size: 28,
-                                )
-                              : null,
+                          fallbackIcon: Icons.storefront_rounded,
+                          iconColor: Colors.white,
                         ),
                         const SizedBox(width: AppTheme.space12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                controller.businessData['businessName'] ??
-                                    'متجري',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      controller.businessData['businessName'] ??
+                                          'متجري',
+                                      style: theme.textTheme.titleLarge?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  if (controller.businessData['isVerified'] == true ||
+                                      controller.businessData['is_verified'] == true) ...[
+                                    const SizedBox(width: 6),
+                                    const VerifiedBadge(
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Row(
@@ -455,24 +458,14 @@ class _ProductTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                ClipRRect(
+                AppCachedImage(
+                  imageUrl: imageUrl,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                  child: CachedNetworkImage(
-                    imageUrl: ApiClient.getImageUrl(imageUrl),
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => Container(
-                      width: 60,
-                      height: 60,
-                      color: AppTheme.background,
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 20,
-                        color: AppTheme.textHint,
-                      ),
-                    ),
-                  ),
+                  memCacheWidth: 150,
+                  memCacheHeight: 150,
                 ),
                 const SizedBox(width: AppTheme.space12),
                 Expanded(
@@ -1237,7 +1230,12 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
 
   Future<void> _pickLogo() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 600,
+      maxHeight: 600,
+    );
     if (picked != null) {
       setState(() {
         _newLogoFile = File(picked.path);
@@ -1336,25 +1334,21 @@ class _EditBusinessScreenState extends State<EditBusinessScreen> {
                 onTap: _pickLogo,
                 child: Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: AppTheme.primarySurface,
-                      backgroundImage: _newLogoFile != null
-                          ? FileImage(_newLogoFile!)
-                          : (_currentLogoUrl != null
-                                    ? NetworkImage(
-                                        ApiClient.getImageUrl(_currentLogoUrl!),
-                                      )
-                                    : null)
-                                as ImageProvider?,
-                      child: (_newLogoFile == null && _currentLogoUrl == null)
-                          ? const Icon(
-                              Icons.storefront_rounded,
-                              size: 40,
-                              color: AppTheme.primary,
-                            )
-                          : null,
-                    ),
+                    if (_newLogoFile != null)
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: AppTheme.primarySurface,
+                        backgroundImage: FileImage(_newLogoFile!),
+                      )
+                    else
+                      AppCachedAvatar(
+                        imageUrl: _currentLogoUrl,
+                        radius: 50,
+                        backgroundColor: AppTheme.primarySurface,
+                        fallbackIcon: Icons.storefront_rounded,
+                        iconColor: AppTheme.primary,
+                        iconSize: 40,
+                      ),
                     Positioned(
                       bottom: 0,
                       left: 0,

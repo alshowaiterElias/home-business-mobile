@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../models/chat_models.dart';
 import '../models/dummy_data.dart';
@@ -7,6 +6,8 @@ import '../core/theme/app_theme.dart';
 import '../core/network/api_client.dart';
 import '../core/network/data_service.dart';
 import '../screens/product/product_details_screen.dart';
+import 'verified_badge.dart';
+import 'app_cached_image.dart';
 
 /// Compact product card shown inline in chat messages.
 class ProductReferenceCard extends StatelessWidget {
@@ -47,24 +48,13 @@ class ProductReferenceCard extends StatelessWidget {
           children: [
             // Product Image
             if (imageUrl != null)
-              ClipRRect(
+              AppCachedImage(
+                imageUrl: imageUrl,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                memCacheWidth: 400,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusMd)),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    height: 120,
-                    color: context.colors.shimmerBase,
-                    child: Icon(Icons.image_outlined, color: context.colors.textHint),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    height: 120,
-                    color: context.colors.shimmerBase,
-                    child: Icon(Icons.broken_image_outlined, color: context.colors.textHint),
-                  ),
-                ),
               ),
 
             Padding(
@@ -153,14 +143,13 @@ class StoreReferenceCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Store Logo
-            CircleAvatar(
+            AppCachedAvatar(
+              imageUrl: logoUrl,
               radius: 22,
               backgroundColor: context.colors.primarySurface,
-              backgroundImage: logoUrl != null ? CachedNetworkImageProvider(logoUrl) : null,
-              child: logoUrl == null
-                  ? Icon(Icons.storefront_rounded, color: context.colors.primary, size: 22)
-                  : null,
+              fallbackIcon: Icons.storefront_rounded,
+              iconColor: context.colors.primary,
+              iconSize: 22,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -168,13 +157,24 @@ class StoreReferenceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    reference.snapshotTitle ?? 'متجر',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          reference.snapshotTitle ?? 'متجر',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                      if (reference.snapshotMeta?['isVerified'] == true ||
+                          reference.snapshotMeta?['is_verified'] == true) ...[
+                        const SizedBox(width: 4),
+                        const VerifiedBadge(size: 14),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Row(

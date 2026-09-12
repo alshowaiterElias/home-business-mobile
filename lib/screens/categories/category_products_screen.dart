@@ -4,6 +4,7 @@ import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
 import '../../core/network/data_service.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class CategoryProductsScreen extends StatefulWidget {
   const CategoryProductsScreen({super.key});
@@ -47,46 +48,59 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
         title: Text(_category.nameAr),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _products.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: context.colors.background,
-                          shape: BoxShape.circle,
+          ? const ProductGridSkeleton()
+          : RefreshIndicator(
+              onRefresh: _fetchProducts,
+              child: _products.isEmpty
+                  ? LayoutBuilder(
+                      builder: (context, constraints) => SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 90,
+                                  height: 90,
+                                  decoration: BoxDecoration(
+                                    color: context.colors.background,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.inventory_2_outlined,
+                                      size: 44, color: context.colors.textHint),
+                                ),
+                                const SizedBox(height: AppTheme.space24),
+                                Text('لا توجد منتجات',
+                                    style: Theme.of(context).textTheme.headlineSmall),
+                                const SizedBox(height: AppTheme.space8),
+                                Text('لم يتم إضافة منتجات في هذا القسم بعد',
+                                    style: Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.inventory_2_outlined,
-                            size: 44, color: context.colors.textHint),
                       ),
-                      const SizedBox(height: AppTheme.space24),
-                      Text('لا توجد منتجات',
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: AppTheme.space8),
-                      Text('لم يتم إضافة منتجات في هذا القسم بعد',
-                          style: Theme.of(context).textTheme.bodyMedium),
-                    ],
-                  ),
-                )
-              : GridView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.all(AppTheme.space16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.60,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                  ),
-                  itemCount: _products.length,
-                  itemBuilder: (context, index) => ProductCard(
-                    product: _products[index],
-                    heroTagPrefix: 'cat_prod_',
-                  ),
-                ),
+                    )
+                  : GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.60,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      itemCount: _products.length,
+                      itemBuilder: (context, index) => ProductCard(
+                        product: _products[index],
+                        heroTagPrefix: 'cat_prod_',
+                      ),
+                    ),
+            ),
     );
   }
 }

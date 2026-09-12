@@ -17,7 +17,9 @@ import '../../controllers/data_controller.dart';
 import '../../controllers/ai_assistant_controller.dart';
 import '../../controllers/favorites_controller.dart';
 import '../../models/chat_models.dart';
-import '../../widgets/ask_marketplace_ai_button.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
+import '../../widgets/app_cached_image.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -350,30 +352,12 @@ class _StoreScreenState extends State<StoreScreen> {
                         InteractiveViewer(
                           minScale: 0.8,
                           maxScale: 4.0,
-                          child: Image.network(
-                            imageUrl,
+                          child: AppCachedImage(
+                            imageUrl: imageUrl,
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => Container(
-                              padding: const EdgeInsets.all(32),
-                              color: context.colors.surface,
-                              child: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.broken_image_rounded,
-                                    size: 64,
-                                    color: Colors.white54,
-                                  ),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    'تعذر تحميل الصورة',
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            memCacheWidth: 1200,
                           ),
                         ),
                         Positioned(
@@ -497,13 +481,6 @@ class _StoreScreenState extends State<StoreScreen> {
         : '0.0';
 
     return Scaffold(
-      floatingActionButton: AskMarketplaceAiButton(
-        contextData: {
-          'screen': 'store_details',
-          'storeId': _businessData?['id'],
-          'storeName': _businessData?['businessName'],
-        }
-      ),
       body: RefreshIndicator(
         onRefresh: _fetchBusinessData,
         color: AppTheme.primary,
@@ -531,10 +508,11 @@ class _StoreScreenState extends State<StoreScreen> {
                     if (fullLogoUrl != null)
                       GestureDetector(
                         onTap: () => _showEnlargedImage(context, fullLogoUrl, businessName),
-                        child: Image.network(
-                          fullLogoUrl,
+                        child: AppCachedImage(
+                          imageUrl: fullLogoUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          memCacheWidth: 800,
+                          errorWidget: Container(
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [AppTheme.primaryDark, AppTheme.primary],
@@ -592,19 +570,13 @@ class _StoreScreenState extends State<StoreScreen> {
                                       ),
                                     ],
                                   ),
-                                  child: CircleAvatar(
+                                  child: AppCachedAvatar(
+                                    imageUrl: fullLogoUrl,
                                     radius: 36,
                                     backgroundColor: AppTheme.primaryDark,
-                                    backgroundImage: fullLogoUrl != null
-                                        ? NetworkImage(fullLogoUrl)
-                                        : null,
-                                    child: fullLogoUrl == null
-                                        ? const Icon(
-                                            Icons.storefront_rounded,
-                                            color: Colors.white,
-                                            size: 36,
-                                          )
-                                        : null,
+                                    fallbackIcon: Icons.storefront_rounded,
+                                    iconColor: Colors.white,
+                                    iconSize: 36,
                                   ),
                                 ),
                                 if (fullLogoUrl != null)
@@ -628,18 +600,31 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                           const SizedBox(height: AppTheme.space8),
-                          Text(
-                            businessName,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                const Shadow(
-                                  color: Colors.black45,
-                                  blurRadius: 6,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  businessName,
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    shadows: [
+                                      const Shadow(
+                                        color: Colors.black45,
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                              if (_businessData?['isVerified'] == true ||
+                                  _businessData?['is_verified'] == true) ...[
+                                const SizedBox(width: 6),
+                                const VerifiedBadge(size: 20),
                               ],
-                            ),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -933,30 +918,7 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   Widget _buildProductGridSkeleton(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.all(AppTheme.space16),
-      sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (_, __) => Shimmer.fromColors(
-            baseColor: context.colors.shimmerBase,
-            highlightColor: context.colors.shimmerHighlight,
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colors.surface,
-                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-              ),
-            ),
-          ),
-          childCount: 4,
-        ),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.60,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 14,
-        ),
-      ),
-    );
+    return const ProductGridSkeleton(isSliver: true, itemCount: 4);
   }
 
   Widget _buildStoreSkeleton(BuildContext context) {

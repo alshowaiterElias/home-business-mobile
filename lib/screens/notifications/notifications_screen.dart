@@ -6,6 +6,7 @@ import '../../controllers/notification_controller.dart';
 import '../../models/dummy_data.dart';
 import '../product/product_details_screen.dart';
 import '../seller/seller_dashboard_screen.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -222,7 +223,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       body: Obx(() {
         if (_controller.isLoading.value && _controller.notifications.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const NotificationListSkeleton();
         }
 
         if (_controller.notifications.isEmpty) {

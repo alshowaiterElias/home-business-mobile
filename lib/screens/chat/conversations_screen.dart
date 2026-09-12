@@ -7,6 +7,8 @@ import '../../core/network/api_client.dart';
 import '../../controllers/chat_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/chat_models.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class ConversationsScreen extends StatelessWidget {
   const ConversationsScreen({super.key});
@@ -34,7 +36,7 @@ class ConversationsScreen extends StatelessWidget {
         ),
         body: Obx(() {
           if (chatCtrl.isLoading.value && chatCtrl.conversations.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const ConversationListSkeleton();
           }
 
           if (chatCtrl.conversations.isEmpty) {
@@ -182,7 +184,7 @@ class _ConversationTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(
+                      Flexible(
                         child: Text(
                           displayName,
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -192,6 +194,11 @@ class _ConversationTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (otherUser?.business?.isVerified == true) ...[
+                        const SizedBox(width: 4),
+                        const VerifiedBadge(size: 14),
+                      ],
+                      const Spacer(),
                       if (lastMsg != null) ...[
                         const SizedBox(width: 8),
                         Text(

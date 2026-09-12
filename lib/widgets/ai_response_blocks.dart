@@ -4,6 +4,7 @@ import 'package:home_business_mobile/core/network/data_service.dart';
 import 'package:home_business_mobile/models/ai_models.dart';
 import 'package:home_business_mobile/models/dummy_data.dart';
 import 'package:home_business_mobile/widgets/product_card.dart';
+import 'package:home_business_mobile/widgets/verified_badge.dart';
 
 class AiBlockRenderer extends StatelessWidget {
   final AiBlock block;
@@ -244,11 +245,26 @@ class _CachedStoreBlockCardState extends State<CachedStoreBlockCard>
         }
 
         final store = snapshot.data!;
+        final isVerified = store['isVerified'] == true || store['is_verified'] == true;
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
             leading: const Icon(Icons.storefront, color: Colors.blue),
-            title: Text(store['businessName'] ?? 'متجر'),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    store['businessName'] ?? 'متجر',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (isVerified) ...[
+                  const SizedBox(width: 4),
+                  const VerifiedBadge(size: 16),
+                ],
+              ],
+            ),
             subtitle: Text(store['city']?['nameAr'] ?? ''),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
             onTap: () {

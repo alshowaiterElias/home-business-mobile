@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 import 'storage_service.dart';
 
 class ApiClient {
@@ -70,8 +71,12 @@ class ApiClient {
 
           // Auto-logout on 401 (expired/invalid token)
           if (e.response?.statusCode == 401 && StorageService.hasToken()) {
-            StorageService.removeToken();
-            Get.offAllNamed('/auth');
+            if (Get.isRegistered<AuthController>()) {
+              Get.find<AuthController>().logout();
+            } else {
+              StorageService.removeToken();
+              Get.offAllNamed('/auth');
+            }
           }
 
           return handler.next(e);

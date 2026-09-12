@@ -31,6 +31,8 @@ import 'screens/chat/chat_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'core/services/crash_service.dart';
+import 'widgets/error_boundary.dart';
 import 'core/network/push_notification_service.dart';
 
 void main() async {
@@ -40,6 +42,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize Crashlytics & Global UI Error Boundary
+  await CrashService.init();
+  setupGlobalErrorBoundary();
 
   // Initialize networking, storage & push notifications
   await StorageService.init();
@@ -55,6 +61,17 @@ void main() async {
 
   // Initialize Socket + Chat after auth is ready
   final auth = Get.find<AuthController>();
+  ever(auth.userId, (id) {
+    if (id.isNotEmpty) {
+      CrashService.setUserIdentifier(id);
+    } else {
+      CrashService.clearUserIdentifier();
+    }
+  });
+  if (auth.userId.value.isNotEmpty) {
+    CrashService.setUserIdentifier(auth.userId.value);
+  }
+
   ever(auth.isLoggedIn, (isLoggedIn) {
     if (isLoggedIn) {
       SocketService.instance.connect();

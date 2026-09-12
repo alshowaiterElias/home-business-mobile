@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
 import '../core/network/error_handler.dart';
+import '../core/services/app_update_service.dart';
 import 'auth_controller.dart';
 
 class DataController extends GetxController {
@@ -77,6 +78,15 @@ class DataController extends GetxController {
       }
       if (config['developerEmail'] != null && config['developerEmail'].toString().trim().isNotEmpty) {
         developerEmail.value = config['developerEmail'].toString().trim();
+      }
+
+      if (config.isNotEmpty) {
+        // If current route is not splash, evaluate updates (e.g. pull-to-refresh or in-app resume)
+        if (Get.currentRoute != '/splash') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            AppUpdateService.checkForUpdates(config);
+          });
+        }
       }
     } catch (e) {
       debugPrint('Error fetching app config: $e');

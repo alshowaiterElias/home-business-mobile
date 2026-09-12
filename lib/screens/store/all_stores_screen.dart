@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/network/data_service.dart';
-import '../../core/network/api_client.dart';
 import '../search/widgets/store_filter_sheet.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
+import '../../widgets/app_cached_image.dart';
 
 class AllStoresScreen extends StatefulWidget {
   const AllStoresScreen({super.key});
@@ -114,7 +116,7 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
           Expanded(
             child: Obx(() {
               if (_isLoading.value && _stores.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
+                return const StoreListSkeleton();
               }
 
               if (_stores.isEmpty) {
@@ -186,18 +188,35 @@ class _AllStoresScreenState extends State<AllStoresScreen> {
                         ),
                         child: Row(
                           children: [
-                            CircleAvatar(
+                            AppCachedAvatar(
+                              imageUrl: logoUrl,
                               radius: 28,
                               backgroundColor: context.colors.background,
-                              backgroundImage: logoUrl != null ? NetworkImage(ApiClient.getImageUrl(logoUrl)) : null,
-                              child: logoUrl == null ? Icon(Icons.storefront_rounded, size: 28, color: context.colors.textHint) : null,
+                              fallbackIcon: Icons.storefront_rounded,
+                              iconColor: context.colors.textHint,
                             ),
                             const SizedBox(width: AppTheme.space16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(name, style: theme.textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          name,
+                                          style: theme.textTheme.titleMedium,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (store['isVerified'] == true ||
+                                          store['is_verified'] == true) ...[
+                                        const SizedBox(width: 4),
+                                        const VerifiedBadge(size: 15),
+                                      ],
+                                    ],
+                                  ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [

@@ -40,7 +40,12 @@ class CreateStoreController extends GetxController {
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 600,
+      maxHeight: 600,
+    );
     if (picked != null) {
       logoFile.value = File(picked.path);
     }

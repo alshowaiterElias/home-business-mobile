@@ -99,6 +99,7 @@ class AppTheme {
     final base = GoogleFonts.cairoTextTheme();
 
     return ThemeData(
+      fontFamily: 'Cairo',
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: primary,
@@ -157,6 +158,7 @@ class AppTheme {
     final base = GoogleFonts.cairoTextTheme();
 
     return ThemeData(
+      fontFamily: 'Cairo',
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: primaryLight,

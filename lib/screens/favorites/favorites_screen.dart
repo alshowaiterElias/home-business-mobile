@@ -5,7 +5,9 @@ import '../../widgets/product_card.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/favorites_controller.dart';
 import '../../core/network/data_service.dart';
-import '../../core/network/api_client.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
+import '../../widgets/app_cached_image.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -88,7 +90,7 @@ class _FavoriteProductsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (favoritesController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const ProductGridSkeleton();
       }
 
       final favorites = favoritesController.favorites;
@@ -199,7 +201,7 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
     final theme = Theme.of(context);
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const StoreListSkeleton();
     }
 
     if (_stores.isEmpty) {
@@ -245,10 +247,8 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
         itemBuilder: (context, index) {
           final store = _stores[index];
           final logoUrl = store['logoUrl'] as String?;
-          final fullLogoUrl = (logoUrl != null && logoUrl.isNotEmpty)
-              ? ApiClient.getImageUrl(logoUrl)
-              : null;
           final storeName = store['businessName'] ?? 'متجر غير معروف';
+          final isVerified = store['isVerified'] == true || store['is_verified'] == true;
           final location = store['city']?['nameAr'] ?? 'اليمن';
           final followersCount = store['followersCount'] ?? 0;
 
@@ -277,24 +277,34 @@ class _FollowedStoresViewState extends State<_FollowedStoresView> {
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    CircleAvatar(
+                    AppCachedAvatar(
+                      imageUrl: logoUrl,
                       radius: 28,
                       backgroundColor: AppTheme.primaryDark,
-                      backgroundImage: fullLogoUrl != null ? NetworkImage(fullLogoUrl) : null,
-                      child: fullLogoUrl == null
-                          ? const Icon(Icons.storefront_rounded, color: Colors.white, size: 28)
-                          : null,
+                      fallbackIcon: Icons.storefront_rounded,
+                      iconColor: Colors.white,
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            storeName,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  storeName,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (isVerified) ...[
+                                const SizedBox(width: 4),
+                                const VerifiedBadge(size: 16),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Row(

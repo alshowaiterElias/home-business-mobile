@@ -14,7 +14,8 @@ import '../../core/network/chat_service.dart';
 import '../../models/chat_models.dart';
 import '../../controllers/conversation_controller.dart';
 import 'product_reviews_screen.dart';
-import '../../widgets/ask_marketplace_ai_button.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/app_cached_image.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -43,20 +44,6 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72.0),
-        child: AskMarketplaceAiButton(
-          contextData: {
-            'screen': 'product_details',
-            'productId': product.id,
-            'productTitle': product.title,
-            'storeName': product.sellerName,
-            'categoryName': product.categoryName,
-          }
-        ),
-      ),
-      // Move FAB up so it doesn't overlap the bottom action bar
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       backgroundColor: context.colors.surface,
       body: Stack(
         children: [
@@ -238,29 +225,13 @@ class ProductDetailsScreen extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 52,
-                                  height: 52,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        context.colors.primary.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        context.colors.primaryLight.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppTheme.radiusMd,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.storefront_rounded,
-                                    color: context.colors.primary,
-                                    size: 24,
-                                  ),
+                                AppCachedAvatar(
+                                  imageUrl: product.sellerAvatar,
+                                  radius: 26,
+                                  backgroundColor: context.colors.primarySurface,
+                                  fallbackIcon: Icons.storefront_rounded,
+                                  iconColor: context.colors.primary,
+                                  iconSize: 26,
                                 ),
                                 const SizedBox(width: AppTheme.space12),
                                 Expanded(
@@ -268,9 +239,21 @@ class ProductDetailsScreen extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        product.sellerName,
-                                        style: theme.textTheme.titleLarge,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              product.sellerName,
+                                              style: theme.textTheme.titleLarge,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (product.isSellerVerified) ...[
+                                            const SizedBox(width: 4),
+                                            const VerifiedBadge(size: 16),
+                                          ],
+                                        ],
                                       ),
                                       const SizedBox(height: 2),
                                       Row(

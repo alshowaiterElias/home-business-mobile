@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
 import '../../core/network/data_service.dart';
 import '../search/widgets/search_filter_sheet.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class AllProductsScreen extends StatefulWidget {
   const AllProductsScreen({super.key});
@@ -72,26 +73,39 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : products.isEmpty
-              ? const Center(child: Text('لا توجد منتجات'))
-              : GridView.builder(
-                  padding: const EdgeInsets.all(AppTheme.space16),
-                  physics: const BouncingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.60,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                  ),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    return ProductCard(
-                      product: products[index],
-                      heroTagPrefix: 'all-products-',
-                    );
-                  },
-                ),
+          ? const ProductGridSkeleton()
+          : RefreshIndicator(
+              onRefresh: _fetchProducts,
+              child: products.isEmpty
+                  ? LayoutBuilder(
+                      builder: (context, constraints) => SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          child: const Center(child: Text('لا توجد منتجات')),
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.60,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return ProductCard(
+                          product: products[index],
+                          heroTagPrefix: 'all-products-',
+                        );
+                      },
+                    ),
+            ),
     );
   }
 }

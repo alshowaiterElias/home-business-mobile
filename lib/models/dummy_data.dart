@@ -66,6 +66,7 @@ class Product {
   final String businessId;
   final String sellerUserId;
   final String sellerPhone;
+  final bool isSellerVerified;
   final DateTime createdAt;
 
   const Product({
@@ -84,6 +85,7 @@ class Product {
     this.businessId = '',
     this.sellerUserId = '',
     this.sellerPhone = '',
+    this.isSellerVerified = false,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? const _DefaultDate();
 
@@ -100,11 +102,14 @@ class Product {
     String bizId = '';
     String sUserId = '';
     String phone = '';
+    bool isVerified = false;
     if (json['business'] != null) {
       bizId = json['business']['id'] ?? '';
       sUserId = json['business']['userId'] ?? '';
       seller = json['business']['businessName'] ?? seller;
       phone = json['business']['contactPhone'] ?? phone;
+      isVerified = json['business']['isVerified'] == true ||
+          json['business']['is_verified'] == true;
       if (json['business']['city'] != null) {
         loc = json['business']['city']['nameAr'] ?? loc;
       }
@@ -124,6 +129,7 @@ class Product {
       businessId: bizId,
       sellerUserId: sUserId,
       sellerPhone: phone,
+      isSellerVerified: isVerified,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,

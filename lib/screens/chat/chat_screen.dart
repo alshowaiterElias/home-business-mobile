@@ -12,6 +12,8 @@ import '../../models/chat_models.dart';
 import '../../widgets/chat_reference_cards.dart';
 import '../../widgets/report_sheet.dart';
 import 'marketplace_share_sheet.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -123,11 +125,21 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: theme.textTheme.titleMedium?.copyWith(fontSize: 15),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: theme.textTheme.titleMedium?.copyWith(fontSize: 15),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (otherUser?.business?.isVerified == true) ...[
+                          const SizedBox(width: 4),
+                          const VerifiedBadge(size: 14),
+                        ],
+                      ],
                     ),
                     Obx(() {
                       if (_controller.isTyping.value) {
@@ -154,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: Obx(() {
               if (_controller.isLoading.value && _controller.messages.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
+                return const ChatMessageListSkeleton();
               }
 
               if (_controller.messages.isEmpty) {

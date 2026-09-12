@@ -25,24 +25,37 @@ class AddProductController extends GetxController {
 
   List<String> get units {
     final dc = Get.find<DataController>();
-    return dc.unitsOfSale.isNotEmpty ? dc.unitsOfSale : ['حبة', 'قطعة', 'كيلو', 'لتر'];
+    return dc.unitsOfSale.isNotEmpty
+        ? dc.unitsOfSale
+        : ['حبة', 'قطعة', 'كيلو', 'لتر'];
   }
+
   final currencies = ['YER', 'SAR', 'USD'];
 
   @override
   void onInit() {
     super.onInit();
     final availableUnits = units;
-    selectedUnit = (availableUnits.isNotEmpty ? availableUnits.first : 'حبة').obs;
+    selectedUnit =
+        (availableUnits.isNotEmpty ? availableUnits.first : 'حبة').obs;
   }
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
-    final picked = await picker.pickMultiImage();
-    
+    final picked = await picker.pickMultiImage(
+      imageQuality: 80,
+      maxWidth: 1200,
+      maxHeight: 1200,
+    );
+
     if (picked.isNotEmpty) {
       if (images.length + picked.length > 5) {
-        Get.snackbar('تنبيه', 'يمكنك إضافة 5 صور كحد أقصى', backgroundColor: Colors.orange, colorText: Colors.white);
+        Get.snackbar(
+          'تنبيه',
+          'يمكنك إضافة 5 صور كحد أقصى',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
         return;
       }
       images.addAll(picked.map((x) => File(x.path)));
@@ -54,14 +67,24 @@ class AddProductController extends GetxController {
   }
 
   Future<void> submitProduct() async {
-    if (titleController.text.isEmpty || priceController.text.isEmpty || selectedCategoryId.value.isEmpty || images.isEmpty) {
-      Get.snackbar('خطأ', 'يرجى تعبئة الحقول المطلوبة وإضافة صورة واحدة على الأقل', backgroundColor: Colors.redAccent, colorText: Colors.white);
+    if (titleController.text.isEmpty ||
+        priceController.text.isEmpty ||
+        selectedCategoryId.value.isEmpty ||
+        images.isEmpty) {
+      Get.snackbar(
+        'خطأ',
+        'يرجى تعبئة الحقول المطلوبة وإضافة صورة واحدة على الأقل',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return;
     }
 
     isLoading.value = true;
     try {
-      final categoryId = selectedSubCategoryId.value.isNotEmpty ? selectedSubCategoryId.value : selectedCategoryId.value;
+      final categoryId = selectedSubCategoryId.value.isNotEmpty
+          ? selectedSubCategoryId.value
+          : selectedCategoryId.value;
 
       final formData = dio.FormData.fromMap({
         'title': titleController.text.trim(),
@@ -75,27 +98,46 @@ class AddProductController extends GetxController {
       final compressedImages = await ImageCompressor.compressFileList(images);
 
       for (var file in compressedImages) {
-        formData.files.add(MapEntry(
-          'productImages',
-          await dio.MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'productImages',
+            await dio.MultipartFile.fromFile(
+              file.path,
+              filename: file.path.split('/').last,
+            ),
+          ),
+        );
       }
 
-      final response = await ApiClient.instance.post('/products', data: formData);
-      
+      final response = await ApiClient.instance.post(
+        '/products',
+        data: formData,
+      );
+
       if (response.data['success'] == true) {
         // Refresh the seller dashboard so the new product appears immediately
         if (Get.isRegistered<SellerDashboardController>()) {
           Get.find<SellerDashboardController>().fetchDashboardData();
         }
         Get.back(); // close screen
-        Get.snackbar('تم الإرسال', 'تمت إضافة منتجك وهو قيد المراجعة',
-            backgroundColor: Colors.green, colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(16));
+        Get.snackbar(
+          'تم الإرسال',
+          'تمت إضافة منتجك وهو قيد المراجعة',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
       }
     } catch (e) {
       final errorMsg = ApiErrorHandler.handle(e);
-      Get.snackbar('خطأ في الإضافة', errorMsg, backgroundColor: Colors.redAccent, colorText: Colors.white, duration: const Duration(seconds: 4));
+      Get.snackbar(
+        'خطأ في الإضافة',
+        errorMsg,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
     } finally {
       isLoading.value = false;
     }

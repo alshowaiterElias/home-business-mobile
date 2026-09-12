@@ -5,6 +5,8 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/theme_controller.dart';
 import '../../core/network/storage_service.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/app_cached_image.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -74,24 +76,23 @@ class ProfileScreen extends StatelessWidget {
                           width: 2.5,
                         ),
                       ),
-                      child: ClipOval(
-                        child:
-                            (isLoggedIn &&
-                                hasStore &&
-                                logoUrl != null &&
-                                logoUrl.trim().isNotEmpty)
-                            ? Image.network(
-                                logoUrl.trim(),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.storefront_rounded,
-                                  color: Colors.white,
-                                  size: 42,
-                                ),
-                              )
-                            : Icon(
+                      child: (isLoggedIn &&
+                              hasStore &&
+                              logoUrl != null &&
+                              logoUrl.trim().isNotEmpty)
+                          ? AppCachedAvatar(
+                              imageUrl: logoUrl.trim(),
+                              radius: 40,
+                              backgroundColor: Colors.transparent,
+                              fallbackIcon: Icons.storefront_rounded,
+                              iconColor: Colors.white,
+                              iconSize: 42,
+                            )
+                          : Container(
+                              width: 80,
+                              height: 80,
+                              alignment: Alignment.center,
+                              child: Icon(
                                 !isLoggedIn
                                     ? Icons.person_outline_rounded
                                     : (hasStore
@@ -100,16 +101,36 @@ class ProfileScreen extends StatelessWidget {
                                 color: Colors.white,
                                 size: 42,
                               ),
-                      ),
+                            ),
                     ),
                     const SizedBox(height: AppTheme.space16),
 
-                    Text(
-                      headerTitle,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            headerTitle,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isLoggedIn &&
+                            hasStore &&
+                            (business?['isVerified'] == true ||
+                                business?['is_verified'] == true)) ...[
+                          const SizedBox(width: 6),
+                          const VerifiedBadge(
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -191,11 +212,21 @@ class ProfileScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    auth.hasStore.value
-                                        ? 'متجري'
-                                        : 'إنشاء متجر',
-                                    style: theme.textTheme.titleLarge,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        auth.hasStore.value
+                                            ? 'متجري'
+                                            : 'إنشاء متجر',
+                                        style: theme.textTheme.titleLarge,
+                                      ),
+                                      if (auth.hasStore.value &&
+                                          (business?['isVerified'] == true ||
+                                              business?['is_verified'] == true)) ...[
+                                        const SizedBox(width: 6),
+                                        const VerifiedBadge(size: 18),
+                                      ],
+                                    ],
                                   ),
                                   Text(
                                     isSuspended

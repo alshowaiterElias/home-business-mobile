@@ -765,10 +765,30 @@ class _MarketplaceAssistantSheetState extends State<MarketplaceAssistantSheet> {
             spacing: 8,
             runSpacing: 8,
             children: suggestions.map((s) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
               return ActionChip(
-                backgroundColor: Theme.of(context).cardColor,
-                side: BorderSide(color: Colors.purple.withOpacity(0.2)),
-                label: Text(s, style: const TextStyle(fontSize: 12.5)),
+                backgroundColor: isDark
+                    ? const Color(0xFF261C33)
+                    : const Color(0xFFF5EEFA),
+                side: BorderSide(
+                  color: isDark
+                      ? Colors.purple.withValues(alpha: 0.35)
+                      : Colors.purple.withValues(alpha: 0.22),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                label: Text(
+                  s,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFFE9D5FF)
+                        : const Color(0xFF3B0764),
+                  ),
+                ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   _submit(s);

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/data_controller.dart';
 import '../../controllers/favorites_controller.dart';
 import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
+import '../../widgets/app_cached_image.dart';
 
 class MyProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> initialProduct;
@@ -480,24 +479,11 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                             setState(() => _activeImageIndex = idx),
                         itemBuilder: (context, index) {
                           final imgUrl = images[index]['imageUrl'] ?? '';
-                          return CachedNetworkImage(
-                            imageUrl: ApiClient.getImageUrl(imgUrl),
+                          return AppCachedImage(
+                            imageUrl: imgUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            placeholder: (_, __) => Container(
-                              color: Colors.grey.shade100,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (_, __, ___) => Container(
-                              color: Colors.grey.shade200,
-                              child: const Icon(
-                                Icons.image_not_supported_rounded,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                            ),
+                            memCacheWidth: 800,
                           );
                         },
                       ),

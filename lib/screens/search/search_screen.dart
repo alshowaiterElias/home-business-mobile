@@ -7,7 +7,7 @@ import '../../core/network/data_service.dart';
 import '../../core/network/storage_service.dart';
 import '../../controllers/data_controller.dart';
 import 'widgets/search_filter_sheet.dart';
-import '../../widgets/ask_marketplace_ai_button.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -55,12 +55,16 @@ class _SearchScreenState extends State<SearchScreen> {
         _results = data.map<Product>((json) => Product.fromJson(json)).toList();
       });
     } catch (e) {
-      Get.snackbar('خطأ', 'حدث خطأ أثناء البحث',
-          backgroundColor: context.colors.error, colorText: Colors.white);
+      if (mounted) {
+        Get.snackbar('خطأ', 'حدث خطأ أثناء البحث',
+            backgroundColor: context.colors.error, colorText: Colors.white);
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -91,12 +95,6 @@ class _SearchScreenState extends State<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      floatingActionButton: AskMarketplaceAiButton(
-        contextData: {
-          'screen': 'search',
-          'searchQuery': _searchController.text.trim().isNotEmpty ? _searchController.text.trim() : null
-        }
-      ),
       appBar: AppBar(
         titleSpacing: 0,
         leading: IconButton(
@@ -213,7 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildResults(ThemeData theme) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const ProductGridSkeleton();
     }
 
     if (_results.isEmpty) {

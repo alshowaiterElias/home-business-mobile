@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart';
 import '../models/dummy_data.dart';
 import '../core/theme/app_theme.dart';
 import '../screens/product/product_details_screen.dart';
 import '../controllers/favorites_controller.dart';
 import '../core/network/whatsapp_service.dart';
+import 'verified_badge.dart';
+import 'app_cached_image.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -47,31 +47,14 @@ class ProductCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   // Product image with shimmer loading
-                  ClipRRect(
+                  AppCachedImage(
+                    imageUrl: product.imageUrl,
+                    memCacheWidth: 400,
+                    fit: BoxFit.cover,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(AppTheme.radiusLg),
                     ),
-                    child: Hero(
-                      tag: '${heroTagPrefix}product-${product.id}',
-                      child: CachedNetworkImage(
-                        imageUrl: product.imageUrl,
-                        memCacheWidth: 400,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => Shimmer.fromColors(
-                          baseColor: context.colors.shimmerBase,
-                          highlightColor: context.colors.shimmerHighlight,
-                          child: Container(color: context.colors.surface),
-                        ),
-                        errorWidget: (_, __, ___) => Container(
-                          color: context.colors.background,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: context.colors.textHint,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ),
+                    heroTag: '${heroTagPrefix}product-${product.id}',
                   ),
 
                   // Favourite badge — top start
@@ -159,6 +142,10 @@ class ProductCard extends StatelessWidget {
                           style: theme.textTheme.bodySmall,
                         ),
                       ),
+                      if (product.isSellerVerified) ...[
+                        const SizedBox(width: 4),
+                        const VerifiedBadge(size: 13),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 10),

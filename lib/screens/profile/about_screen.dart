@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:home_business_mobile/core/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import '../../core/services/crash_service.dart';
 import '../../controllers/data_controller.dart';
+
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -198,6 +201,196 @@ class AboutScreen extends StatelessWidget {
               );
             }),
 
+            const SizedBox(height: AppTheme.space32),
+
+            // Crash & Error Diagnostics Section
+            Container(
+              padding: const EdgeInsets.all(AppTheme.space16),
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                border: Border.all(
+                  color: Colors.amber.shade400.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                        ),
+                        child: const Icon(
+                          Icons.bug_report_rounded,
+                          color: Colors.amber,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: AppTheme.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'فحص وتجربة رصد الأعطال',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              'Firebase Crashlytics & Error Boundary',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: context.colors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppTheme.space12),
+                  Text(
+                    'أدوات تجربة للتأكد من وصول تقارير الأعطال وعمل واجهات الإنقاذ:',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.space16),
+
+                  // 1. UI Error Boundary Test Button
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.shield_outlined, color: Colors.blue, size: 22),
+                    ),
+                    title: const Text(
+                      '١. تجربة واجهة إنقاذ الأخطاء (UI Boundary)',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: const Text(
+                      'محاكاة خطأ رسم بالواجهة مع ظهور زر العودة للرئيسية',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => Scaffold(
+                            appBar: AppBar(title: const Text('اختبار واجهة الأخطاء')),
+                            body: Builder(
+                              builder: (context) {
+                                throw Exception('اختبار واجهة الإنقاذ من أخطاء العرض (UI Error Boundary Fallback Test)');
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 16),
+
+                  // 2. Non-Fatal Crashlytics Test Button
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.cloud_upload_outlined, color: Colors.teal, size: 22),
+                    ),
+                    title: const Text(
+                      '٢. إرسال خطأ غير فادح (Non-Fatal Report)',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: const Text(
+                      'إرسال تقرير خطأ لـ Firebase Crashlytics دون إغلاق التطبيق',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.send_rounded, size: 16),
+                    onTap: () async {
+                      try {
+                        await CrashService.recordError(
+                          Exception('اختبار تقرير خطأ غير فادح من تطبيق السوق المنزلي (Non-Fatal Crashlytics Test)'),
+                          StackTrace.current,
+                          reason: 'اختبار يدوي من شاشة عن التطبيق',
+                          information: [
+                            'screen: AboutScreen',
+                            'timestamp: ${DateTime.now().toIso8601String()}'
+                          ],
+                        );
+                        Get.snackbar(
+                          '✅ تم تسجيل الخطأ بنجاح',
+                          'تم إرسال التقرير إلى Firebase Crashlytics. يظهر في لوحة التحكم خلال دقائق.',
+                          backgroundColor: Colors.teal.shade700,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 4),
+                          margin: const EdgeInsets.all(16),
+                        );
+                      } catch (e) {
+                        Get.snackbar('خطأ', 'تعذر إرسال التقرير: $e');
+                      }
+                    },
+                  ),
+                  const Divider(height: 16),
+
+                  // 3. Fatal Native Crash Test Button
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.power_settings_new_rounded, color: Colors.red, size: 22),
+                    ),
+                    title: const Text(
+                      '٣. تجربة الانهيار الشامل (Fatal Native Crash)',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red),
+                    ),
+                    subtitle: const Text(
+                      'إغلاق التطبيق فجأة ورفع التقرير عند إعادة الفتح القادمة',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red),
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: 'تأكيد الانهيار التجريبي',
+                        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        middleText: 'سيؤدي هذا إلى إغلاق التطبيق فوراً لمحاكاة انهيار أصلي (Crash). عند فتح التطبيق مجدداً، سيرفع Firebase تقرير الانهيار إلى لوحة Crashlytics.\n\nهل تريد المتابعة؟',
+                        textConfirm: 'نعم، إحداث الانهيار الآن',
+                        textCancel: 'إلغاء',
+                        confirmTextColor: Colors.white,
+                        buttonColor: Colors.red,
+                        onConfirm: () {
+                          Get.back();
+                          if (CrashService.isSupported) {
+                            FirebaseCrashlytics.instance.crash();
+                          } else {
+                            throw Exception('محاكاة انهيار فادح على هذه المنصة (Platform Crash Simulation)');
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: AppTheme.space48),
             Text(
               'جميع الحقوق محفوظة © 2026',
@@ -212,3 +405,4 @@ class AboutScreen extends StatelessWidget {
     );
   }
 }
+

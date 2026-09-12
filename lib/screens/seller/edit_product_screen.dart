@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart' as dio;
 
 import '../../core/theme/app_theme.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/error_handler.dart';
 import '../../core/utils/image_compressor.dart';
+import '../../widgets/app_cached_image.dart';
 import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/data_controller.dart';
 
@@ -92,7 +92,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   Future<void> _pickNewImages() async {
     final picker = ImagePicker();
-    final picked = await picker.pickMultiImage();
+    final picked = await picker.pickMultiImage(
+      imageQuality: 80,
+      maxWidth: 1200,
+      maxHeight: 1200,
+    );
 
     if (picked.isNotEmpty) {
       if (existingImages.length + newImages.length + picked.length > 5) {
@@ -286,14 +290,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                                     AppTheme.radiusMd,
                                   ),
                                 ),
-                                child: ClipRRect(
+                                child: AppCachedImage(
+                                  imageUrl: imgUrl,
                                   borderRadius: BorderRadius.circular(
                                     AppTheme.radiusMd,
                                   ),
-                                  child: CachedNetworkImage(
-                                    imageUrl: ApiClient.getImageUrl(imgUrl),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  memCacheWidth: 300,
+                                  memCacheHeight: 300,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned(

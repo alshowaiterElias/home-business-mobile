@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/app_update_service.dart';
+import '../../core/network/data_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  String _installedVersion = '1.0.0+17';
 
   @override
   void initState() {
@@ -35,10 +38,70 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to main screen after a brief delay
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      Get.offAllNamed('/main');
-    });
+    // Start initialization and update checks
+    _initAppAndCheckUpdates();
+  }
+
+  Future<void> _initAppAndCheckUpdates() async {
+    // 1. Ensure splash animation plays for at least 1800ms
+    final minSplashDuration = Future.delayed(const Duration(milliseconds: 1800));
+
+    Map<String, dynamic> config = {};
+    AppUpdateStatus updateStatus = AppUpdateStatus.upToDate;
+
+    try {
+      final installed = await AppUpdateService.getInstalledVersion();
+      if (mounted) {
+        setState(() {
+          _installedVersion = '${installed.version}+${installed.buildNumber}';
+        });
+      }
+
+      config = await DataService.getAppConfig().timeout(const Duration(seconds: 4));
+      if (config.isNotEmpty) {
+        updateStatus = await AppUpdateService.checkUpdateStatus(config);
+      }
+    } catch (e) {
+      debugPrint('[SplashScreen] Config check error/timeout: $e');
+    }
+
+    // Wait for the minimum splash animation to finish
+    await minSplashDuration;
+    if (!mounted) return;
+
+    // 2. Handle Maintenance Mode
+    if (updateStatus == AppUpdateStatus.maintenance) {
+      AppUpdateService.showMaintenanceDialog(config);
+      return; // Stop navigation! Stay on splash screen
+    }
+
+    // 3. Handle Force Update
+    if (updateStatus == AppUpdateStatus.forceUpdate) {
+      final installed = await AppUpdateService.getInstalledVersion();
+      final minAppVersion = config['minAppVersion']?.toString().trim() ?? '2.0.0';
+      final appStoreUrl = config['appStoreUrl']?.toString().trim() ??
+          'https://play.google.com/store/apps/details?id=com.homebusiness.app';
+
+      AppUpdateService.showForceUpdateDialog(
+        title: config['forceUpdateTitleAr']?.toString() ?? 'تحديث هام وإلزامي',
+        message: config['forceUpdateMessageAr']?.toString() ??
+            'يتطلب التطبيق تحديثاً ضرورياً لمتابعة استخدامه بشكل آمن ومستقر.',
+        storeUrl: appStoreUrl,
+        installedVersion: installed.version,
+        requiredVersion: minAppVersion,
+      );
+      return; // Stop navigation! Stay on splash screen with blocking modal
+    }
+
+    // 4. Normal flow: Proceed to /main
+    Get.offAllNamed('/main');
+
+    // 5. If Soft Update is available, prompt smoothly after main screen renders
+    if (updateStatus == AppUpdateStatus.softUpdate) {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        AppUpdateService.checkForUpdates(config);
+      });
+    }
   }
 
   @override
@@ -113,7 +176,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: AppTheme.space16),
                     Text(
-                      'الإصدار 1.0.0+16',
+                      'الإصدار $_installedVersion',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,

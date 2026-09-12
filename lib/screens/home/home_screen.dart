@@ -4,7 +4,6 @@ import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/ad_carousel.dart';
-import '../../core/network/api_client.dart';
 import '../../core/network/data_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/data_controller.dart';
@@ -12,6 +11,9 @@ import '../product/all_products_screen.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/main_controller.dart';
 import '../../widgets/ask_marketplace_ai_button.dart';
+import '../../widgets/verified_badge.dart';
+import '../../widgets/shimmer_skeletons.dart';
+import '../../widgets/app_cached_image.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -22,11 +24,16 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       floatingActionButton: const AskMarketplaceAiButton(contextData: {'screen': 'home'}),
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final dataController = Get.find<DataController>();
+          await dataController.fetchInitialData();
+        },
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
           // ── Custom App Bar ─────────────────────────────────────
           SliverAppBar(
             floating: true,
@@ -145,7 +152,7 @@ class HomeScreen extends StatelessWidget {
                     child: Obx(() {
                       final dataController = Get.find<DataController>();
                       if (dataController.isLoadingCategories.value) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const HorizontalCategoryListSkeleton();
                       }
                       final categories = dataController.categories;
                       if (categories.isEmpty) {
@@ -192,7 +199,7 @@ class HomeScreen extends StatelessWidget {
                     child: Obx(() {
                       final dataController = Get.find<DataController>();
                       if (dataController.isLoadingFeaturedProducts.value) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const HorizontalProductListSkeleton();
                       }
                       final products = dataController.featuredProducts;
                       if (products.isEmpty) {
@@ -296,7 +303,7 @@ class HomeScreen extends StatelessWidget {
                     child: Obx(() {
                       final dataController = Get.find<DataController>();
                       if (dataController.isLoadingFeaturedStores.value) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const HorizontalStoreListSkeleton();
                       }
                       final stores = dataController.featuredStores.isNotEmpty
                           ? dataController.featuredStores
@@ -384,24 +391,15 @@ class HomeScreen extends StatelessWidget {
                                               width: 2,
                                             ),
                                           ),
-                                          child: CircleAvatar(
+                                          child: AppCachedAvatar(
+                                            imageUrl: logoUrl,
                                             radius: 34,
                                             backgroundColor:
                                                 context.colors.background,
-                                            backgroundImage: logoUrl != null
-                                                ? NetworkImage(
-                                                    ApiClient.getImageUrl(
-                                                      logoUrl,
-                                                    ),
-                                                  )
-                                                : null,
-                                            child: logoUrl == null
-                                                ? const Icon(
-                                                    Icons.storefront_rounded,
-                                                    size: 34,
-                                                    color: AppTheme.textHint,
-                                                  )
-                                                : null,
+                                            fallbackIcon:
+                                                Icons.storefront_rounded,
+                                            iconColor: AppTheme.textHint,
+                                            iconSize: 34,
                                           ),
                                         ),
                                         const SizedBox(height: AppTheme.space8),
@@ -409,14 +407,29 @@ class HomeScreen extends StatelessWidget {
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 6.0,
                                           ),
-                                          child: Text(
-                                            name,
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.titleMedium,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  name,
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.titleMedium,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              if (store['isVerified'] == true ||
+                                                  store['is_verified'] == true) ...[
+                                                const SizedBox(width: 4),
+                                                const VerifiedBadge(size: 14),
+                                              ],
+                                            ],
                                           ),
                                         ),
                                         const SizedBox(height: 4),
@@ -457,6 +470,13 @@ class HomeScreen extends StatelessWidget {
                                           color: Colors.white,
                                         ),
                                       ),
+                                    ),
+                                  if (store['isVerified'] == true ||
+                                      store['is_verified'] == true)
+                                    const Positioned(
+                                      top: 6,
+                                      left: 6,
+                                      child: VerifiedBadge(size: 16),
                                     ),
                                 ],
                               ),
@@ -628,9 +648,7 @@ class HomeScreen extends StatelessWidget {
             sliver: Obx(() {
               final dataController = Get.find<DataController>();
               if (dataController.isLoadingProducts.value) {
-                return const SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                return const ProductGridSkeleton(isSliver: true, itemCount: 4);
               }
               final products = dataController.latestProducts;
               if (products.isEmpty) {
@@ -654,6 +672,7 @@ class HomeScreen extends StatelessWidget {
             }),
           ),
         ],
+        ),
       ),
     );
   }

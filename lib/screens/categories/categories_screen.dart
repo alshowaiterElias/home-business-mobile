@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../models/dummy_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../../controllers/data_controller.dart';
+import '../../widgets/shimmer_skeletons.dart';
 
 
 class CategoriesScreen extends StatelessWidget {
@@ -20,36 +21,49 @@ class CategoriesScreen extends StatelessWidget {
       body: Obx(() {
         final dataController = Get.find<DataController>();
         if (dataController.isLoadingCategories.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const CategoryListSkeleton();
         }
         final categories = dataController.categories;
-        if (categories.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.category_outlined, size: 64, color: context.colors.textHint.withValues(alpha: 0.5)),
-                const SizedBox(height: AppTheme.space16),
-                Text('لا توجد أقسام متاحة حالياً', style: theme.textTheme.titleMedium),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(
-            AppTheme.space16,
-            AppTheme.space12,
-            AppTheme.space16,
-            AppTheme.space32,
-          ),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            final catData = categories[index];
-            final cat = Category.fromJson(catData);
-            return _CategoryCard(category: cat);
+        return RefreshIndicator(
+          onRefresh: () async {
+            await dataController.fetchCategories();
           },
+          child: categories.isEmpty
+              ? LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.category_outlined, size: 64, color: context.colors.textHint.withValues(alpha: 0.5)),
+                            const SizedBox(height: AppTheme.space16),
+                            Text('لا توجد أقسام متاحة حالياً', style: theme.textTheme.titleMedium),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.space16,
+                    AppTheme.space12,
+                    AppTheme.space16,
+                    AppTheme.space32,
+                  ),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final catData = categories[index];
+                    final cat = Category.fromJson(catData);
+                    return _CategoryCard(category: cat);
+                  },
+                ),
         );
       }),
     );

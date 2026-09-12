@@ -66,8 +66,15 @@ class ChatBusiness {
   final String businessName;
   final String? logoUrl;
   final String? contactPhone;
+  final bool isVerified;
 
-  ChatBusiness({required this.id, required this.businessName, this.logoUrl, this.contactPhone});
+  ChatBusiness({
+    required this.id,
+    required this.businessName,
+    this.logoUrl,
+    this.contactPhone,
+    this.isVerified = false,
+  });
 
   factory ChatBusiness.fromJson(Map<String, dynamic> json) {
     return ChatBusiness(
@@ -75,6 +82,7 @@ class ChatBusiness {
       businessName: json['businessName'] ?? json['business_name'] ?? '',
       logoUrl: json['logoUrl'] ?? json['logo_url'],
       contactPhone: json['contactPhone'] ?? json['contact_phone'],
+      isVerified: json['isVerified'] == true || json['is_verified'] == true,
     );
   }
 }
