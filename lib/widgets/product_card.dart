@@ -64,6 +64,40 @@ class ProductCard extends StatelessWidget {
                     child: _FavBadge(product: product),
                   ),
 
+                  // Boosted badge — top left
+                  if (product.isBoosted)
+                    Positioned(
+                      top: AppTheme.space8,
+                      left: AppTheme.space8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+                          ),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.deepOrange.withValues(alpha: 0.35),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          'مروّج 🚀',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+
                   // Rating pill — bottom start
                   if (product.rating > 0)
                     Positioned(
@@ -187,6 +221,8 @@ class ProductCard extends StatelessWidget {
                               productName: product.title,
                               price: product.price,
                               imageUrl: product.imageUrl,
+                              businessId: product.businessId,
+                              productId: product.id,
                             );
                           },
                           child: const Padding(

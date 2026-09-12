@@ -117,7 +117,9 @@ class AddProductController extends GetxController {
       if (response.data['success'] == true) {
         // Refresh the seller dashboard so the new product appears immediately
         if (Get.isRegistered<SellerDashboardController>()) {
-          Get.find<SellerDashboardController>().fetchDashboardData();
+          Get.find<SellerDashboardController>().fetchDashboardData(forceRefresh: true);
+        } else {
+          SellerDashboardController.invalidateCache();
         }
         Get.back(); // close screen
         Get.snackbar(

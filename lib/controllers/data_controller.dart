@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../core/network/data_service.dart';
+import '../core/network/collection_service.dart';
 import '../core/network/error_handler.dart';
 import '../core/services/app_update_service.dart';
 import 'auth_controller.dart';
@@ -16,6 +17,7 @@ class DataController extends GetxController {
   var latestProducts = <dynamic>[].obs;
   var featuredProducts = <dynamic>[].obs;
   var featuredStores = <dynamic>[].obs;
+  var featuredCollections = <dynamic>[].obs;
   var locations = <dynamic>[].obs;
   var topStores = <dynamic>[].obs;
   var unitsOfSale = <String>['حبة', 'قطعة', 'كيلو', 'جرام', 'لتر', 'درزن', 'طقم', 'علبة', 'طبق', 'قالب', 'قرص', 'كرتون', 'مجموعة'].obs;
@@ -49,6 +51,7 @@ class DataController extends GetxController {
       fetchLatestProducts(),
       fetchLocations(),
       fetchTopStores(),
+      fetchFeaturedCollections(),
     ]);
   }
 
@@ -159,6 +162,15 @@ class DataController extends GetxController {
       debugPrint('Error fetching top stores: ${ApiErrorHandler.handle(e)}');
     } finally {
       isLoadingStores.value = false;
+    }
+  }
+
+  Future<void> fetchFeaturedCollections() async {
+    try {
+      final data = await CollectionService.getFeaturedCollections();
+      featuredCollections.assignAll(data);
+    } catch (e) {
+      debugPrint('Error fetching featured collections: $e');
     }
   }
 }

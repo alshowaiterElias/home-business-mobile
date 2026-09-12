@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'api_client.dart';
+import 'analytics_service.dart';
 import '../../models/dummy_data.dart';
 
 class WhatsAppService {
@@ -51,7 +52,16 @@ class WhatsAppService {
     double? price,
     String? currency,
     String? imageUrl,
+    String? businessId,
+    String? productId,
   }) async {
+    if (businessId != null && businessId.isNotEmpty) {
+      AnalyticsService.trackWhatsAppInquiry(
+        businessId: businessId,
+        productId: productId,
+        inquiryType: 'PRODUCT',
+      );
+    }
     final formattedPrice = price != null ? _formatPrice(price) : '';
     final curr = currency ?? 'ر.ي';
 
@@ -91,7 +101,14 @@ class WhatsAppService {
   static Future<void> openWhatsAppForStore({
     required String phoneNumber,
     required String storeName,
+    String? businessId,
   }) async {
+    if (businessId != null && businessId.isNotEmpty) {
+      AnalyticsService.trackWhatsAppInquiry(
+        businessId: businessId,
+        inquiryType: 'STORE',
+      );
+    }
     final message = _getTemplate(
       'STORE_INQUIRY',
       {

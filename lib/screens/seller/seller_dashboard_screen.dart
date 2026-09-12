@@ -14,6 +14,8 @@ import '../../controllers/auth_controller.dart';
 import 'my_product_detail_screen.dart';
 import 'edit_product_screen.dart';
 import 'suspended_account_screen.dart';
+import 'seller_analytics_screen.dart';
+import 'manage_collections_screen.dart';
 import '../../widgets/verified_badge.dart';
 import '../../widgets/shimmer_skeletons.dart';
 import '../../widgets/app_cached_image.dart';
@@ -38,8 +40,28 @@ class SellerDashboardScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('لوحة تحكم البائع'),
           actions: [
+            Obx(() => controller.isRefreshing.value
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14),
+                    child: Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.refresh_rounded),
+                    tooltip: 'تحديث البيانات',
+                    onPressed: () => controller.fetchDashboardData(forceRefresh: true),
+                  )),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
+              tooltip: 'إعدادات المتجر',
               onPressed: () => Get.to(
                 () => EditBusinessScreen(
                   businessData: Map<String, dynamic>.from(
@@ -57,7 +79,7 @@ class SellerDashboardScreen extends StatelessWidget {
           label: const Text('إضافة منتج'),
         ),
         body: RefreshIndicator(
-          onRefresh: controller.fetchDashboardData,
+          onRefresh: () => controller.fetchDashboardData(forceRefresh: true),
           child: GetBuilder<SellerDashboardController>(
             builder: (cnt) {
               if (cnt.isLoading.value && cnt.myProducts.isEmpty) {
@@ -178,6 +200,152 @@ class SellerDashboardScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: AppTheme.space16),
+
+                  // ── Store Analytics Card ──
+                  GestureDetector(
+                    onTap: () => Get.to(() => const SellerAnalyticsScreen()),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppTheme.primaryDark,
+                            AppTheme.primary,
+                          ],
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                        ),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primary.withValues(alpha: 0.25),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            ),
+                            child: const Icon(
+                              Icons.analytics_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'تحليلات المتجر والتفاعل 📊',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'مشاهدات المنتجات، استفسارات واتساب، والمزيد',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppTheme.space12),
+
+                  // ── Store Collections & Lookbooks Card ──
+                  GestureDetector(
+                    onTap: () => Get.to(() => const ManageCollectionsScreen()),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF5E35B1),
+                            Color(0xFF7E57C2),
+                          ],
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                        ),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF5E35B1).withValues(alpha: 0.25),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            ),
+                            child: const Icon(
+                              Icons.collections_bookmark_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'المجموعات والكتالوجات (Lookbook) 🎨',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'نظّم منتجاتك في مجموعات منسقة تجذب الزبائن',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: AppTheme.space20),
 
                   // ── Quick Stats Grid (Interactive Filter Buttons) ────

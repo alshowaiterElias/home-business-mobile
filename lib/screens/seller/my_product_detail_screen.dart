@@ -9,6 +9,7 @@ import '../../controllers/favorites_controller.dart';
 import 'edit_product_screen.dart';
 import 'suspended_product_screen.dart';
 import '../../widgets/app_cached_image.dart';
+import '../../core/network/whatsapp_service.dart';
 
 class MyProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> initialProduct;
@@ -264,7 +265,9 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                                       if (Get.isRegistered<
                                           SellerDashboardController>()) {
                                         Get.find<SellerDashboardController>()
-                                            .fetchDashboardData();
+                                            .fetchDashboardData(forceRefresh: true);
+                                      } else {
+                                        SellerDashboardController.invalidateCache();
                                       }
                                       if (Get.isRegistered<DataController>()) {
                                         final dataCtrl = Get.find<DataController>();
@@ -312,6 +315,170 @@ class _MyProductDetailScreenState extends State<MyProductDetailScreen> {
                       ],
                     ),
                   ),
+
+                  // ── Boost / Promotion Status Card ──
+                  if (product['isBoosted'] == true)
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.space16,
+                        vertical: AppTheme.space8,
+                      ),
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFFFF9800).withValues(alpha: 0.12),
+                            const Color(0xFFFF5722).withValues(alpha: 0.06),
+                          ],
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                        ),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        border: Border.all(
+                          color: const Color(0xFFFF9800).withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.rocket_launch_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'هذا المنتج مروّج حالياً 🚀',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFFE65100),
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  product['boostExpiresAt'] != null
+                                      ? 'ينتهي الترويج في: ${DateTime.tryParse(product['boostExpiresAt'].toString())?.toString().substring(0, 10) ?? product['boostExpiresAt']}'
+                                      : 'ترويج نشط في مقدمة التطبيق',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'يظهر هذا المنتج في مقدمة نتائج البحث وقائمة المنتجات لجميع الزوار.',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppTheme.textHint,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (product['status'] == 'APPROVED')
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.space16,
+                        vertical: AppTheme.space8,
+                      ),
+                      padding: const EdgeInsets.all(AppTheme.space16),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        border: Border.all(
+                          color: Colors.deepOrange.withValues(alpha: 0.25),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepOrange.withValues(alpha: 0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepOrange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                ),
+                                child: const Icon(
+                                  Icons.campaign_rounded,
+                                  color: Colors.deepOrange,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Text(
+                                  'روّج هذا المنتج ليظهر في الصدارة 🚀',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'احصل على مشاهدات ومبيعات أكثر بمضاعفة ظهور منتجك في مقدمة التطبيق لجميع المتسوقين.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textHint,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                const phone = '+967772546343';
+                                WhatsAppService.openWhatsAppForStore(
+                                  phoneNumber: phone,
+                                  storeName: 'إدارة تطبيق الأسر المنتجة',
+                                );
+                              },
+                              icon: const Icon(Icons.support_agent_rounded, size: 18),
+                              label: const Text(
+                                'تواصل مع الإدارة لترويج المنتج',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF25D366),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   // Revision Alert if NEEDS_REVISION
                   if (product['status'] == 'NEEDS_REVISION' &&

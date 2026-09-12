@@ -14,6 +14,7 @@ import '../../widgets/ask_marketplace_ai_button.dart';
 import '../../widgets/verified_badge.dart';
 import '../../widgets/shimmer_skeletons.dart';
 import '../../widgets/app_cached_image.dart';
+import '../../widgets/collection_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -489,6 +490,71 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+
+          // ── Featured Collections Horizontal Scroll ─────────────
+          SliverToBoxAdapter(
+            child: Obx(() {
+              final dataController = Get.find<DataController>();
+              final collections = dataController.featuredCollections;
+              if (collections.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: AppTheme.space24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.space16,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.collections_bookmark_rounded,
+                              size: 18,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'تشكيلات ومجموعات منسقة',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.space12),
+                    SizedBox(
+                      height: 160,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.space16,
+                        ),
+                        itemCount: collections.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppTheme.space12),
+                        itemBuilder: (_, index) {
+                          final col = Map<String, dynamic>.from(collections[index]);
+                          return CollectionCard(collection: col);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
 
           // ── Featured Banner ────────────────────────────────────

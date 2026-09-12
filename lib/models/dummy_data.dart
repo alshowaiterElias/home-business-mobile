@@ -67,6 +67,7 @@ class Product {
   final String sellerUserId;
   final String sellerPhone;
   final bool isSellerVerified;
+  final bool isBoosted;
   final DateTime createdAt;
 
   const Product({
@@ -86,6 +87,7 @@ class Product {
     this.sellerUserId = '',
     this.sellerPhone = '',
     this.isSellerVerified = false,
+    this.isBoosted = false,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? const _DefaultDate();
 
@@ -130,6 +132,7 @@ class Product {
       sellerUserId: sUserId,
       sellerPhone: phone,
       isSellerVerified: isVerified,
+      isBoosted: json['isBoosted'] == true || json['is_boosted'] == true,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,

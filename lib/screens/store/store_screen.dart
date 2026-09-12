@@ -10,6 +10,7 @@ import '../../core/network/data_service.dart';
 import '../../core/network/api_client.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/network/whatsapp_service.dart';
+import '../../core/network/analytics_service.dart';
 import '../../core/network/chat_service.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/conversation_controller.dart';
@@ -20,6 +21,8 @@ import '../../models/chat_models.dart';
 import '../../widgets/verified_badge.dart';
 import '../../widgets/shimmer_skeletons.dart';
 import '../../widgets/app_cached_image.dart';
+import '../../core/network/collection_service.dart';
+import '../../widgets/collection_card.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -31,8 +34,10 @@ class StoreScreen extends StatefulWidget {
 class _StoreScreenState extends State<StoreScreen> {
   bool _isLoading = true;
   bool _isFetchingProducts = true;
+  bool _isFetchingCollections = true;
   Map<String, dynamic>? _businessData;
   List<Product> _products = [];
+  List<dynamic> _collections = [];
   bool? _isFollowed;
   int _followersCount = 0;
   bool _followLoading = false;
@@ -144,6 +149,15 @@ class _StoreScreenState extends State<StoreScreen> {
       };
       _isLoading = false;
     }
+
+    // Populate cached store collections if available
+    final cachedCollections = businessId.isNotEmpty
+        ? CollectionService.getCachedStoreCollections(businessId)
+        : null;
+    if (cachedCollections != null) {
+      _collections = cachedCollections;
+      _isFetchingCollections = false;
+    }
   }
 
   void _applyBusinessData(Map<String, dynamic> data) {
@@ -167,16 +181,29 @@ class _StoreScreenState extends State<StoreScreen> {
 
     final productsData = data['products'] as List<dynamic>? ?? [];
     if (productsData.isNotEmpty) {
-      _products = productsData.map((p) {
-        if (p is Product) return p;
-        final productMap = Map<String, dynamic>.from(p as Map);
-        productMap['business'] = data;
-        return Product.fromJson(productMap);
+      // Only parse products if they are complete with titles and images (not stubs)
+      final validProductMaps = productsData.where((p) {
+        if (p is Product) return true;
+        if (p is Map) {
+          final title = p['title']?.toString();
+          return title != null && title.trim().isNotEmpty;
+        }
+        return false;
       }).toList();
+
+      if (validProductMaps.isNotEmpty) {
+        _products = validProductMaps.map((p) {
+          if (p is Product) return p;
+          final productMap = Map<String, dynamic>.from(p as Map);
+          productMap['business'] = data;
+          return Product.fromJson(productMap);
+        }).toList();
+        _isFetchingProducts = false;
+      }
     }
   }
 
-  Future<void> _fetchBusinessData() async {
+  Future<void> _fetchBusinessData({bool forceRefresh = false}) async {
     final args = Get.arguments as Map<String, dynamic>?;
     final businessId = args?['id'] as String? ?? _businessData?['id'] as String? ?? '';
 
@@ -185,18 +212,33 @@ class _StoreScreenState extends State<StoreScreen> {
         setState(() {
           _isLoading = false;
           _isFetchingProducts = false;
+          _isFetchingCollections = false;
         });
       }
       return;
     }
 
     try {
-      final data = await DataService.getBusinessById(businessId, forceRefresh: true);
+      final data = await DataService.getBusinessById(businessId, forceRefresh: forceRefresh);
+      
+      // Fire-and-forget store view tracking
+      AnalyticsService.trackStoreView(businessId);
+      
+      List<dynamic> collections = _collections;
+      try {
+        collections = await CollectionService.getStoreCollections(
+          businessId,
+          forceRefresh: forceRefresh,
+        );
+      } catch (_) {}
+
       if (mounted) {
         setState(() {
           _applyBusinessData(data);
+          _collections = collections;
           _isLoading = false;
           _isFetchingProducts = false;
+          _isFetchingCollections = false;
         });
       }
     } catch (e) {
@@ -204,6 +246,7 @@ class _StoreScreenState extends State<StoreScreen> {
         setState(() {
           if (_businessData == null) _isLoading = false;
           _isFetchingProducts = false;
+          _isFetchingCollections = false;
         });
       }
     }
@@ -482,7 +525,7 @@ class _StoreScreenState extends State<StoreScreen> {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _fetchBusinessData,
+        onRefresh: () => _fetchBusinessData(forceRefresh: true),
         color: AppTheme.primary,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -788,6 +831,7 @@ class _StoreScreenState extends State<StoreScreen> {
                           WhatsAppService.openWhatsAppForStore(
                             phoneNumber: phone,
                             storeName: businessName,
+                            businessId: _businessData?['id']?.toString(),
                           );
                         },
                       ),
@@ -864,6 +908,60 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
               ),
             ),
+
+            // Store Collections Section
+            if (_isFetchingCollections && _collections.isEmpty)
+              const HorizontalCollectionListSkeleton(isSliver: true)
+            else if (_collections.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: AppTheme.space20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.space16,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.collections_bookmark_rounded,
+                              size: 18,
+                              color: AppTheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'تشكيلات المتجر',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.space12),
+                      SizedBox(
+                        height: 155,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.space16,
+                          ),
+                          itemCount: _collections.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: AppTheme.space12),
+                          itemBuilder: (_, index) {
+                            final col = Map<String, dynamic>.from(_collections[index]);
+                            return CollectionCard(collection: col);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
             // Products header
             SliverToBoxAdapter(
@@ -988,6 +1086,7 @@ class _StoreScreenState extends State<StoreScreen> {
               ),
             ),
           ),
+          const HorizontalCollectionListSkeleton(isSliver: true),
           _buildProductGridSkeleton(context),
         ],
       ),

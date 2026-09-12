@@ -58,6 +58,7 @@ class DataService {
 
   static final Map<String, Map<String, dynamic>> _businessCache = {};
   static final Map<String, Future<Map<String, dynamic>>> _inFlightBusinessRequests = {};
+  static Map<String, dynamic>? _myBusinessDashboardCache;
 
   // Track globally followed store IDs for instant 0ms follow state resolution
   static final Set<String> _followedStoreIds = {};
@@ -115,7 +116,10 @@ class DataService {
     String id, {
     bool forceRefresh = false,
   }) async {
-    if (!forceRefresh && _businessCache.containsKey(id)) {
+    // Only return cached business if it has full profile data and not forcing refresh
+    if (!forceRefresh &&
+        _businessCache.containsKey(id) &&
+        _businessCache[id]?['_isFull'] == true) {
       return _businessCache[id]!;
     }
     if (_inFlightBusinessRequests.containsKey(id)) {
@@ -135,7 +139,29 @@ class DataService {
   /// Prime or update the business cache in memory
   static void cacheBusiness(String id, Map<String, dynamic> data) {
     if (data.isNotEmpty) {
-      _businessCache[id] = Map<String, dynamic>.from(data);
+      final products = data['products'] as List<dynamic>?;
+      final bool hasFullProducts = products != null &&
+          products.isNotEmpty &&
+          products.any((p) {
+            if (p is Map) {
+              final title = p['title']?.toString();
+              return title != null && title.trim().isNotEmpty;
+            }
+            return false;
+          });
+
+      if (data['_isFull'] == true || hasFullProducts) {
+        final fullData = Map<String, dynamic>.from(data);
+        fullData['_isFull'] = true;
+        _businessCache[id] = fullData;
+      } else {
+        // Only store partial data if we don't already have a full profile cached
+        if (!_businessCache.containsKey(id) || _businessCache[id]?['_isFull'] != true) {
+          final partialData = Map<String, dynamic>.from(data);
+          partialData['_isFull'] = false;
+          _businessCache[id] = partialData;
+        }
+      }
     }
   }
 
@@ -144,6 +170,7 @@ class DataService {
       final response = await ApiClient.instance.get('/business/$id');
       final data = (response.data['data'] as Map<String, dynamic>?) ?? {};
       if (data.isNotEmpty) {
+        data['_isFull'] = true;
         _businessCache[id] = data;
       }
       return data;
@@ -231,13 +258,26 @@ class DataService {
   }
 
   // Fetch My Business Profile Dashboard (includes all products)
-  static Future<Map<String, dynamic>> getMyBusinessDashboard() async {
+  static Future<Map<String, dynamic>> getMyBusinessDashboard({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _myBusinessDashboardCache != null) {
+      return _myBusinessDashboardCache!;
+    }
     try {
       final response = await ApiClient.instance.get('/business/me/dashboard');
-      return response.data['data'] ?? {};
+      final data = (response.data['data'] as Map<String, dynamic>?) ?? {};
+      if (data.isNotEmpty) {
+        _myBusinessDashboardCache = data;
+      }
+      return data;
     } catch (e) {
       rethrow;
     }
+  }
+
+  static void invalidateMyBusinessDashboard() {
+    _myBusinessDashboardCache = null;
   }
 
   // Update My Business Profile
@@ -247,6 +287,7 @@ class DataService {
         '/business',
         data: formData,
       );
+      invalidateMyBusinessDashboard();
       return response.data;
     } catch (e) {
       rethrow;
@@ -425,6 +466,19 @@ class DataService {
         '/products/$productId/availability',
       );
       return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Fetch Seller Store Analytics
+  static Future<Map<String, dynamic>> getMyStoreAnalytics({int days = 30}) async {
+    try {
+      final response = await ApiClient.instance.get(
+        '/analytics/my-store',
+        queryParameters: {'days': days},
+      );
+      return response.data['data'] as Map<String, dynamic>? ?? {};
     } catch (e) {
       rethrow;
     }

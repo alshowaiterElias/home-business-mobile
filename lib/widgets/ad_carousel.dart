@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../core/theme/app_theme.dart';
 import '../core/network/api_client.dart';
 import '../core/network/data_service.dart';
+import '../core/network/analytics_service.dart';
 import '../screens/product/all_products_screen.dart';
 import '../screens/store/store_screen.dart';
 
@@ -98,6 +99,9 @@ class _AdCarouselState extends State<AdCarousel> {
             _ads = mappedAds;
             _isLoading = false;
           });
+          if (mappedAds.isNotEmpty) {
+            AnalyticsService.trackAdImpression(mappedAds.first.id);
+          }
           _startTimer();
         }
       } else {
@@ -293,13 +297,19 @@ class _AdCarouselState extends State<AdCarousel> {
                 setState(() {
                   _currentIndex = index;
                 });
+                if (index < _ads.length) {
+                  AnalyticsService.trackAdImpression(_ads[index].id);
+                }
               },
               itemBuilder: (context, index) {
                 final ad = _ads[index];
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: GestureDetector(
-                    onTap: () => _showAdOverlay(context, ad),
+                    onTap: () {
+                      AnalyticsService.trackAdClick(ad.id);
+                      _showAdOverlay(context, ad);
+                    },
                     child: Hero(
                       tag: 'ad-banner-${ad.id}',
                       child: Container(

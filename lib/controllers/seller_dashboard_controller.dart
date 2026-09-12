@@ -7,7 +7,11 @@ import 'data_controller.dart';
 import 'favorites_controller.dart';
 
 class SellerDashboardController extends GetxController {
+  static Map<String, dynamic>? _cachedDashboardData;
+  static List<dynamic>? _cachedMyProducts;
+
   var isLoading = false.obs;
+  var isRefreshing = false.obs;
   var businessData = {}.obs;
   var myProducts = <dynamic>[].obs;
   var selectedFilter = 'ALL'.obs; // ALL, APPROVED, PENDING, REJECTED, SUSPENDED
@@ -18,27 +22,61 @@ class SellerDashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchDashboardData();
+    // 1. Instant hydration with cached stale data (0ms delay)
+    if (_cachedDashboardData != null) {
+      businessData.value = _cachedDashboardData!;
+      if (_cachedMyProducts != null) {
+        myProducts.assignAll(_cachedMyProducts!);
+      }
+    } else {
+      final auth = Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+      final bus = auth?.currentUser['business'];
+      if (bus != null) {
+        businessData.value = Map<String, dynamic>.from(bus);
+      }
+    }
+
+    // 2. Fetch fresh data only if cache is completely empty
+    if (_cachedDashboardData == null) {
+      fetchDashboardData(forceRefresh: true);
+    }
   }
 
-  Future<void> fetchDashboardData() async {
+  Future<void> fetchDashboardData({bool forceRefresh = true}) async {
     final auth = Get.find<AuthController>();
     final businessInfo = auth.currentUser['business'];
     if (businessInfo == null) return;
 
-    isLoading.value = true;
+    if (_cachedDashboardData == null && myProducts.isEmpty) {
+      isLoading.value = true;
+    } else {
+      isRefreshing.value = true;
+    }
+
     try {
-      final data = await DataService.getMyBusinessDashboard();
+      final data = await DataService.getMyBusinessDashboard(forceRefresh: forceRefresh);
+      _cachedDashboardData = data;
       businessData.value = data;
       
       if (data['products'] != null) {
-        myProducts.assignAll(data['products']);
+        final prods = List<dynamic>.from(data['products']);
+        _cachedMyProducts = prods;
+        myProducts.assignAll(prods);
       }
+      update();
     } catch (e) {
       debugPrint('Error fetching seller dashboard: $e');
     } finally {
       isLoading.value = false;
+      isRefreshing.value = false;
     }
+  }
+
+  /// Invalidate static cache when products or store details are updated
+  static void invalidateCache() {
+    _cachedDashboardData = null;
+    _cachedMyProducts = null;
+    DataService.invalidateMyBusinessDashboard();
   }
 
   List<dynamic> get filteredProducts {
@@ -67,6 +105,10 @@ class SellerDashboardController extends GetxController {
         if (index != -1) {
           myProducts[index] = updated;
           myProducts.refresh();
+          if (_cachedMyProducts != null) {
+            final cIndex = _cachedMyProducts!.indexWhere((p) => p['id'] == productId);
+            if (cIndex != -1) _cachedMyProducts![cIndex] = updated;
+          }
           update();
         }
         if (Get.isRegistered<DataController>()) {

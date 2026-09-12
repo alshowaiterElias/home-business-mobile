@@ -181,7 +181,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
       if (response.data['success'] == true) {
         if (Get.isRegistered<SellerDashboardController>()) {
-          Get.find<SellerDashboardController>().fetchDashboardData();
+          Get.find<SellerDashboardController>().fetchDashboardData(forceRefresh: true);
+        } else {
+          SellerDashboardController.invalidateCache();
         }
         Get.back(result: true); // close edit screen
         Get.snackbar(

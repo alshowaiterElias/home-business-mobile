@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'auth_controller.dart';
 import '../models/dummy_data.dart';
 import '../core/network/data_service.dart';
+import '../core/network/analytics_service.dart';
 import '../core/network/error_handler.dart';
 import 'favorites_controller.dart';
 
@@ -69,6 +70,9 @@ class ProductDetailsController extends GetxController {
   Future<void> fetchProductDetails() async {
     try {
       final productData = await DataService.getProductById(productId);
+      
+      // Fire-and-forget product view tracking
+      AnalyticsService.trackProductView(productId);
       
       currentProductRating.value = double.tryParse(productData['averageRating']?.toString() ?? '0') ?? 0;
       currentProductReviewCount.value = productData['reviewsCount'] ?? 0;

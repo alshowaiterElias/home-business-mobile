@@ -370,6 +370,125 @@ class StoreListSkeleton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 3.1 COLLECTION SKELETONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Skeleton for a single Collection Card (matches CollectionCard size and proportions).
+class CollectionCardSkeleton extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const CollectionCardSkeleton({
+    super.key,
+    this.width = 240,
+    this.height = 155,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: context.colors.divider.withValues(alpha: 0.5)),
+        boxShadow: AppTheme.shadowSm,
+      ),
+      child: Stack(
+        children: [
+          ShimmerBox(
+            width: width,
+            height: height,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          ),
+          Positioned(
+            top: 12,
+            right: 12,
+            child: ShimmerBox(
+              width: 60,
+              height: 22,
+              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+            ),
+          ),
+          Positioned(
+            bottom: 12,
+            right: 12,
+            left: 12,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                ShimmerBox(width: 130, height: 14),
+                SizedBox(height: 6),
+                ShimmerBox(width: 80, height: 10),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Horizontal scroll skeleton for collections (used on StoreScreen and HomeScreen).
+class HorizontalCollectionListSkeleton extends StatelessWidget {
+  final int itemCount;
+  final bool isSliver;
+
+  const HorizontalCollectionListSkeleton({
+    super.key,
+    this.itemCount = 3,
+    this.isSliver = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+          child: Row(
+            children: const [
+              ShimmerBox(width: 22, height: 22, shape: BoxShape.circle),
+              SizedBox(width: 8),
+              ShimmerBox(width: 110, height: 15),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppTheme.space12),
+        SizedBox(
+          height: 155,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+            itemCount: itemCount,
+            separatorBuilder: (_, __) => const SizedBox(width: AppTheme.space12),
+            itemBuilder: (_, __) => const CollectionCardSkeleton(),
+          ),
+        ),
+      ],
+    );
+
+    if (isSliver) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: AppTheme.space20),
+          child: content,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppTheme.space20),
+      child: content,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 4. NOTIFICATION SKELETONS
 // ─────────────────────────────────────────────────────────────────────────────
 

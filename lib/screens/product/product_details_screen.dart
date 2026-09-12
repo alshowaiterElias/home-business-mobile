@@ -173,6 +173,32 @@ class ProductDetailsScreen extends StatelessWidget {
                                         ),
                                   ),
                                 ),
+                              if (product.isBoosted) ...[
+                                if (product.categoryName.isNotEmpty)
+                                  const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppTheme.radiusFull,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'منتج مروّج 🚀',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const Spacer(),
                               const Icon(
                                 Icons.star_rounded,
@@ -413,6 +439,8 @@ class ProductDetailsScreen extends StatelessWidget {
                               productName: product.title,
                               price: product.price,
                               imageUrl: product.imageUrl,
+                              businessId: product.businessId,
+                              productId: product.id,
                             );
                           },
                         ),
